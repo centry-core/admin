@@ -1,8 +1,7 @@
 function getPluginsList(){
+  let selectedItems = vueVm.multiselectFilter.selectedItems
   let pluginsList = []
-  for (let i=0; i<plugins.length; i++){
-    pluginsList.push(Object.assign({}, plugins[i])['id'])
-  }
+  selectedItems.forEach(item => pluginsList.push(item['id']))
   return pluginsList
 }
 
@@ -20,9 +19,21 @@ function projectCreateSubmit() {
         "data_retention_limit": 1000000000,
         "invitations": []
       })
-  }).then(response => {
+  }).then(async response => {
       $("#projectCreateModal").modal('hide');
-      location.reload();
+      data = await response.json()
+      const newSections = data['plugins']
+      const currentSection = "admin"
+      const notAdmin = !vueVm.navbar.isAdmin
+
+      if (notAdmin && !newSections.includes(currentSection) && newSections.length>0)
+      {
+        section = newSections[0]
+        location.href = `/-/${section}`
+        $('select.selectpicker[name=`section_select`]').val(section)
+      } else {
+          location.reload()
+      }
   })
 }
 

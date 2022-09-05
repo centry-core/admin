@@ -1,5 +1,3 @@
-var plugins = []
-
 const MultiselectFilter = {
     props: ['title'],
     data() {
@@ -32,7 +30,6 @@ const MultiselectFilter = {
     watch: {
         selectedItems: function (val) {
             this.$refs[this.refSearchId].checked = this.selectedItems.length === this.itemsList.length ? true : false;
-            plugins = this.selectedItems
         }
     },
     methods: {
@@ -42,7 +39,6 @@ const MultiselectFilter = {
             } else {
                 this.selectedItems.splice(0);
             }
-            plugins = this.selectedItems
         }
     },
     template: `
