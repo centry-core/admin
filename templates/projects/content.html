@@ -68,6 +68,20 @@
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
+            
+                    <div class="row">
+                        <div class="form-group col">
+                            <h9>Plugins</h9>
+                            <div>
+                                <multiselect-filter
+                                    id="multiselect"
+                                    @register="register"
+                                    instance_name="multiselect-filter"
+                                    :title="'Select plugins to be enabled'">
+                                </multiselect-filter>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
