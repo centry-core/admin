@@ -49,37 +49,39 @@ class Method:  # pylint: disable=E1101,R0903
         if flask.g.auth.id == "-":
             return
         #
-        target_to_empty_or_needed = \
-            ( \
-                request.endpoint is not None and \
-                request.endpoint.endswith(".static") \
-            ) or \
-            ( \
-                request.endpoint == "api.v1.projects.project" \
-            ) or \
-            ( \
-                request.endpoint == "api.v1.projects.session" \
-            ) or \
-            ( \
-                request.path.endswith("/api/v1/projects/session") \
-            ) or \
-            ( \
-                request.endpoint == "theme.route_section_subsection_page" and \
-                request.view_args is not None and \
-                request.view_args.get("section", "unknown") == "system" and \
-                request.view_args.get("subsection", "unknown") == "status" and \
-                request.view_args.get("page", "unknown") == "empty" \
+        project_mode_target = \
+            (
+                request.endpoint is not None and
+                request.endpoint in [
+                    "theme.index",
+                    "theme.route_section",
+                    "theme.route_section_subsection",
+                    "theme.route_section_subsection_page",
+                ]
+            ) or (
+                request.endpoint is not None and
+                request.endpoint.startswith("theme.route_mode_") and
+                (
+                    request.view_args is None or
+                    request.view_args.get("mode", "default") in ["default", "project"]
+                )
             )
         #
-        if target_to_empty_or_needed:
+        empty_page_target = \
+            (
+                request.endpoint == "theme.route_section_subsection_page" and
+                request.view_args is not None and
+                request.view_args.get("section", "unknown") == "system" and
+                request.view_args.get("subsection", "unknown") == "status" and
+                request.view_args.get("page", "unknown") == "empty"
+            )
+        #
+        if not project_mode_target or empty_page_target:
             return
         #
         user_projects = self.context.rpc_manager.call.list_user_projects(flask.g.auth.id)
         #
         if not user_projects:
-            if theme.is_current_user_admin():
-                return
-            #
             log.info("--- [REDIRECT] --- Request endpoint: %s", request.endpoint)
             log.info("--- [REDIRECT] --- Request view_args: %s", request.view_args)
             #
