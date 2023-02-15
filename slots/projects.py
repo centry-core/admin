@@ -40,7 +40,7 @@ class Slot:  # pylint: disable=E1101,R0903
         - access_denied_reply=None -> can be set to content to return in case of 'access denied'
 
     """
-    @web.slot("admin_projects_content")
+    @web.slot("admin_mode_projects_content")
     @auth.decorators.check_slot(["global_admin"], access_denied_reply=theme.access_denied_part)
     def _projects_content(self, context, slot, payload):
         _ = slot, payload
@@ -50,7 +50,7 @@ class Slot:  # pylint: disable=E1101,R0903
                 "projects/content.html",
             )
 
-    @web.slot("admin_projects_scripts")
+    @web.slot("admin_mode_projects_scripts")
     @auth.decorators.check_slot(["global_admin"])
     def _projects_scripts(self, context, slot, payload):
         _ = slot, payload

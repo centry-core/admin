@@ -48,61 +48,72 @@ class Module(module.ModuleModel):
         # DB
         # init_db(self)
         # Theme registration
+        #
+        # System: for landing info screen
+        #
         theme.register_section(
-            "admin", "Administration",
+            "system", "System",
             kind="holder",
+            hidden=True,
             location="left",
-            permissions=["global_admin"],
-            icon_class="fas fa-info-circle fa-fw",
+            permissions=[],
+            # icon_class="fas fa-info-circle fa-fw",
         )
         theme.register_subsection(
-            "admin",
-            "projects", "Projects",
-            title="Projects",
+            "system",
+            "status", "Status",
+            title="Status",
             kind="slot",
-            permissions=["global_admin"],
-            prefix="admin_projects_",
+            hidden=True,
+            permissions=[],
+            prefix="admin_system_status_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
         )
         theme.register_page(
-            "admin", "projects", "edit",
+            "system", "status", "empty",
+            title="Empty",
+            kind="slot",
+            permissions=[],
+            prefix="admin_system_status_empty_",
+        )
+        #
+        # Administration mode
+        #
+        theme.register_mode(
+            "administration", "Administration",
+            permissions=["global_admin"],
+        )
+        theme.register_mode_section(
+            "administration", "projects", "Projects",
+            kind="holder",
+            location="left",
+            permissions=["global_admin"],
+            # icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "projects",
+            "list", "Projects",
+            title="Projects",
+            kind="slot",
+            permissions=["global_admin"],
+            prefix="admin_mode_projects_",
+            # icon_class="fas fa-server fa-fw",
+            # weight=2,
+        )
+        theme.register_mode_page(
+            "administration", "projects",
+            "list", "edit",
             title="Edit",
             kind="slot",
             permissions=["global_admin"],
-            prefix="admin_project_edit_",
+            prefix="admin_mode_projects_edit_",
         )
-        theme.register_page(
-            "admin", "projects", "empty",
-            title="Empty",
-            kind="slot",
-            prefix="admin_empty_",
-        )
-        theme.register_landing(
-            kind="route",
-            route="admin.landing",
-        )
-        # Init RPCs
-        self.descriptor.init_rpcs()
-        # Init API
-        self.descriptor.init_api()
-        # Init SocketIO
-        self.descriptor.init_sio()
-        # Init blueprint
-        self.descriptor.init_blueprint()
-        # Init slots
-        self.descriptor.init_slots()
+        # Init
+        self.descriptor.init_all()
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
         log.info("De-initializing module")
-        # De-init slots
-        # self.descriptor.deinit_slots()
-        # De-init blueprint
-        # self.descriptor.deinit_blueprint()
-        # De-init SocketIO
-        # self.descriptor.deinit_sio()
-        # De-init API
-        # self.descriptor.deinit_api()
-        # De-init RPCs
-        # self.descriptor.deinit_rpcs()
+        # De-init
+        # self.descriptor.deinit_all()

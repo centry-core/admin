@@ -30,7 +30,7 @@ function projectCreateSubmit() {
 
 
 function projectActionFormatter(value, row, index) {
-    return '<a href="/-/admin/projects/edit?project=' + row.id + '"><i class="fas fa-sync"></i></a>'
+    return '<a href="/~/administration/~/projects/list/edit?project=' + row.id + '"><i class="fas fa-sync"></i></a>'
 }
 
 $(document).on('vue_init', () => {
