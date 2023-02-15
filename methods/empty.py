@@ -24,6 +24,7 @@ from pylon.core.tools import log  # pylint: disable=E0611,E0401
 from pylon.core.tools import web  # pylint: disable=E0611,E0401
 
 from tools import auth  # pylint: disable=E0401
+from tools import theme  # pylint: disable=E0401
 
 
 class Method:  # pylint: disable=E1101,R0903
@@ -76,6 +77,9 @@ class Method:  # pylint: disable=E1101,R0903
         user_projects = self.context.rpc_manager.call.list_user_projects(flask.g.auth.id)
         #
         if not user_projects:
+            if theme.is_current_user_admin():
+                return
+            #
             log.info("--- [REDIRECT] --- Request endpoint: %s", request.endpoint)
             log.info("--- [REDIRECT] --- Request view_args: %s", request.view_args)
             #
