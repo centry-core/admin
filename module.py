@@ -101,6 +101,16 @@ class Module(module.ModuleModel):
             # icon_class="fas fa-server fa-fw",
             # weight=2,
         )
+        theme.register_mode_subsection(
+            "administration", "projects",
+            "roles", "Roles",
+            title="Roles",
+            kind="slot",
+            permissions=["global_admin"],
+            prefix="admin_mode_roles_",
+            # icon_class="fas fa-server fa-fw",
+            # weight=2,
+        )
         theme.register_mode_page(
             "administration", "projects",
             "list", "edit",

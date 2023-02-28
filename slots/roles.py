@@ -41,11 +41,22 @@ class Slot:  # pylint: disable=E1101,R0903
 
     """
 
-    @web.slot("admin_system_status_empty_content")
-    def _empty_content(self, context, slot, payload):
+    @web.slot("admin_mode_roles_content")
+    @auth.decorators.check_slot(["global_admin"], access_denied_reply=theme.access_denied_part)
+    def _projects_content(self, context, slot, payload):
         _ = slot, payload
         #
         with context.app.app_context():
             return self.descriptor.render_template(
-                "empty/empty.html",
+                "roles/content.html",
+            )
+
+    @web.slot("admin_mode_roles_scripts")
+    @auth.decorators.check_slot(["global_admin"])
+    def _projects_scripts(self, context, slot, payload):
+        _ = slot, payload
+        #
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                "roles/scripts.html",
             )

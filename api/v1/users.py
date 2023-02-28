@@ -53,17 +53,17 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
     def __init__(self, module):
         self.module = module
 
-
     @auth.decorators.check_api(["global_admin"])
     def get(self, project):  # pylint: disable=R0201
         """ Process """
         #
-        project_ids = [item["id"] for item in self.module.context.rpc_manager.call.project_list()]
+        project_ids = [item["id"] for item in
+                       self.module.context.rpc_manager.call.project_list()]
         if project not in project_ids:
             return {"total": 0, "rows": []}
         #
         project_scope_name = f"Project-{project}"
-        scope_map = {item["name"]:item["id"] for item in auth.list_scopes()}
+        scope_map = {item["name"]: item["id"] for item in auth.list_scopes()}
         #
         if project_scope_name not in scope_map:
             return {"total": 0, "rows": []}
@@ -89,7 +89,6 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
             "rows": project_users,
         }
 
-
     @auth.decorators.check_api(["global_admin"])
     def post(self, project):  # pylint: disable=R0201
         """ Process """
@@ -97,19 +96,20 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         data = flask.request.json
         user_name = data["name"]
         #
-        project_ids = [item["id"] for item in self.module.context.rpc_manager.call.project_list()]
+        project_ids = [item["id"] for item in
+                       self.module.context.rpc_manager.call.project_list()]
         if project not in project_ids:
             return {}
         #
         project_scope_name = f"Project-{project}"
-        scope_map = {item["name"]:item["id"] for item in auth.list_scopes()}
+        scope_map = {item["name"]: item["id"] for item in auth.list_scopes()}
         #
         if project_scope_name not in scope_map:
             return {}
         #
         project_scope_id = scope_map.get(project_scope_name)
         #
-        user_map = {item["name"]:item["id"] for item in auth.list_users()}
+        user_map = {item["name"]: item["id"] for item in auth.list_users()}
         if user_name not in user_map:
             return {}
         #
