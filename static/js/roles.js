@@ -9,18 +9,38 @@ const RolesPage = {
                 "data-search-selector": "#customSearch"
             },
             roles: [],
+            roles_to_permissions: [],
             table_data: {},
             table_options: {},
-            edit_mode: true,
+            edit_mode: false,
         }
     },
     methods: {
-        async get_roles() {
+        async get_permissions() {
             const response = await fetch('/api/v1/admin/permissions/')
             if (response.ok) {
                 this.table_data = await response.json()
-                const roles = this.table_data.rows.map(row => row.roles).flat();
-                this.roles = Array.from(new Set(roles.flatMap(role => Object.keys(role))));
+                this.roles_to_permissions = Array.from(new Set(this.roles.flatMap(role => role.name)));
+            }
+        },
+        async get_roles() {
+            const response = await fetch(`/api/v1/admin/roles`)
+            if (response.ok) {
+                this.roles = await response.json()
+            }
+        },
+        async update_permissions() {
+            const table_data = vueVm.registered_components.roles_table.table_action('getData')
+            const response = await fetch('/api/v1/admin/permissions/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(table_data)
+            })
+            if (response.ok) {
+                console.log("Permissions updated")
+                this.edit_mode = false
             }
         },
         changeMode() {
@@ -29,7 +49,12 @@ const RolesPage = {
         }
     },
     watch: {
-        roles(new_roles) {
+        async edit_mode(new_value) {
+            if (new_value === false) {
+                await this.get_permissions()
+            }
+        },
+        roles_to_permissions(new_roles) {
             const columns = [{
                 field: 'name',
                 title: 'Permission',
@@ -39,7 +64,7 @@ const RolesPage = {
             }]
             for (const role of new_roles) {
                 columns.push({
-                    field: "roles." + role,
+                    field: role,
                     title: role,
                     formatter: (value, row, index, field) => roleTableFormatters.checkboxFormatter(value, row, index, field, this.edit_mode),
                     sortable: false
@@ -59,8 +84,9 @@ const RolesPage = {
         },
     },
     async mounted() {
-        await this.get_roles();
-        $('#searchRole').on('input', function ({ target: { value }}) {
+        await this.get_roles()
+        await this.get_permissions();
+        $('#searchRole').on('input', function ({target: {value}}) {
             $('#roles-table').bootstrapTable('filterBy', {
                 name: value.toLowerCase()
             }, {
@@ -88,10 +114,16 @@ const RolesPage = {
                             <input type="text" placeholder="Search" id="searchRole">
                             <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
                         </div>
-                        <button type="button" class="btn btn-secondary btn-icon btn-icon__purple mr-2" 
+                        <button v-if="!edit_mode" type="button" class="btn btn-secondary btn-icon btn-icon__purple mr-2" 
                             @click="changeMode">
                             <i class="icon__18x18 icon-edit"></i>
                         </button>
+                        <div v-if="edit_mode">
+                            <button type="button" @click="changeMode" 
+                                id="project_submit" class="btn btn-secondary btn-basic">Cancel</button>
+                            <button type="button" @click="update_permissions" 
+                                id="project_submit" class="btn btn-basic ml-2">Save</button>
+                        </div>
                     </div>
                 </template>
             </TableCard>
