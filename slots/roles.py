@@ -51,6 +51,13 @@ class Slot:  # pylint: disable=E1101,R0903
                 "roles/content.html",
             )
 
+    @web.slot('admin_mode_roles_styles')
+    def styles(self, context, slot, payload):
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                'roles/styles.html',
+            )
+
     @web.slot("admin_mode_roles_scripts")
     @auth.decorators.check_slot(["global_admin"])
     def _projects_scripts(self, context, slot, payload):
