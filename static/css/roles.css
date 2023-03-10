@@ -30,3 +30,6 @@
 .thead-light .th-inner:hover .icon__18x18 {
     display: block !important;
 }
+.table-hover tbody tr.empty-row__error {
+    background-color: var(--card-red);
+}

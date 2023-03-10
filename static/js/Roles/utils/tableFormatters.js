@@ -39,8 +39,8 @@ var roleTableFormatters = {
             row[role] = false;
         })
         $(el.closest('table')).bootstrapTable(
-            'updateRow', {
-                index: index,
+            'updateByUniqueId', {
+                id: rowName,
                 row: row,
             }
         )
