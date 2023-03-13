@@ -60,7 +60,13 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
     def __init__(self, module):
         self.module = module
 
-    @auth.decorators.check_api(["global_admin"])
+    @auth.decorators.check_api({
+        "permissions": ["admin.roles.permissions.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": False},
+            "project": {"admin": True, "viewer": True, "editor": False},
+            "develop": {"admin": True, "viewer": False, "editor": False},
+        }})
     def get(self):  # pylint: disable=R0201
         """ Process """
         roles = auth.get_roles()
@@ -82,20 +88,23 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
             } for permission in all_permissions]
         }
 
-    @auth.decorators.check_api(["global_admin"])
+    @auth.decorators.check_api({
+        "permissions": ["admin.roles.permissions.edit"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": False},
+            "project": {"admin": True, "viewer": True, "editor": False},
+            "develop": {"admin": True, "viewer": False, "editor": False},
+        }})
     def put(self):  # pylint: disable=R0201
         """ Process """
         new_data = request.get_json()
         old_data = self.get()["rows"]
-        log.info(f"{new_data=} \n {old_data=}")
         old_permissions = set(
             (r, p['name']) for p in old_data for r, v in p.items() if v)
         new_permissions = set(
             (r, p['name']) for p in new_data for r, v in p.items() if v)
         permissions_to_delete = old_permissions - new_permissions
         permissions_to_add = new_permissions - old_permissions
-        log.info(f"{permissions_to_add=}")
-        log.info(f"{permissions_to_delete=}")
         for permission in permissions_to_add:
             auth.set_permission_for_role(*permission)
         for permission in permissions_to_delete:

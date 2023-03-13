@@ -50,7 +50,13 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
     def __init__(self, module):
         self.module = module
 
-    @auth.decorators.check_api(["global_admin"])
+    @auth.decorators.check_api({
+        "permissions": ["admin.projects.projects.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": False},
+            "project": {"admin": True, "viewer": True, "editor": False},
+            "develop": {"admin": True, "viewer": False, "editor": False},
+        }})
     def get(self):  # pylint: disable=R0201
         """ Process """
         all_projects = self.module.context.rpc_manager.call.project_list()

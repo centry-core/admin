@@ -89,6 +89,7 @@ const RolesTable = {
                 fixedColumns: true,
                 fixedNumber: 1,
                 fixedRightNumber: 2,
+            })
         },
         generateColumns(roles, canEdit) {
             return [
@@ -124,11 +125,11 @@ const RolesTable = {
         },
         generateEditableTableOptions() {
             this.editableTableColumns = [...this.generateColumns(this.roles, true), {
-                    title: `<span class="d-flex align-items-center cursor-pointer" onclick="roleTableFormatters.addColumnTableEvent('create')">
+                title: `<span class="d-flex align-items-center cursor-pointer" onclick="roleTableFormatters.addColumnTableEvent('create')">
                         <i class="icon__14x14 icon-add-column mr-1"></i>Add role
                         </span>`,
-                    class: 'w-28',
-                },
+                class: 'w-28',
+            },
                 {
                     class: 'w-12',
                     formatter: (value, row, index) => roleTableFormatters.clearRowFormatter(value, row, index, this.roles),
@@ -189,7 +190,7 @@ const RolesTable = {
             document.querySelector(".fixed-table-body").scrollLeft = tableWidth;
         },
         updateColumn(newRoleName, currentRoleName) {
-            this.editableRoles = [ ...this.editableRoles.filter(role => role !== currentRoleName), newRoleName];
+            this.editableRoles = [...this.editableRoles.filter(role => role !== currentRoleName), newRoleName];
             this.editableTableColumns = this.editableTableColumns.map(col => {
                 if (col.field === currentRoleName) {
                     col.field = newRoleName;
@@ -201,7 +202,7 @@ const RolesTable = {
                 return col;
             })
             this.editableTableData.forEach(permission => {
-                delete Object.assign(permission, {[newRoleName]: permission[currentRoleName] })[currentRoleName];
+                delete Object.assign(permission, {[newRoleName]: permission[currentRoleName]})[currentRoleName];
             })
             this.refreshEditableTable()
         },
@@ -240,7 +241,7 @@ const RolesTable = {
         updateProxyCell(index, field, checked, rowName) {
             this.editableTableData = this.editableTableData.map(row => {
                 if (row.name === rowName) {
-                    return { ...row, [field]: checked }
+                    return {...row, [field]: checked}
                 }
                 return row
             })
@@ -251,7 +252,6 @@ const RolesTable = {
             const tableData = $('#roles-table').bootstrapTable('getData');
             const isRowValid = this.rowValidation(tableData);
             if (!isRowValid) return;
-            const tableData = $('#roles-table').bootstrapTable('getData');
             this.saveRolesAPI(tableData).then((res) => {
                 if (res.ok) {
                     showNotify('SUCCESS', 'Permissions updated')
@@ -276,7 +276,7 @@ const RolesTable = {
                 emptyRowIdx.forEach(idx => {
                     $('#roles-table').find(`[data-index='${idx}']`).addClass('empty-row__error');
                 })
-                showNotify('ERROR', '[Permission] must be assigned to one role.');
+                showNotify('ERROR', '[Permission] must be assigned to at least one role.');
                 return false;
             }
             return true;

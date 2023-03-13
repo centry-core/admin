@@ -24,8 +24,7 @@ from pylon.core.tools import module  # pylint: disable=E0401
 from pylon.core.tools.context import Context as Holder  # pylint: disable=E0401
 
 from tools import theme  # pylint: disable=E0401
-from tools import db  # pylint: disable=E0401
-from tools import db_migrations  # pylint: disable=E0401
+
 
 # from .db import init_db
 
