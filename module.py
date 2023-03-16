@@ -81,13 +81,13 @@ class Module(module.ModuleModel):
         #
         theme.register_mode(
             "administration", "Administration",
-            permissions=["global_admin"],
+            permissions=["admin"],
         )
         theme.register_mode_section(
             "administration", "projects", "Projects",
             kind="holder",
             location="left",
-            permissions=["global_admin"],
+            permissions=["admin.projects"],
             # icon_class="fas fa-info-circle fa-fw",
         )
         theme.register_mode_subsection(
@@ -95,7 +95,7 @@ class Module(module.ModuleModel):
             "list", "Projects",
             title="Projects",
             kind="slot",
-            permissions=["global_admin"],
+            permissions=["admin.projects"],
             prefix="admin_mode_projects_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
@@ -105,7 +105,7 @@ class Module(module.ModuleModel):
             "roles", "Roles",
             title="Roles",
             kind="slot",
-            permissions=["global_admin"],
+            permissions=["admin.roles"],
             prefix="admin_mode_roles_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
@@ -115,7 +115,7 @@ class Module(module.ModuleModel):
             "list", "edit",
             title="Edit",
             kind="slot",
-            permissions=["global_admin"],
+            permissions=[],
             prefix="admin_mode_projects_edit_",
         )
         # Init

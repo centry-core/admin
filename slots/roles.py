@@ -42,7 +42,7 @@ class Slot:  # pylint: disable=E1101,R0903
     """
 
     @web.slot("admin_mode_roles_content")
-    @auth.decorators.check_slot(["global_admin"], access_denied_reply=theme.access_denied_part)
+    @auth.decorators.check_slot([], access_denied_reply=theme.access_denied_part)
     def _projects_content(self, context, slot, payload):
         _ = slot, payload
         #
@@ -59,7 +59,7 @@ class Slot:  # pylint: disable=E1101,R0903
             )
 
     @web.slot("admin_mode_roles_scripts")
-    @auth.decorators.check_slot(["global_admin"])
+    @auth.decorators.check_slot([])
     def _projects_scripts(self, context, slot, payload):
         _ = slot, payload
         #

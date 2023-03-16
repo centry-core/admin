@@ -29,6 +29,7 @@ const RolesTable = {
             editableRoleName: null,
             deletingRole: null,
             loading: false,
+            selectedMode: 'administration'
         }
     },
     mounted() {
@@ -53,22 +54,53 @@ const RolesTable = {
             })
         },
         fetchPermissionsAPI() {
-            return fetch('/api/v1/admin/permissions/').then((data) => {
+            return fetch(`/api/v1/admin/permissions/${this.selectedMode}`).then((data) => {
                 return data.json()
             })
         },
         fetchRolesAPI() {
-            return fetch(`/api/v1/admin/roles`).then((data) => {
+            return fetch(`/api/v1/admin/roles/${this.selectedMode}`).then((data) => {
                 return data.json()
             })
         },
-        async saveRolesAPI(tableData) {
-            const res = await fetch('/api/v1/admin/permissions/', {
+        async saveRolesPermissionsAPI(tableData) {
+            const res = await fetch(`/api/v1/admin/permissions/${this.selectedMode}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(tableData)
+            })
+            return res.json();
+        },
+
+        async createRoleAPI(newRoleName) {
+            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: newRoleName})
+            })
+            return res.json();
+        },
+        async deleteRoleAPI(roleName) {
+            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: roleName})
+            })
+            return res.json();
+        },
+        async updateRoleNameAPI(oldRoleName, newRoleName) {
+            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: oldRoleName, new_name: newRoleName})
             })
             return res.json();
         },
@@ -206,12 +238,14 @@ const RolesTable = {
             })
             this.refreshEditableTable()
         },
-        handleSaveColumn(newRoleName) {
+        async handleSaveColumn(newRoleName) {
             this.showCreateModal = false;
+            await this.createRoleAPI(newRoleName);
             this.addColumn(newRoleName);
         },
-        handleUpdateColumn(newRoleName) {
+        async handleUpdateColumn(newRoleName) {
             this.showCreateModal = false;
+            await this.updateRoleNameAPI(this.editableRoleName, newRoleName);
             this.updateColumn(newRoleName, this.editableRoleName);
         },
         openCreateModal(modalType, role) {
@@ -223,8 +257,9 @@ const RolesTable = {
             this.deletingRole = role;
             this.showConfirmModal = true;
         },
-        handleDeleteRole() {
+        async handleDeleteRole() {
             this.showConfirmModal = false;
+            await this.deleteRoleAPI(this.deletingRole);
             this.editableRoles = this.editableRoles.filter(role => role !== this.deletingRole)
             const deletedIndex = this.editableTableColumns.findIndex((col, index) => col.field === this.deletingRole);
             this.editableTableColumns = [
@@ -250,9 +285,9 @@ const RolesTable = {
             $('#searchRole').val('');
             $('#roles-table').bootstrapTable('filterBy', {})
             const tableData = $('#roles-table').bootstrapTable('getData');
-            const isRowValid = this.rowValidation(tableData);
-            if (!isRowValid) return;
-            this.saveRolesAPI(tableData).then((res) => {
+            // const isRowValid = this.rowValidation(tableData);
+            // if (!isRowValid) return;
+            this.saveRolesPermissionsAPI(tableData).then((res) => {
                 if (res.ok) {
                     showNotify('SUCCESS', 'Permissions updated')
                     this.canEdit = false;
@@ -280,7 +315,7 @@ const RolesTable = {
                 return false;
             }
             return true;
-        }
+        },
     },
     template: `
     <div class="">

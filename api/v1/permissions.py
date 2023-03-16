@@ -37,25 +37,10 @@ def group_roles_by_permissions(auth_permissions):
 
 
 class API(flask_restful.Resource):  # pylint: disable=R0903
-    """
-        API Resource
 
-        Endpoint URL structure: <pylon_root>/api/<api_version>/<plugin_name>/<resource_name>
-
-        Example:
-        - Pylon root is at "https://example.com/"
-        - Plugin name is "demo"
-        - We are in subfolder "v1"
-        - Current file name is "myapi.py"
-
-        API URL: https://example.com/api/v1/demo/myapi
-
-        API resources use check_api auth decorator
-        auth.decorators.check_api takes the following arguments:
-        - permissions
-        - scope_id=1
-        - access_denied_reply={"ok": False, "error": "access_denied"},
-    """
+    url_params = [
+        "<string:mode>"
+    ]
 
     def __init__(self, module):
         self.module = module
@@ -67,16 +52,15 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
             "project": {"admin": True, "viewer": True, "editor": False},
             "develop": {"admin": True, "viewer": False, "editor": False},
         }})
-    def get(self):  # pylint: disable=R0201
+    def get(self, mode):  # pylint: disable=R0201
         """ Process """
-        roles = auth.get_roles()
-        auth_permissions = auth.get_permissions()
+        roles = auth.get_roles(mode)
+        auth_permissions = auth.get_permissions(mode)
         log.info(f"{roles=} {auth_permissions=}")
         local_permissions = auth.local_permissions
 
-        permissions = set(auth.resolve_permissions(scope_id=1, auth_data=g.auth))
+        permissions = set(auth.resolve_permissions(auth_data=g.auth))
         all_permissions = local_permissions | permissions
-        log.info(f"{permissions=} {local_permissions=} {all_permissions=}")
         roles_to_permissions = group_roles_by_permissions(auth_permissions)
         all_permissions = sorted(all_permissions)
         return {
@@ -95,10 +79,10 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
             "project": {"admin": True, "viewer": True, "editor": False},
             "develop": {"admin": True, "viewer": False, "editor": False},
         }})
-    def put(self):  # pylint: disable=R0201
+    def put(self, mode):  # pylint: disable=R0201
         """ Process """
         new_data = request.get_json()
-        old_data = self.get()["rows"]
+        old_data = self.get(mode)["rows"]
         old_permissions = set(
             (r, p['name']) for p in old_data for r, v in p.items() if v)
         new_permissions = set(
@@ -106,7 +90,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         permissions_to_delete = old_permissions - new_permissions
         permissions_to_add = new_permissions - old_permissions
         for permission in permissions_to_add:
-            auth.set_permission_for_role(*permission)
+            auth.set_permission_for_role(*permission, mode=mode)
         for permission in permissions_to_delete:
-            auth.remove_permission_from_role(*permission)
+            auth.remove_permission_from_role(*permission, mode=mode)
         return {"ok": True}
