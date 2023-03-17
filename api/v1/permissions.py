@@ -50,7 +50,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "project": {"admin": True, "viewer": True, "editor": False},
-            "develop": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, mode):  # pylint: disable=R0201
         """ Process """
@@ -61,6 +61,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
 
         permissions = set(auth.resolve_permissions(auth_data=g.auth))
         all_permissions = local_permissions | permissions
+        # log.info(f"{permissions=} {local_permissions=} {all_permissions=}")
         roles_to_permissions = group_roles_by_permissions(auth_permissions)
         all_permissions = sorted(all_permissions)
         return {
@@ -77,7 +78,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "project": {"admin": True, "viewer": True, "editor": False},
-            "develop": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, mode):  # pylint: disable=R0201
         """ Process """

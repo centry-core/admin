@@ -53,9 +53,3 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         name, new_name = request.json["name"], request.json["new_name"]
         auth.update_role_name(name, new_name, mode)
         return {"ok": True}
-
-# user | project_id
-
-# user | role | mode | project_id (optional)
-
-# permission | role | mode

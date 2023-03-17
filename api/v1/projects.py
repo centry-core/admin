@@ -55,7 +55,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "project": {"admin": True, "viewer": True, "editor": False},
-            "develop": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self):  # pylint: disable=R0201
         """ Process """
