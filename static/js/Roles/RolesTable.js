@@ -29,7 +29,8 @@ const RolesTable = {
             editableRoleName: null,
             deletingRole: null,
             loading: false,
-            selectedMode: 'administration'
+            selectedMode: 'administration',
+            hasRowError: false,
         }
     },
     mounted() {
@@ -43,66 +44,27 @@ const RolesTable = {
                 }
             })
         })
+        $('#roles-table').on('page-change.bs.table', (e, data) => {
+            if(this.hasRowError) {
+                const emptyRowIdxs = this.getEmptyRows();
+                if (emptyRowIdxs.length > 0) {
+                    this.$nextTick(() => {
+                        emptyRowIdxs.forEach(idx => {
+                            $('#roles-table').find(`[data-uniqueid='${idx}']`).addClass('empty-row__error');
+                        })
+                    })
+                }
+            }
+        })
         this.fetchTableData();
     },
     methods: {
         fetchTableData() {
-            Promise.all([this.fetchPermissionsAPI(), this.fetchRolesAPI()]).then(data => {
+            Promise.all([fetchPermissionsAPI(this.selectedMode), fetchRolesAPI(this.selectedMode)]).then(data => {
                 this.roles = data[1].map(role => role.name);
                 this.permissions = data[0].rows;
                 this.generateTableOptions()
             })
-        },
-        fetchPermissionsAPI() {
-            return fetch(`/api/v1/admin/permissions/${this.selectedMode}`).then((data) => {
-                return data.json()
-            })
-        },
-        fetchRolesAPI() {
-            return fetch(`/api/v1/admin/roles/${this.selectedMode}`).then((data) => {
-                return data.json()
-            })
-        },
-        async saveRolesPermissionsAPI(tableData) {
-            const res = await fetch(`/api/v1/admin/permissions/${this.selectedMode}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(tableData)
-            })
-            return res.json();
-        },
-
-        async createRoleAPI(newRoleName) {
-            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({name: newRoleName})
-            })
-            return res.json();
-        },
-        async deleteRoleAPI(roleName) {
-            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({name: roleName})
-            })
-            return res.json();
-        },
-        async updateRoleNameAPI(oldRoleName, newRoleName) {
-            const res = await fetch(`/api/v1/admin/roles/${this.selectedMode}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({name: oldRoleName, new_name: newRoleName})
-            })
-            return res.json();
         },
         generateTableOptions() {
             $('#roles-table').bootstrapTable('destroy').bootstrapTable({
@@ -240,12 +202,12 @@ const RolesTable = {
         },
         async handleSaveColumn(newRoleName) {
             this.showCreateModal = false;
-            await this.createRoleAPI(newRoleName);
+            await createRoleAPI(newRoleName, this.selectedMode);
             this.addColumn(newRoleName);
         },
         async handleUpdateColumn(newRoleName) {
             this.showCreateModal = false;
-            await this.updateRoleNameAPI(this.editableRoleName, newRoleName);
+            await updateRoleNameAPI(this.editableRoleName, newRoleName, this.selectedMode);
             this.updateColumn(newRoleName, this.editableRoleName);
         },
         openCreateModal(modalType, role) {
@@ -259,7 +221,7 @@ const RolesTable = {
         },
         async handleDeleteRole() {
             this.showConfirmModal = false;
-            await this.deleteRoleAPI(this.deletingRole);
+            await deleteRoleAPI(this.deletingRole, this.selectedMode);
             this.editableRoles = this.editableRoles.filter(role => role !== this.deletingRole)
             const deletedIndex = this.editableTableColumns.findIndex((col, index) => col.field === this.deletingRole);
             this.editableTableColumns = [
@@ -282,16 +244,15 @@ const RolesTable = {
             })
         },
         async saveRoles() {
-            $('#searchRole').val('');
-            $('#roles-table').bootstrapTable('filterBy', {})
-            const tableData = $('#roles-table').bootstrapTable('getData');
-            // const isRowValid = this.rowValidation(tableData);
-            // if (!isRowValid) return;
-            this.saveRolesPermissionsAPI(tableData).then((res) => {
+            const isRowValid = this.rowValidation();
+            if (!isRowValid) return;
+            saveRolesPermissionsAPI(this.editableTableData, this.selectedMode).then((res) => {
                 if (res.ok) {
                     showNotify('SUCCESS', 'Permissions updated')
                     this.canEdit = false;
                     this.fetchTableData();
+                    $('#searchRole').val('');
+                    $('#roles-table').bootstrapTable('filterBy', {});
                 }
             }).catch(e => {
                 showNotify('ERROR', e)
@@ -299,23 +260,30 @@ const RolesTable = {
                 this.loading = false;
             })
         },
-        rowValidation(tableData) {
-            const emptyRowIdx = [];
-            tableData.forEach((row, index) => {
-                const rowRoles = Object.assign({}, row);
-                delete rowRoles.name;
-                const isFilledRow = Object.values(rowRoles).some(role => role);
-                if (!isFilledRow) emptyRowIdx.push(index);
-            })
-            if (emptyRowIdx.length > 0) {
-                emptyRowIdx.forEach(idx => {
-                    $('#roles-table').find(`[data-index='${idx}']`).addClass('empty-row__error');
+        rowValidation() {
+            const emptyRowIds = this.getEmptyRows();
+            if (emptyRowIds.length > 0) {
+                emptyRowIds.forEach(idx => {
+                    $('#roles-table').find(`[data-uniqueid='${idx}']`).addClass('empty-row__error');
                 })
+                this.hasRowError = true;
                 showNotify('ERROR', '[Permission] must be assigned to at least one role.');
                 return false;
             }
+            this.hasRowError = false;
             return true;
         },
+        getEmptyRows() {
+            const emptyRowIdx = [];
+            this.editableTableData.forEach((row, index) => {
+                const rowRoles = Object.assign({}, row);
+                const uniqId = rowRoles.name;
+                delete rowRoles.name;
+                const isFilledRow = Object.values(rowRoles).some(role => role);
+                if (!isFilledRow) emptyRowIdx.push(uniqId);
+            })
+            return emptyRowIdx;
+        }
     },
     template: `
     <div class="">
@@ -370,5 +338,4 @@ const RolesTable = {
     </div>
    `
 }
-register_component('roles-table', RolesTable)
-
+register_component('roles-table', RolesTable);
