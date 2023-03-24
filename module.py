@@ -16,17 +16,12 @@
 #   limitations under the License.
 
 """ Module """
-
-# import sqlalchemy  # pylint: disable=E0401
-
 from pylon.core.tools import log  # pylint: disable=E0401
 from pylon.core.tools import module  # pylint: disable=E0401
-from pylon.core.tools.context import Context as Holder  # pylint: disable=E0401
-
-from tools import theme  # pylint: disable=E0401
 
 
-# from .db import init_db
+from tools import theme, VaultClient  # pylint: disable=E0401
+import hvac
 
 
 class Module(module.ModuleModel):
@@ -118,8 +113,22 @@ class Module(module.ModuleModel):
             permissions=[],
             prefix="admin_mode_projects_edit_",
         )
+
+        theme.register_mode_section(
+            "administration", "configuration", "Configuration",
+            kind="holder",
+            location="left",
+            permissions=["global_admin"],
+            # icon_class="fas fa-info-circle fa-fw",
+        )
         # Init
         self.descriptor.init_all()
+
+        vc = VaultClient()
+        try:
+            vc.init_project_space()
+        except hvac.exceptions.InvalidRequest:
+            ...
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
