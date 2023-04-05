@@ -88,7 +88,6 @@ class RPC:
                     tenant_session.commit()
             return True
 
-        # TODO: Сделать маршрутизацию по схемам в зависимости от мода.
 
     @web.rpc("add_user_to_project", "admin_add_user_to_project")
     def add_user_to_project(self, project_id, user_id, role_name, **kwargs) -> bool:
