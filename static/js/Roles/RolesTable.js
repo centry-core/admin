@@ -29,11 +29,13 @@ const RolesTable = {
             editableRoleName: null,
             deletingRole: null,
             loading: false,
-            selectedMode: 'administration',
+            selectedMode: 'default',
+            modes: ['administration', 'project', 'default', 'developer'],
             hasRowError: false,
         }
     },
     mounted() {
+
         $('#searchRole').on('input', function ({target: {value}}) {
             $('#roles-table').bootstrapTable('filterBy', {
                 name: value.toLowerCase()
@@ -45,7 +47,7 @@ const RolesTable = {
             })
         })
         $('#roles-table').on('page-change.bs.table', (e, data) => {
-            if(this.hasRowError) {
+            if (this.hasRowError) {
                 const emptyRowIdxs = this.getEmptyRows();
                 if (emptyRowIdxs.length > 0) {
                     this.$nextTick(() => {
@@ -56,7 +58,9 @@ const RolesTable = {
                 }
             }
         })
-        this.fetchTableData();
+        $(document).on('vue_init', () => {
+            this.fetchTableData();
+        })
     },
     methods: {
         fetchTableData() {
@@ -285,6 +289,11 @@ const RolesTable = {
             return emptyRowIdx;
         }
     },
+    watch: {
+        selectedMode: function (newVal, oldVal) {
+            this.fetchTableData();
+        }
+    },
     template: `
     <div class="">
         <div class="m-3">
@@ -297,6 +306,16 @@ const RolesTable = {
                 >
                 <template #actions="{master}">
                     <div class="d-flex justify-content-end">
+                        <div class="custom-input" v-if="$root.mode === 'administration'">
+                            <select class="selectpicker bootstrap-select__b" 
+                                data-style="btn" 
+                                v-model="selectedMode"
+                            >
+                                <option v-for="mode in modes">
+                                    {{mode}}
+                                </option>
+                            </select>
+                        </div>
                         <div class="custom-input custom-input_search custom-input_search__sm position-relative mr-2">
                             <input type="text" placeholder="Search permissions" id="searchRole">
                             <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
