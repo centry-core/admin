@@ -19,7 +19,6 @@
 from pylon.core.tools import log  # pylint: disable=E0401
 from pylon.core.tools import module  # pylint: disable=E0401
 
-
 from tools import theme, VaultClient  # pylint: disable=E0401
 import hvac
 
@@ -40,7 +39,6 @@ class Module(module.ModuleModel):
         # Run DB migrations
         # db_migrations.run_db_migrations(self, db.url)
         # DB
-        # init_db(self)
         # Theme registration
         #
         # System: for landing info screen
@@ -105,6 +103,14 @@ class Module(module.ModuleModel):
             # icon_class="fas fa-server fa-fw",
             # weight=2,
         )
+        theme.register_subsection(
+            "configuration",
+            "roles", "Roles",
+            title="Roles",
+            kind="slot",
+            permissions=[],
+            prefix="roles_",
+        )
         theme.register_mode_page(
             "administration", "projects",
             "list", "edit",
@@ -118,7 +124,7 @@ class Module(module.ModuleModel):
             "administration", "configuration", "Configuration",
             kind="holder",
             location="left",
-            permissions=["global_admin"],
+            permissions=["configuration"],
             # icon_class="fas fa-info-circle fa-fw",
         )
         # Init
