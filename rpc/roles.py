@@ -88,7 +88,6 @@ class RPC:
                     tenant_session.commit()
             return True
 
-
     @web.rpc("add_user_to_project", "admin_add_user_to_project")
     def add_user_to_project(self, project_id, user_id, role_name, **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
@@ -127,3 +126,11 @@ class RPC:
                 permissions = [permission.permission for _, permission in permissions]
                 return permissions
             return []
+
+    @web.rpc("get_users_in_project", "admin_get_users_in_project")
+    def get_users_in_project(self, project_id, **kwargs) -> list[dict]:
+        with db.with_project_schema_session(project_id) as tenant_session:
+            users = tenant_session.query(User).all()
+            users = [user.to_json() for user in users]
+            return users
+
