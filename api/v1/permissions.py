@@ -56,7 +56,7 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         """ Process """
         roles = auth.get_roles(mode)
         auth_permissions = auth.get_permissions(mode)
-        log.info(f"{roles=} {auth_permissions=}")
+        # log.info(f"{roles=} {auth_permissions=}")
         local_permissions = auth.local_permissions
 
         permissions = set(auth.resolve_permissions(auth_data=g.auth))
