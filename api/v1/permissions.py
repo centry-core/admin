@@ -41,7 +41,7 @@ class AdminAPI(api_tools.APIModeHandler):
         "permissions": ["admin.roles.permissions.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
-            "project": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, target_mode):  # pylint: disable=R0201
@@ -68,7 +68,7 @@ class AdminAPI(api_tools.APIModeHandler):
         "permissions": ["admin.roles.permissions.edit"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
-            "project": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, target_mode):  # pylint: disable=R0201
@@ -93,7 +93,7 @@ class ProjectAPI(api_tools.APIModeHandler):
         "permissions": ["admin.roles.permissions.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
-            "project": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, project_id):  # pylint: disable=R0201
@@ -116,7 +116,7 @@ class ProjectAPI(api_tools.APIModeHandler):
         "permissions": ["admin.roles.permissions.edit"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
-            "project": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, project_id):  # pylint: disable=R0201
@@ -152,7 +152,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
     ]
 
     mode_handlers = {
-        'project': ProjectAPI,
         'default': ProjectAPI,
         'administration': AdminAPI,
     }

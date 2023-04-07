@@ -14,7 +14,7 @@ const clear_errors = () => {
 
 async function projectCreateSubmit() {
     clear_errors()
-    const resp = await fetch('/api/v1/projects/project/', {
+    const resp = await fetch(V.build_api_url('projects', 'project'), {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
