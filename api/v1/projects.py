@@ -23,10 +23,10 @@ from flask import g
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth  # pylint: disable=E0401
+from tools import auth, api_tools
 
 
-class API(flask_restful.Resource):  # pylint: disable=R0903
+class API(api_tools.APIBase):
     """
         API Resource
 
@@ -46,23 +46,22 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
         - scope_id=1
         - access_denied_reply={"ok": False, "error": "access_denied"},
     """
+    url_params = [
+        '<string:mode>'
+    ]
 
-    def __init__(self, module):
-        self.module = module
-
-    @auth.decorators.check_api({
-        "permissions": ["admin.projects.projects.view"],
-        "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
-            "developer": {"admin": True, "viewer": False, "editor": False},
-        }})
-    def get(self):  # pylint: disable=R0201
-        """ Process """
-        all_projects = self.module.context.rpc_manager.call.project_list()
-
-        #
-        return {
-            "total": len(all_projects),
-            "rows": all_projects,
-        }
+    # @auth.decorators.check_api({
+    #     "permissions": ["admin.projects.projects.view"],
+    #     "recommended_roles": {
+    #         "administration": {"admin": True, "viewer": True, "editor": False},
+    #         "default": {"admin": True, "viewer": True, "editor": False},
+    #         "developer": {"admin": True, "viewer": False, "editor": False},
+    #     }})
+    def get(self, **kwargs):  # pylint: disable=R0201
+        if kwargs.get('mode') == 'administration':
+            all_projects = self.module.context.rpc_manager.call.project_list()
+            return {
+                "total": len(all_projects),
+                "rows": all_projects,
+            }, 200
+        return None, 403

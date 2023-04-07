@@ -89,7 +89,7 @@ class RPC:
             return True
 
     @web.rpc("add_user_to_project", "admin_add_user_to_project")
-    def add_user_to_project(self, project_id, user_id, role_name, **kwargs) -> bool:
+    def add_user_to_project(self, project_id: int, user_id: int, role_name: str, **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
             user = tenant_session.query(User).filter(User.auth_id == user_id).first()
             if not user:
