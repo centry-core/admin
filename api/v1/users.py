@@ -56,12 +56,25 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         return {
             "total": len(users_roles),
             "rows": users_roles,
-        }
+        }, 200
 
     def post(self, project_id: int, **kwargs):
         user_name = request.json["name"]
         user_email = request.json["email"]
         user_roles = request.json["roles"]
-        return self.module.context.rpc_manager.call.add_user_to_project_or_create(
+        result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
             user_email, user_email, project_id, user_roles)
-  
+        return {'msg': result}, 200
+
+    def put(self, project_id: int, **kwargs):
+        user_id = request.json["id"]
+        new_user_roles = request.json["roles"]
+        result = self.module.context.rpc_manager.call.update_roles_for_user(
+            project_id, user_id, new_user_roles)
+        return {'msg': f'roles updated' if result else 'something wrong'}, 200
+
+    def delete(self, project_id, **kwargs):
+        user_id = request.args["id"]
+        result = self.module.context.rpc_manager.call.remove_user_from_project(
+            project_id, user_id)
+        return {'msg': 'user removed' if result else 'something wrong'}, 204
