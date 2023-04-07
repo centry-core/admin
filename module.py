@@ -111,6 +111,14 @@ class Module(module.ModuleModel):
             permissions=[],
             prefix="roles_",
         )
+        theme.register_subsection(
+            "configuration",
+            "users", "Users",
+            title="Users",
+            kind="slot",
+            permissions=[],
+            prefix="users_",
+        )
         theme.register_mode_page(
             "administration", "projects",
             "list", "edit",
