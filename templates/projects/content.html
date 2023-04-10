@@ -21,7 +21,7 @@
               data-toggle="table"
               data-unique-id="id"
               data-pagination="false"
-              data-url="/api/v1/admin/projects/administration/"
+              :data-url="build_api_url('admin', 'projects')"
           >
               <thead class="thead-light">
                   <tr>
@@ -65,7 +65,7 @@
                             <p>
                                 <h13>Enter project name</h13>
                             </p>
-                            <input type="text" id="project_name" class="form-control form-control-alternative" placeholder="Project Name">
+                            <input type="text" id="name" class="form-control form-control-alternative" placeholder="Project Name">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
-
+            
                     <div class="row">
                         <div class="form-group col">
                             <h9>Plugins</h9>

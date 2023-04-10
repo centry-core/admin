@@ -1,24 +1,27 @@
 const set_errors = error_data => {
-    error_data?.loc.forEach(i => {
-        const inpt = $(`#${i}`)
-        inpt.addClass('is-invalid')
-        inpt.siblings('.invalid-feedback').text(error_data?.msg)
+    error_data?.forEach(err => {
+        err.loc?.forEach(i => {
+            const inpt = $(`#${i}`)
+            inpt.addClass('is-invalid')
+            inpt.siblings('.invalid-feedback').text(err.msg)
+        })
     })
 }
 
 const clear_errors = () => {
-    ['project_name', 'project_admin_email'].forEach(i => {
+    ['name', 'project_admin_email'].forEach(i => {
         $(`#${i}`).removeClass('is-invalid')
     })
 }
 
 async function projectCreateSubmit() {
     clear_errors()
-    const resp = await fetch(V.build_api_url('projects', 'project'), {
+    const api_url = V.build_api_url('projects', 'project', {trailing_slash: true})
+    const resp = await fetch(api_url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            "name": $('#project_name').val(),
+            "name": $('#name').val(),
             "project_admin_email": $('#project_admin_email').val(),
             "vuh_limit": 60000,
             "plugins": vueVm.multiselectFilter?.selectedItems.map(i => i.id) || [],
