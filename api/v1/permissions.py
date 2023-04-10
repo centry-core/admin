@@ -38,7 +38,7 @@ def group_roles_by_permissions(auth_permissions, roles):
 
 class AdminAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
-        "permissions": ["admin.roles.permissions.view"],
+        "permissions": ["configuration.roles.permissions.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "default": {"admin": True, "viewer": True, "editor": False},
@@ -65,7 +65,7 @@ class AdminAPI(api_tools.APIModeHandler):
         }
 
     @auth.decorators.check_api({
-        "permissions": ["admin.roles.permissions.edit"],
+        "permissions": ["configuration.roles.permissions.edit"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "default": {"admin": True, "viewer": True, "editor": False},
@@ -90,7 +90,7 @@ class AdminAPI(api_tools.APIModeHandler):
 
 class ProjectAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
-        "permissions": ["admin.roles.permissions.view"],
+        "permissions": ["configuration.roles.permissions.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "default": {"admin": True, "viewer": True, "editor": False},
@@ -113,7 +113,7 @@ class ProjectAPI(api_tools.APIModeHandler):
         }
 
     @auth.decorators.check_api({
-        "permissions": ["admin.roles.permissions.edit"],
+        "permissions": ["configuration.roles.permissions.edit"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": True, "editor": False},
             "default": {"admin": True, "viewer": True, "editor": False},
@@ -152,7 +152,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
     ]
 
     mode_handlers = {
-        'project': ProjectAPI,
         'default': ProjectAPI,
         'administration': AdminAPI,
     }

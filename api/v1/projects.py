@@ -23,45 +23,33 @@ from flask import g
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth, api_tools
+from tools import auth, api_tools  # pylint: disable=E0401
 
 
-class API(api_tools.APIBase):
-    """
-        API Resource
+class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
 
-        Endpoint URL structure: <pylon_root>/api/<api_version>/<plugin_name>/<resource_name>
+    @auth.decorators.check_api({
+        "permissions": ["configuration.projects.projects.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
+    def get(self):  # pylint: disable=R0201
+        """ Process """
+        all_projects = self.module.context.rpc_manager.call.project_list()
+        #
+        return {
+            "total": len(all_projects),
+            "rows": all_projects,
+        }
 
-        Example:
-        - Pylon root is at "https://example.com/"
-        - Plugin name is "demo"
-        - We are in subfolder "v1"
-        - Current file name is "myapi.py"
 
-        API URL: https://example.com/api/v1/demo/myapi
-
-        API resources use check_api auth decorator
-        auth.decorators.check_api takes the following arguments:
-        - permissions
-        - scope_id=1
-        - access_denied_reply={"ok": False, "error": "access_denied"},
-    """
+class API(api_tools.APIBase):  # pylint: disable=R0903
     url_params = [
-        '<string:mode>'
+        "<string:mode>",
     ]
 
-    # @auth.decorators.check_api({
-    #     "permissions": ["admin.projects.projects.view"],
-    #     "recommended_roles": {
-    #         "administration": {"admin": True, "viewer": True, "editor": False},
-    #         "default": {"admin": True, "viewer": True, "editor": False},
-    #         "developer": {"admin": True, "viewer": False, "editor": False},
-    #     }})
-    def get(self, **kwargs):  # pylint: disable=R0201
-        if kwargs.get('mode') == 'administration':
-            all_projects = self.module.context.rpc_manager.call.project_list()
-            return {
-                "total": len(all_projects),
-                "rows": all_projects,
-            }, 200
-        return None, 403
+    mode_handlers = {
+        'administration': AdminAPI,
+    }

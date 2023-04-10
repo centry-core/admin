@@ -30,7 +30,7 @@ const RolesTable = {
             deletingRole: null,
             loading: false,
             selectedMode: 'default',
-            modes: ['administration', 'project', 'default', 'developer'],
+            modes: ['administration', 'default', 'developer'],
             hasRowError: false,
         }
     },

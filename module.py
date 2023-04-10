@@ -74,13 +74,12 @@ class Module(module.ModuleModel):
         #
         theme.register_mode(
             "administration", "Administration",
-            permissions=["admin"],
         )
         theme.register_mode_section(
             "administration", "projects", "Projects",
             kind="holder",
             location="left",
-            permissions=["admin.projects"],
+            permissions=["projects"],
             # icon_class="fas fa-info-circle fa-fw",
         )
         theme.register_mode_subsection(
@@ -88,17 +87,17 @@ class Module(module.ModuleModel):
             "list", "Projects",
             title="Projects",
             kind="slot",
-            permissions=["admin.projects"],
+            permissions=["projects.projects"],
             prefix="admin_mode_projects_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
         )
         theme.register_mode_subsection(
-            "administration", "projects",
+            "administration", "configuration",
             "roles", "Roles",
             title="Roles",
             kind="slot",
-            permissions=["admin.roles"],
+            permissions=["configuration.roles"],
             prefix="admin_mode_roles_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
@@ -108,7 +107,7 @@ class Module(module.ModuleModel):
             "roles", "Roles",
             title="Roles",
             kind="slot",
-            permissions=[],
+            permissions=["configuration.roles"],
             prefix="roles_",
         )
         theme.register_subsection(
@@ -116,7 +115,7 @@ class Module(module.ModuleModel):
             "users", "Users",
             title="Users",
             kind="slot",
-            permissions=[],
+            permissions=["configuration.users"],
             prefix="users_",
         )
         theme.register_mode_page(
@@ -124,7 +123,7 @@ class Module(module.ModuleModel):
             "list", "edit",
             title="Edit",
             kind="slot",
-            permissions=[],
+            permissions=["projects.projects"],
             prefix="admin_mode_projects_edit_",
         )
 

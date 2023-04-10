@@ -82,7 +82,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
     ]
 
     mode_handlers = {
-        'project': ProjectAPI,
         'default': ProjectAPI,
         'administration': AdminAPI,
     }
