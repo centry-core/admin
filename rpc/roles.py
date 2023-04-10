@@ -143,7 +143,7 @@ class RPC:
                 ).all()
             user_roles = {}
             for user, _, role in users:
-                user_roles.setdefault(user.auth_id, []).append(role.name)            
+                user_roles.setdefault(user.auth_id, []).append(role.name)
             return user_roles
 
     @web.rpc("update_roles_for_user", "admin_update_roles_for_user")
@@ -159,6 +159,6 @@ class RPC:
                     role = tenant_session.query(Role).filter(Role.name == role_name).first()
                     if role:
                         user_role = UserRole(user_id=user.id, role_id=role.id)
-                        tenant_session.add(user_role)   
+                        tenant_session.add(user_role)
                 tenant_session.commit()
             return True
