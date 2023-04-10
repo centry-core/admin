@@ -16,11 +16,6 @@
 #   limitations under the License.
 
 """ API """
-
-import flask  # pylint: disable=E0401,W0611
-import flask_restful  # pylint: disable=E0401
-from flask import g
-
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
 from tools import auth, api_tools  # pylint: disable=E0401
