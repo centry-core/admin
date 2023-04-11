@@ -21,7 +21,8 @@
               data-toggle="table"
               data-unique-id="id"
               data-pagination="false"
-              data-url="/api/v1/admin/projects/">
+              :data-url="build_api_url('admin', 'projects')"
+          >
               <thead class="thead-light">
                   <tr>
                       <th data-visible="false" data-field="id">ID</th>
@@ -64,7 +65,18 @@
                             <p>
                                 <h13>Enter project name</h13>
                             </p>
-                            <input type="text" id="project_name" class="form-control form-control-alternative" placeholder="Project Name">
+                            <input type="text" id="name" class="form-control form-control-alternative" placeholder="Project Name">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <h9>Assign project admin</h9>
+                            <p>
+                                <h13>Enter email</h13>
+                            </p>
+                            <input type="text" id="project_admin_email" class="form-control form-control-alternative" placeholder="Email">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>

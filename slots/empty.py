@@ -41,9 +41,7 @@ class Slot:  # pylint: disable=E1101,R0903
 
     """
 
-
     @web.slot("admin_system_status_empty_content")
-    @auth.decorators.check_slot([], access_denied_reply=theme.access_denied_part)
     def _empty_content(self, context, slot, payload):
         _ = slot, payload
         #

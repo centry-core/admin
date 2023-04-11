@@ -16,18 +16,11 @@
 #   limitations under the License.
 
 """ Module """
-
-# import sqlalchemy  # pylint: disable=E0401
-
 from pylon.core.tools import log  # pylint: disable=E0401
 from pylon.core.tools import module  # pylint: disable=E0401
-from pylon.core.tools.context import Context as Holder  # pylint: disable=E0401
 
-from tools import theme  # pylint: disable=E0401
-from tools import db  # pylint: disable=E0401
-from tools import db_migrations  # pylint: disable=E0401
-
-# from .db import init_db
+from tools import theme, VaultClient  # pylint: disable=E0401
+import hvac
 
 
 class Module(module.ModuleModel):
@@ -46,7 +39,6 @@ class Module(module.ModuleModel):
         # Run DB migrations
         # db_migrations.run_db_migrations(self, db.url)
         # DB
-        # init_db(self)
         # Theme registration
         #
         # System: for landing info screen
@@ -82,13 +74,12 @@ class Module(module.ModuleModel):
         #
         theme.register_mode(
             "administration", "Administration",
-            permissions=["global_admin"],
         )
         theme.register_mode_section(
             "administration", "projects", "Projects",
             kind="holder",
             location="left",
-            permissions=["global_admin"],
+            permissions=["projects"],
             # icon_class="fas fa-info-circle fa-fw",
         )
         theme.register_mode_subsection(
@@ -96,21 +87,61 @@ class Module(module.ModuleModel):
             "list", "Projects",
             title="Projects",
             kind="slot",
-            permissions=["global_admin"],
+            permissions=["projects.projects"],
             prefix="admin_mode_projects_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
+        )
+        theme.register_mode_subsection(
+            "administration", "configuration",
+            "roles", "Roles",
+            title="Roles",
+            kind="slot",
+            permissions=["configuration.roles"],
+            prefix="admin_mode_roles_",
+            # icon_class="fas fa-server fa-fw",
+            # weight=2,
+        )
+        theme.register_subsection(
+            "configuration",
+            "roles", "Roles",
+            title="Roles",
+            kind="slot",
+            permissions=["configuration.roles"],
+            prefix="roles_",
+        )
+        theme.register_subsection(
+            "configuration",
+            "users", "Users",
+            title="Users",
+            kind="slot",
+            permissions=["configuration.users"],
+            prefix="users_",
         )
         theme.register_mode_page(
             "administration", "projects",
             "list", "edit",
             title="Edit",
             kind="slot",
-            permissions=["global_admin"],
+            permissions=["projects.projects"],
             prefix="admin_mode_projects_edit_",
+        )
+
+        theme.register_mode_section(
+            "administration", "configuration", "Configuration",
+            kind="holder",
+            location="left",
+            permissions=["configuration"],
+            # icon_class="fas fa-info-circle fa-fw",
         )
         # Init
         self.descriptor.init_all()
+
+        vc = VaultClient()
+        try:
+            vc.init_project_space()
+        except hvac.exceptions.InvalidRequest:
+            ...
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """

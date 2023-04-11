@@ -16,42 +16,20 @@
 #   limitations under the License.
 
 """ API """
-
-import flask  # pylint: disable=E0401,W0611
-import flask_restful  # pylint: disable=E0401
-
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth  # pylint: disable=E0401
+from tools import auth, api_tools  # pylint: disable=E0401
 
 
-class API(flask_restful.Resource):  # pylint: disable=R0903
-    """
-        API Resource
+class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
 
-        Endpoint URL structure: <pylon_root>/api/<api_version>/<plugin_name>/<resource_name>
-
-        Example:
-        - Pylon root is at "https://example.com/"
-        - Plugin name is "demo"
-        - We are in subfolder "v1"
-        - Current file name is "myapi.py"
-
-        API URL: https://example.com/api/v1/demo/myapi
-
-        API resources use check_api auth decorator
-        auth.decorators.check_api takes the following arguments:
-        - permissions
-        - scope_id=1
-        - access_denied_reply={"ok": False, "error": "access_denied"},
-    """
-
-
-    def __init__(self, module):
-        self.module = module
-
-
-    @auth.decorators.check_api(["global_admin"])
+    @auth.decorators.check_api({
+        "permissions": ["configuration.projects.projects.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def get(self):  # pylint: disable=R0201
         """ Process """
         all_projects = self.module.context.rpc_manager.call.project_list()
@@ -60,3 +38,13 @@ class API(flask_restful.Resource):  # pylint: disable=R0903
             "total": len(all_projects),
             "rows": all_projects,
         }
+
+
+class API(api_tools.APIBase):  # pylint: disable=R0903
+    url_params = [
+        "<string:mode>",
+    ]
+
+    mode_handlers = {
+        'administration': AdminAPI,
+    }

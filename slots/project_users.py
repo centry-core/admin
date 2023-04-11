@@ -40,22 +40,30 @@ class Slot:  # pylint: disable=E1101,R0903
         - access_denied_reply=None -> can be set to content to return in case of 'access denied'
 
     """
-    @web.slot("admin_mode_projects_content")
-    @auth.decorators.check_slot(["configuration.projects"], access_denied_reply=theme.access_denied_part)
+
+    @web.slot("users_content")
+    @auth.decorators.check_slot([], access_denied_reply=theme.access_denied_part)
     def _projects_content(self, context, slot, payload):
         _ = slot, payload
         #
         with context.app.app_context():
             return self.descriptor.render_template(
-                "projects/content.html",
+                "users/content.html",
             )
 
-    @web.slot("admin_mode_projects_scripts")
-    @auth.decorators.check_slot(["configuration.projects"])
+    @web.slot('roles_styles')
+    def styles(self, context, slot, payload):
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                'users/styles.html',
+            )
+
+    @web.slot("users_scripts")
+    @auth.decorators.check_slot([])
     def _projects_scripts(self, context, slot, payload):
         _ = slot, payload
         #
         with context.app.app_context():
             return self.descriptor.render_template(
-                "projects/scripts.html",
+                "users/scripts.html",
             )
