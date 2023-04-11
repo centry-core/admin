@@ -111,6 +111,7 @@ class RPC:
                     UserRole.user_id == user.id).all()
                 for user_role in user_roles:
                     tenant_session.delete(user_role)
+                tenant_session.delete(user)
                 tenant_session.commit()
             return True
 

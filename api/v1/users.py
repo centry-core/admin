@@ -52,6 +52,8 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         for user_id, roles in project_users.items():
             user = {'id': user_id, 'roles': roles}
             user.update([u for u in all_users if user['id'] == u['id']][0])
+            if user['last_login']:
+                user['last_login'] = user['last_login'].strftime("%Y-%m-%d %H:%M")
             users_roles.append(user)
         return {
             "total": len(users_roles),
@@ -59,11 +61,10 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         }, 200
 
     def post(self, project_id: int, **kwargs):
-        user_name = request.json["name"]
         user_email = request.json["email"]
         user_roles = request.json["roles"]
         result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
-            user_email, user_email, project_id, user_roles)
+            user_email, project_id, user_roles)
         return {'msg': result}, 200
 
     def put(self, project_id: int, **kwargs):
