@@ -53,7 +53,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             user = {'id': user_id, 'roles': roles}
             user.update([u for u in all_users if user['id'] == u['id']][0])
             if user['last_login']:
-                user['last_login'] = user['last_login'].strftime("%Y-%m-%d %H:%M")
+                user['last_login'] = user['last_login'].strftime("%d.%m.%Y %H:%M")
             users_roles.append(user)
         return {
             "total": len(users_roles),
@@ -75,7 +75,11 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         return {'msg': f'roles updated' if result else 'something wrong'}, 200
 
     def delete(self, project_id, **kwargs):
-        user_id = request.args["id"]
-        result = self.module.context.rpc_manager.call.remove_user_from_project(
-            project_id, user_id)
-        return {'msg': 'user removed' if result else 'something wrong'}, 204
+        try:
+            delete_ids = list(map(int, request.args["id[]"].split(',')))
+        except TypeError:
+            return 'IDs must be integers', 400
+        for user_id in delete_ids:
+            self.module.context.rpc_manager.call.remove_user_from_project(
+                project_id, user_id)
+        return {'msg': 'users succesfully removed'}, 204
