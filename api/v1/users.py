@@ -16,6 +16,8 @@
 #   limitations under the License.
 
 """ API """
+import re
+
 
 import flask  # pylint: disable=E0401,W0611
 import flask_restful  # pylint: disable=E0401
@@ -61,18 +63,24 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         }, 200
 
     def post(self, project_id: int, **kwargs):
-        user_email = request.json["email"]
+        user_emails = request.json["emails"]
         user_roles = request.json["roles"]
-        result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
-            user_email, project_id, user_roles)
-        return {'msg': result}, 200
+        results = []
+        for user_email in user_emails:
+            if not re.match(r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$", user_email):
+                results.append(f'email {user_email} is not valid')
+                continue  
+            result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
+                user_email, project_id, user_roles)
+            results.append(result)
+        return {'msg': results}, 200
 
     def put(self, project_id: int, **kwargs):
         user_id = request.json["id"]
         new_user_roles = request.json["roles"]
         result = self.module.context.rpc_manager.call.update_roles_for_user(
             project_id, user_id, new_user_roles)
-        return {'msg': f'roles updated' if result else 'something wrong'}, 200
+        return {'msg': f'roles updated' if result else 'something is wrong'}, 200
 
     def delete(self, project_id, **kwargs):
         try:
