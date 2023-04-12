@@ -51,7 +51,7 @@ class Slot:  # pylint: disable=E1101,R0903
                 "users/content.html",
             )
 
-    @web.slot('roles_styles')
+    @web.slot('users_styles')
     def styles(self, context, slot, payload):
         with context.app.app_context():
             return self.descriptor.render_template(
