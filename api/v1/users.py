@@ -68,12 +68,12 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         results = []
         for user_email in user_emails:
             if not re.match(r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$", user_email):
-                results.append(f'email {user_email} is not valid')
+                results.append({'msg': f'email {user_email} is not valid', 'status': 'error'})
                 continue  
             result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
                 user_email, project_id, user_roles)
             results.append(result)
-        return {'msg': results}, 200
+        return results, 200
 
     def put(self, project_id: int, **kwargs):
         user_id = request.json["id"]
