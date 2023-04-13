@@ -16,112 +16,78 @@
 #   limitations under the License.
 
 """ API """
+import re
+
 
 import flask  # pylint: disable=E0401,W0611
 import flask_restful  # pylint: disable=E0401
+from flask import g, request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
+from sqlalchemy import schema
 
-from tools import auth  # pylint: disable=E0401
+from tools import auth, db, api_tools  # pylint: disable=E0401
 
 
-class API(flask_restful.Resource):  # pylint: disable=R0903
-    """
-        API Resource
+class AdminAPI(api_tools.APIModeHandler):
+    pass
 
-        Endpoint URL structure: <pylon_root>/api/<api_version>/<plugin_name>/<resource_name>
 
-        Example:
-        - Pylon root is at "https://example.com/"
-        - Plugin name is "demo"
-        - We are in subfolder "v1"
-        - Current file name is "myapi.py"
+class ProjectAPI(api_tools.APIModeHandler):
+    pass
 
-        API URL: https://example.com/api/v1/demo/myapi
-
-        API resources use check_api auth decorator
-        auth.decorators.check_api takes the following arguments:
-        - permissions
-        - scope_id=1
-        - access_denied_reply={"ok": False, "error": "access_denied"},
-    """
-
+class API(api_tools.APIBase):  # pylint: disable=R0903
     url_params = [
-        '<int:project>',
+        '<int:project_id>',
+        '<string:mode>/<int:project_id>'
     ]
+    mode_handlers = {
+        'default': ProjectAPI,
+        'administration': AdminAPI,
+    }
 
-    def __init__(self, module):
-        self.module = module
-
-    @auth.decorators.check_api(["global_admin"])
-    def get(self, project):  # pylint: disable=R0201
-        """ Process """
-        #
-        project_ids = [item["id"] for item in
-                       self.module.context.rpc_manager.call.project_list()]
-        if project not in project_ids:
-            return {"total": 0, "rows": []}
-        #
-        project_scope_name = f"Project-{project}"
-        scope_map = {item["name"]: item["id"] for item in auth.list_scopes()}
-        #
-        if project_scope_name not in scope_map:
-            return {"total": 0, "rows": []}
-        #
-        project_scope_id = scope_map.get(project_scope_name)
-        #
+    def get(self, project_id: int, **kwargs):
         all_users = auth.list_users()
-        #
-        project_users = list()
-        for user in all_users:
-            if user["name"].startswith(":Carrier:Project:"):
-                continue
-            #
-            project_user_permissions = self.module.context.rpc_manager.call.auth_get_user_permissions(
-                user["id"], project_scope_id
-            )
-            #
-            if "project_member" in project_user_permissions:
-                project_users.append(user)
-        #
+        project_users = self.module.context.rpc_manager.call.get_users_roles_in_project(
+            project_id)
+        users_roles = []
+        for user_id, roles in project_users.items():
+            user = {'id': user_id, 'roles': roles}
+            user.update([u for u in all_users if user['id'] == u['id']][0])
+            if user['last_login']:
+                user['last_login'] = user['last_login'].strftime("%d.%m.%Y %H:%M")
+            users_roles.append(user)
         return {
-            "total": len(project_users),
-            "rows": project_users,
-        }
+            "total": len(users_roles),
+            "rows": users_roles,
+        }, 200
 
-    @auth.decorators.check_api(["global_admin"])
-    def post(self, project):  # pylint: disable=R0201
-        """ Process """
-        #
-        data = flask.request.json
-        user_name = data["name"]
-        #
-        project_ids = [item["id"] for item in
-                       self.module.context.rpc_manager.call.project_list()]
-        if project not in project_ids:
-            return {}
-        #
-        project_scope_name = f"Project-{project}"
-        scope_map = {item["name"]: item["id"] for item in auth.list_scopes()}
-        #
-        if project_scope_name not in scope_map:
-            return {}
-        #
-        project_scope_id = scope_map.get(project_scope_name)
-        #
-        user_map = {item["name"]: item["id"] for item in auth.list_users()}
-        if user_name not in user_map:
-            return {}
-        #
-        user_id = user_map[user_name]
-        #
-        project_user_permissions = self.module.context.rpc_manager.call.auth_get_user_permissions(
-            user_id, project_scope_id
-        )
-        if "project_member" not in project_user_permissions:
-            self.module.context.rpc_manager.call.auth_add_user_permission(
-                user_id, project_scope_id, "project_member"
-            )
-            log.info("Added permission for %s: %s", user_id, "project_member")
-        #
-        return {}
+    def post(self, project_id: int, **kwargs):
+        user_emails = request.json["emails"]
+        user_roles = request.json["roles"]
+        results = []
+        for user_email in user_emails:
+            if not re.match(r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$", user_email):
+                results.append(f'email {user_email} is not valid')
+                continue  
+            result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
+                user_email, project_id, user_roles)
+            results.append(result)
+        return {'msg': results}, 200
+
+    def put(self, project_id: int, **kwargs):
+        user_id = request.json["id"]
+        new_user_roles = request.json["roles"]
+        result = self.module.context.rpc_manager.call.update_roles_for_user(
+            project_id, user_id, new_user_roles)
+        return {'msg': f'roles updated' if result else 'something is wrong'}, 200
+
+    def delete(self, project_id, **kwargs):
+        try:
+            delete_ids = list(map(int, request.args["id[]"].split(',')))
+        except TypeError:
+            return 'IDs must be integers', 400
+        for user_id in delete_ids:
+            self.module.context.rpc_manager.call.remove_user_from_project(
+                project_id, user_id)
+        return {'msg': 'users succesfully removed'}, 204

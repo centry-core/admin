@@ -22,34 +22,66 @@ import flask_restful  # pylint: disable=E0401
 from flask import g, request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
+from sqlalchemy import schema
 
-from tools import auth  # pylint: disable=E0401
+from tools import auth, db, api_tools  # pylint: disable=E0401
 
 
-class API(flask_restful.Resource):  # pylint: disable=R0903
-    url_params = [
-        "<string:mode>"
-    ]
+class AdminAPI(api_tools.APIModeHandler):
 
-    def __init__(self, module):
-        self.module = module
-
-    def get(self, mode):
-        roles = auth.get_roles(mode)
+    def get(self, target_mode):
+        roles = auth.get_roles(target_mode)
         return roles
 
-    def post(self, mode):  # pylint: disable=R0201
+    def post(self, target_mode):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
-        auth.add_role(role_name, mode)
+        auth.add_role(role_name, target_mode)
         return {"ok": True}
 
-    def delete(self, mode):
+    def delete(self, target_mode):
         role_name = request.json["name"]
-        auth.delete_role(role_name, mode)
+        auth.delete_role(role_name, target_mode)
         return {"ok": True}
 
-    def put(self, mode):
+    def put(self, target_mode):
         name, new_name = request.json["name"], request.json["new_name"]
-        auth.update_role_name(name, new_name, mode)
+        auth.update_role_name(name, new_name, target_mode)
         return {"ok": True}
+
+
+class ProjectAPI(api_tools.APIModeHandler):
+
+    def get(self, project_id):
+        roles = self.module.context.rpc_manager.call.get_roles(project_id)
+        return roles
+
+    def post(self, project_id):  # pylint: disable=R0201
+        """ Process """
+        role_name = request.json["name"]
+        result = self.module.context.rpc_manager.call.add_role(project_id, role_name)
+        return {"ok": result}
+
+    def delete(self, project_id):
+        role_name = request.json["name"]
+        result = self.module.context.rpc_manager.call.delete_role(project_id, role_name)
+        return {"ok": result}
+
+    def put(self, project_id):
+        name, new_name = request.json["name"], request.json["new_name"]
+        result = self.module.context.rpc_manager.call.update_role_name(project_id, name,
+                                                                       new_name)
+        return {"ok": result}
+
+
+class API(api_tools.APIBase):  # pylint: disable=R0903
+    url_params = [
+        "<string:target_mode>",
+        "<string:mode>/<string:target_mode>",
+        "<string:mode>/<int:project_id>",
+    ]
+
+    mode_handlers = {
+        'default': ProjectAPI,
+        'administration': AdminAPI,
+    }
