@@ -57,6 +57,18 @@ const RolesTable = {
                     })
                 }
             }
+        });
+        $('#roles-table').on('sort.bs.table', (e, data) => {
+            if(this.hasRowError) {
+                const emptyRowIdxs = this.getEmptyRows();
+                if (emptyRowIdxs.length > 0) {
+                    this.$nextTick(() => {
+                        emptyRowIdxs.forEach(idx => {
+                            $('#roles-table').find(`[data-uniqueid='${idx}']`).addClass('empty-row__error');
+                        })
+                    })
+                }
+            }
         })
         $(document).on('vue_init', () => {
             this.fetchTableData();

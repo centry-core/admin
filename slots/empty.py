@@ -16,9 +16,9 @@
 #   limitations under the License.
 
 """ Slot """
-
+import flask
 # from pylon.core.tools import log  # pylint: disable=E0611,E0401
-from pylon.core.tools import web  # pylint: disable=E0611,E0401
+from pylon.core.tools import web, log  # pylint: disable=E0611,E0401
 
 from tools import auth  # pylint: disable=E0401
 from tools import theme  # pylint: disable=E0401
@@ -45,7 +45,29 @@ class Slot:  # pylint: disable=E1101,R0903
     def _empty_content(self, context, slot, payload):
         _ = slot, payload
         #
+        user_projects = self.context.rpc_manager.call.list_user_projects(
+            flask.g.auth.id)
+        log.info("Here is the empty slot")
         with context.app.app_context():
             return self.descriptor.render_template(
-                "empty/empty.html",
+                "empty/content.html",
+                user_projects=user_projects
+            )
+
+    @web.slot("admin_system_status_empty_scripts")
+    def _empty_script(self, context, slot, payload):
+        _ = slot, payload
+        #
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                "empty/scripts.html",
+            )
+
+    @web.slot("admin_system_status_empty_styles")
+    def _empty_styles(self, context, slot, payload):
+        _ = slot, payload
+        #
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                "empty/styles.html",
             )
