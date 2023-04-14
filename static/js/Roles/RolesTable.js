@@ -130,7 +130,7 @@ const RolesTable = {
                 this.generateEditableTableOptions();
                 this.editableRoles = [...this.roles]
             } else {
-                this.generateTableOptions();
+                this.fetchTableData();
             }
         },
         generateEditableTableOptions() {
