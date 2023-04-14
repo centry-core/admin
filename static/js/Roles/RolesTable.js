@@ -369,4 +369,5 @@ const RolesTable = {
     </div>
    `
 }
+
 register_component('roles-table', RolesTable);

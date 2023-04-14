@@ -24,7 +24,7 @@ const UsersPage = {
             selectedRoles: [],
             tableColumns: null,
             tableData: null,
-            allExistedRoles: ['admin', 'viewer', 'editor', 'hacker'],
+            allExistedRoles: [],
             selectedRows: [],
             showConfirmModal: false,
             loadingDelete: false,
@@ -34,15 +34,7 @@ const UsersPage = {
     watch: {
         newUser: {
             handler: function (newVal, oldVal) {
-                if (newVal.email && oldVal.email) {
-                    const arr = [];
-                    $('#newUserBlock > div').each(function (index, element) {
-                        $(element).find('div.cell-input > div').each(function (index, cell) {
-                            arr.push(cell.getAttribute('data-valid'));
-                        })
-                    })
-                    this.isValidFilter = arr.every(elem => elem === 'true')
-                }
+                this.isValidFilter = !!newVal.email && !!newVal.roles.length;
             },
             deep: true
         }
@@ -55,28 +47,42 @@ const UsersPage = {
     mounted() {
         $(document).on('vue_init', () => {
             this.fetchUsers();
-        })
+        });
     },
     methods: {
         fetchUsers() {
-            fetchUsersAPI().then(res => {
-                this.tableData = res.rows;
+            Promise.all([fetchUsersAPI(), fetchRolesAPI('default')]).then(data => {
+                this.tableData = data[0].rows;
+                this.allExistedRoles = data[1].map(role => role.name);
+                this.setTableEvents();
+                this.setSearchEvent();
                 this.generateTableOptions();
-                $(".dropdown-menu.close-outside").on("click", function (event) {
-                    event.stopPropagation();
-                });
-                $('#usersTable').on('check.bs.table', (row, $element) => {
-                    this.getSelection();
-                });
-                $('#usersTable').on('uncheck.bs.table', (row, $element) => {
-                    this.getSelection();
-                });
-                $('#usersTable').on('uncheck-all.bs.table', (row, $element) => {
-                    this.getSelection();
-                });
-                $('#usersTable').on('check-all.bs.table', (rowsAfter, rowsBefore) => {
-                    this.getSelection();
-                });
+            })
+        },
+        setTableEvents() {
+            $('#usersTable').on('check.bs.table', (row, $element) => {
+                this.getSelection();
+            });
+            $('#usersTable').on('uncheck.bs.table', (row, $element) => {
+                this.getSelection();
+            });
+            $('#usersTable').on('uncheck-all.bs.table', (row, $element) => {
+                this.getSelection();
+            });
+            $('#usersTable').on('check-all.bs.table', (rowsAfter, rowsBefore) => {
+                this.getSelection();
+            });
+        },
+        setSearchEvent() {
+            $('#searchUser').on('input', function ({target: {value}}) {
+                $('#usersTable').bootstrapTable('filterBy', {
+                    name: value.toLowerCase()
+                }, {
+                    'filterAlgorithm': (row, filters) => {
+                        const name = filters ? filters.name : '';
+                        return row.email.includes(name);
+                    }
+                })
             })
         },
         getSelection() {
@@ -100,9 +106,15 @@ const UsersPage = {
                     class: 'min-w-175',
                 },
                 {
+                    field: 'last_login',
+                    title: 'last login',
+                    sortable: true,
+                    class: 'min-w-175',
+                },
+                {
                     field: 'role',
                     title: 'role',
-                    class: 'max-w-175',
+                    class: 'max-w-175 role-cell',
                     formatter: (value, row, index, field) => userTableFormatters.selectRoleFormatter(value, row, index, field, this.allExistedRoles),
                 },
                 {
@@ -117,22 +129,31 @@ const UsersPage = {
                 data: this.tableData,
                 columns: this.generateColumns(),
                 undefinedText: '',
-            })
-        },
-        async inviteUser({ email, roles }) {
-            const api_url = this.$root.build_api_url('admin', 'users');
-            const res = await fetch (`${api_url}/${getSelectedProjectId()}`,{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "name": email,
-                    "email": email,
-                    "roles": roles
-                })
             });
-            return res.json();
+        },
+        inviteUser({ email, roles }) {
+            this.loadingApply = true;
+            const formattedEmails = email.split(',').map(block => block.trim());
+            inviteUserAPI(formattedEmails, roles).then(responses => {
+                responses.forEach(res => {
+                    if (res.status === 'error') {
+                        showNotify('ERROR', res.msg);
+                    } else {
+                        showNotify('SUCCESS', res.msg);
+                    }
+                })
+                this.newUser.email = '';
+                this.newUser.roles = [];
+                this.fetchUsers();
+                this.applyClicked = false;
+                this.needRedraw = true;
+                this.isValidFilter = false;
+            }).finally(() => {
+                this.needRedraw = false;
+                setTimeout(() => {
+                    this.loadingApply = false;
+                }, 500)
+            })
         },
         hasError(value) {
             return value.length > 0;
@@ -143,17 +164,7 @@ const UsersPage = {
         apply() {
             this.applyClicked = true;
             if (this.isValidFilter) {
-                this.inviteUser(this.newUser).then(res => {
-                    showNotify('SUCCESS', 'User invited');
-                    this.newUser.email = '';
-                    this.newUser.roles = [];
-                    this.fetchUsers();
-                    this.applyClicked = false;
-                    this.needRedraw = true;
-                    this.isValidFilter = false;
-                }).finally(() => {
-                    this.needRedraw = false;
-                })
+                this.inviteUser(this.newUser);
             }
         },
         handleDeleteUser() {
@@ -161,12 +172,19 @@ const UsersPage = {
             const userIds = this.selectedRows.map(user => user.id);
             deleteUserAPI(userIds).then(res => {
                 setTimeout(() => {
+                    this.removeRows(userIds);
                     showNotify('SUCCESS', 'User deleted')
                     this.showConfirmModal = false;
                     this.loadingDelete = false;
                 }, 500)
             })
-        }
+        },
+        removeRows(ids) {
+            $('#usersTable').bootstrapTable('remove', {
+                field: 'id',
+                values: ids
+            })
+        },
     },
     template: `
         <div class="m-3">
@@ -180,7 +198,7 @@ const UsersPage = {
                 <template #actions="{master}">
                     <div class="d-flex justify-content-end">
                         <div class="custom-input custom-input_search__sm position-relative mb-3 mr-2" style="">
-                            <input id="bucketSearch" type="text" placeholder="Bucket name">
+                            <input id="searchUser" type="text" placeholder="User name or email">
                             <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
                         </div>
                         <button id="removeButton" type="button" :disabled="!canRemove" class="btn btn-secondary btn-icon btn-icon__purple"
@@ -193,7 +211,7 @@ const UsersPage = {
                     <div id="newUserBlock" class="d-flex">
                         <div class="mr-2 flex-grow-1 cell-input">
                             <p class="font-h6 font-semibold mb-1">Email Addresses</p>
-                            <div class="custom-input custom-input__sm" :class="{'invalid-input': !showError(newUser.email)}"
+                            <div class="custom-input custom-input__sm need-validation" :class="{'invalid-input': !showError(newUser.email)}"
                                 :data-valid="hasError(newUser.email)">
                                 <input
                                     type="text"
@@ -204,7 +222,7 @@ const UsersPage = {
                         </div>
                         <div class="mr-2 cell-input" style="min-width: 250px">
                             <p class="font-h6 font-semibold mb-1">Roles</p>
-                            <div class="select-validation" :class="{'invalid-select': !showError(newUser.roles)}"
+                            <div class="select-validation need-validation" :class="{'invalid-select': !showError(newUser.roles)}"
                                 :data-valid="hasError(newUser.roles)">
                                 <multiselect-dropdown
                                     :key="needRedraw"
