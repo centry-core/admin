@@ -15,13 +15,28 @@ const updateUserAPI = async (id, roles) => {
     return res;
 }
 
-const deleteUserAPI = async (id, roles) => {
+const deleteUserAPI = async (ids) => {
+    const params = new URLSearchParams();
+    params.append('id[]', ids.join(','));
+
     const api_url = V.build_api_url('admin', 'users');
-    const res = await fetch (`${api_url}/${getSelectedProjectId()}`,{
+    const res = await fetch (`${api_url}/${getSelectedProjectId()}?${params}`,{
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
     });
     return res;
 }
 
+const inviteUserAPI = async (formattedEmails, roles ) => {
+    const api_url = V.build_api_url('admin', 'users');
+    const res = await fetch (`${api_url}/${getSelectedProjectId()}`,{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "emails": formattedEmails,
+            "roles": roles
+        })
+    });
+    return res.json();
+}

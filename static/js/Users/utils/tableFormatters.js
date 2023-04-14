@@ -1,4 +1,4 @@
-var switchFormatter = (ctx) => {
+var openEditor = (ctx, id) => {
     const containerEl = ctx.parentElement;
     $(containerEl).addClass('n-visibility');
     $(containerEl).removeClass('d-visibility');
@@ -24,7 +24,11 @@ var editUser = (ctx, id) => {
                 showNotify('SUCCESS', 'Roles updated');
                 closeEditor(ctx, id, roles.join(','));
                 const element = document.getElementById(`user_${+id}__text`);
-                element.textContent = roles.join(', ');
+                if (roles.length > 4) {
+                    element.textContent = `${roles.length} roles`;
+                } else {
+                    element.textContent = roles.join(', ');
+                }
             }, 500);
         }
     })
@@ -40,14 +44,17 @@ var selectRole = (ctx, id, roles, e) => {
     }
     userTableFormatters.allUserRows.set(+id, newSelectedRoles);
     const element = document.getElementById(`user_${id}`);
-    element.textContent = newSelectedRoles.join(', ');
+    if (newSelectedRoles.length > 4) {
+        element.textContent = `${newSelectedRoles.length} roles`;
+    } else {
+        element.textContent = newSelectedRoles.join(', ');
+    }
 }
 
 var userTableFormatters = {
     allUserRows: new Map(),
-    selectRoleFormatter(value, row, index, field, existedRoles) {
-
-        const optionList = existedRoles.map((role) => {
+    listOptions(row, existedRoles) {
+        return existedRoles.map((role) => {
             const isChecked = row.roles.includes(role) ? 'checked' : '';
             return `
                 <li class="dropdown-menu_item px-3 py-2">
@@ -57,18 +64,26 @@ var userTableFormatters = {
                     </label>
                 </li>`
         }).join('');
+    },
+    selectRoleFormatter(value, row, index, field, existedRoles) {
+        const optionList = userTableFormatters.listOptions(row, existedRoles);
         userTableFormatters.allUserRows.set(row.id, row.roles);
-        const buttonText = row.roles.length ? `${row.roles.join(', ')}` : 'select role'
+        let buttonText;
+        if (row.roles.length) {
+            buttonText = row.roles.length < 5  ? `${row.roles.join(', ')}` : `${row.roles.length} roles`
+        } else {
+            buttonText = 'select role'
+        }
         return `
-            <div class="w-175" style="margin: -4px 0;">
-                <div class="d-flex justify-content-between d-visibility">
-                    <span id="user_${row.id}__text">${row.roles.join(', ')}</span>
-                    <button type="button" class="btn btn-default btn-xs btn-table btn-icon__xs edit_user" onclick="switchFormatter(this)"
+            <div id="editor-cell_${row.id}" style="margin: -4px 0;">
+                <div class="d-flex justify-content-between d-visibility button_edit-role">
+                    <span id="user_${row.id}__text">${buttonText}</span>
+                    <button type="button" class="btn btn-default btn-xs btn-table btn-icon__xs edit_user" onclick="openEditor(this, '${row.id}')"
                         data-toggle="tooltip" data-placement="top">
                         <i class="icon__18x18 icon-edit"></i>
                     </button>
                 </div>
-                <div class="n-visibility d-flex">
+                <div class="n-visibility d-flex field_edit-role">
                     <div class="dropdown_simple-list flex-grow-1">
                         <button type="button"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
@@ -78,7 +93,7 @@ var userTableFormatters = {
                                 ${buttonText}
                             </span>
                         </button>
-                        <ul class="dropdown-menu close-outside">
+                        <ul class="dropdown-menu close-outside" onclick="event.stopPropagation()">
                             ${optionList}
                         </ul>
                     </div>
@@ -104,6 +119,7 @@ var userTableFormatters = {
     },
     action_events: {
         "click .delete_user": function (e, value, row, index) {
+            vueVm.registered_components.UsersPage.selectedRows = [{ id: row.id }];
             vueVm.registered_components.UsersPage.showConfirmModal = true;
         },
     }
