@@ -16,18 +16,13 @@
 #   limitations under the License.
 
 """ API """
-import re
-
-
-import flask  # pylint: disable=E0401,W0611
-import flask_restful  # pylint: disable=E0401
-from flask import g, request
+from flask import request
+from pydantic import ValidationError
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
-from sqlalchemy import schema
+from tools import auth, api_tools  # pylint: disable=E0401
 
-from tools import auth, db, api_tools  # pylint: disable=E0401
-
+from ...models.pd.user_input_field import UserInputFieldPD
 
 class AdminAPI(api_tools.APIModeHandler):
     pass
@@ -67,9 +62,11 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         user_roles = request.json["roles"]
         results = []
         for user_email in user_emails:
-            if not re.match(r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$", user_email):
-                results.append({'msg': f'email {user_email} is not valid', 'status': 'error'})
-                continue  
+            try:
+                UserInputFieldPD(user_email=user_email)
+            except ValidationError as e:
+                results.append({'msg': e.errors()[0]["msg"], 'status': 'error'})
+                continue
             result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
                 user_email, project_id, user_roles)
             results.append(result)
