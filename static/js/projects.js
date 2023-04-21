@@ -17,24 +17,26 @@ const clear_errors = () => {
 async function projectCreateSubmit() {
     clear_errors()
     const api_url = V.build_api_url('projects', 'project', {trailing_slash: true})
+    const project_data = {
+        "name": $('#name').val(),
+        "project_admin_email": $('#project_admin_email').val(),
+        "vuh_limit": 60000,
+        "plugins": V.multiselectFilter?.selectedItems.map(i => i.id) || [],
+        "storage_space_limit": 1000000000,
+        "data_retention_limit": 1000000000,
+        ...V.custom_data
+    }
     const resp = await fetch(api_url, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            "name": $('#name').val(),
-            "project_admin_email": $('#project_admin_email').val(),
-            "vuh_limit": 60000,
-            "plugins": vueVm.multiselectFilter?.selectedItems.map(i => i.id) || [],
-            "storage_space_limit": 1000000000,
-            "data_retention_limit": 1000000000,
-        })
+        body: JSON.stringify(project_data)
     })
     if (resp.ok) {
         $("#projectCreateModal").modal('hide');
         const data = await resp.json()
         const newSections = data['plugins']
         const currentSection = "admin"
-        const notAdmin = !vueVm.navbar.isAdmin
+        const notAdmin = !V.navbar.isAdmin
 
         if (notAdmin && !newSections.includes(currentSection) && newSections.length > 0) {
             const section = newSections[0]

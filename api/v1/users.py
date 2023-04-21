@@ -24,12 +24,14 @@ from tools import auth, api_tools  # pylint: disable=E0401
 
 from ...models.pd.user_input_field import UserInputFieldPD
 
+
 class AdminAPI(api_tools.APIModeHandler):
     pass
 
 
 class ProjectAPI(api_tools.APIModeHandler):
     pass
+
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
     url_params = [
@@ -70,6 +72,25 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
                 user_email, project_id, user_roles)
             results.append(result)
+        try:
+            from tools import TaskManager
+            invitation_integration = request.json.get('invitation_integration')
+            if invitation_integration:
+                recipients = []
+                for i in results:
+                    if i['status'] == 'ok':
+                        recipients.append({
+                            'email': i['email'],
+                            'roles': user_roles
+                        })
+                    i['email_sent'] = i['status'] == 'ok'
+                TaskManager(project_id=project_id).run_task([{
+                    'recipients': recipients,
+                    'subject': f'Invitation to a Centry project {project_id}',
+                    'debug_sleep': '1'
+                }], invitation_integration)
+        except ImportError:
+            ...
         return results, 200
 
     def put(self, project_id: int, **kwargs):
