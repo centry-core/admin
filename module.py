@@ -79,7 +79,13 @@ class Module(module.ModuleModel):
             "administration", "projects", "Projects",
             kind="holder",
             location="left",
-            permissions=["projects"],
+            permissions={
+                "permissions": ["projects"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
             # icon_class="fas fa-info-circle fa-fw",
         )
         theme.register_mode_subsection(
@@ -87,7 +93,13 @@ class Module(module.ModuleModel):
             "list", "Projects",
             title="Projects",
             kind="slot",
-            permissions=["projects.projects"],
+            permissions={
+                "permissions": ["projects.projects"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
             prefix="admin_mode_projects_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
@@ -97,7 +109,13 @@ class Module(module.ModuleModel):
             "roles", "Roles",
             title="Roles",
             kind="slot",
-            permissions=["configuration.roles"],
+            permissions={
+                "permissions": ["configuration.roles"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
             prefix="admin_mode_roles_",
             # icon_class="fas fa-server fa-fw",
             # weight=2,
@@ -107,7 +125,13 @@ class Module(module.ModuleModel):
             "roles", "Roles",
             title="Roles",
             kind="slot",
-            permissions=["configuration.roles"],
+            permissions={
+                "permissions": ["configuration.roles"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
             prefix="roles_",
         )
         theme.register_subsection(
@@ -115,7 +139,13 @@ class Module(module.ModuleModel):
             "users", "Users",
             title="Users",
             kind="slot",
-            permissions=["configuration.users"],
+            permissions={
+                "permissions": ["configuration.users"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
             prefix="users_",
         )
         theme.register_mode_page(
@@ -131,7 +161,13 @@ class Module(module.ModuleModel):
             "administration", "configuration", "Configuration",
             kind="holder",
             location="left",
-            permissions=["configuration"],
+            permissions={
+                "permissions": ["configuration"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": True, "editor": True},
+                    "default": {"admin": True, "viewer": True, "editor": True},
+                    "developer": {"admin": True, "viewer": True, "editor": True},
+                }},
             # icon_class="fas fa-info-circle fa-fw",
         )
         # Init

@@ -40,7 +40,14 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         'default': ProjectAPI,
         'administration': AdminAPI,
     }
-
+    
+    @auth.decorators.check_api({
+        "permissions": ["configuration.users.users.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def get(self, project_id: int, **kwargs):
         all_users = auth.list_users()
         project_users = self.module.context.rpc_manager.call.get_users_roles_in_project(
@@ -57,6 +64,13 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "rows": users_roles,
         }, 200
 
+    @auth.decorators.check_api({
+        "permissions": ["configuration.users.users.create"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def post(self, project_id: int, **kwargs):
         user_emails = request.json["emails"]
         user_roles = request.json["roles"]
@@ -72,6 +86,13 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             results.append(result)
         return results, 200
 
+    @auth.decorators.check_api({
+        "permissions": ["configuration.users.users.edit"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def put(self, project_id: int, **kwargs):
         user_id = request.json["id"]
         new_user_roles = request.json["roles"]
@@ -79,6 +100,13 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             project_id, user_id, new_user_roles)
         return {'msg': f'roles updated' if result else 'something is wrong'}, 200
 
+    @auth.decorators.check_api({
+        "permissions": ["configuration.users.users.delete"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def delete(self, project_id, **kwargs):
         try:
             delete_ids = list(map(int, request.args["id[]"].split(',')))

@@ -40,8 +40,8 @@ class AdminAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.permissions.view"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, target_mode):  # pylint: disable=R0201
@@ -67,8 +67,8 @@ class AdminAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.permissions.edit"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, target_mode):  # pylint: disable=R0201
@@ -92,8 +92,8 @@ class ProjectAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.permissions.view"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, project_id):  # pylint: disable=R0201
@@ -115,8 +115,8 @@ class ProjectAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.permissions.edit"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, project_id):  # pylint: disable=R0201

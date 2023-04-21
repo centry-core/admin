@@ -22,12 +22,11 @@ from tools import auth, api_tools  # pylint: disable=E0401
 
 
 class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
-
     @auth.decorators.check_api({
         "permissions": ["configuration.projects.projects.view"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": False},
-            "default": {"admin": True, "viewer": True, "editor": False},
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self):  # pylint: disable=R0201
