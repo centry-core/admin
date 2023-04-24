@@ -1,42 +1,45 @@
 <div class="d-flex">
 
-  <div class="card card-x card-table">
-      <div class="card-header">
-          <div class="row">
-              <div class="col-4">
-                  <h3>Projects</h3>
-              </div>
-              <div class="col-8">
-                  <div class="d-flex justify-content-end">
-                      <button type="button" class="btn btn-32 btn-secondary" data-toggle="modal" data-target="#projectCreateModal"><i class="fas fa-plus"></i></button>
-                  </div>
-              </div>
-          </div>
+    <div class="card card-x card-table">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-4">
+                    <h3>Projects</h3>
+                </div>
+                <div class="col-8">
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-32 btn-secondary" data-toggle="modal"
+                                data-target="#projectCreateModal"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
 
-      </div>
-      <div class="card-body">
-          <table
-            class="table table-border"
-            id="projects-list"
-              data-toggle="table"
-              data-unique-id="id"
-              data-pagination="false"
-              :data-url="build_api_url('admin', 'projects')"
-          >
-              <thead class="thead-light">
-                  <tr>
-                      <th data-visible="false" data-field="id">ID</th>
-                      <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="name">Name</th>
-                      <th scope="col" data-align="right" data-cell-style="cellStyle" data-formatter="projectActionFormatter">Actions</th>
-                  </tr>
-              </thead>
-              <tbody>
-              </tbody>
-          </table>
+        </div>
+        <div class="card-body">
+            <table
+                    class="table table-border"
+                    id="projects-list"
+                    data-toggle="table"
+                    data-unique-id="id"
+                    data-pagination="false"
+                    :data-url="build_api_url('admin', 'projects')"
+            >
+                <thead class="thead-light">
+                <tr>
+                    <th data-visible="true" data-field="id">ID</th>
+                    <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="name">Name</th>
+                    <th scope="col" data-align="right" data-cell-style="cellStyle"
+                        data-formatter="projectActionFormatter">Actions
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
 
-          <br>
-      </div>
-  </div>
+            <br>
+        </div>
+    </div>
 
 </div>
 
@@ -65,7 +68,8 @@
                             <p>
                                 <h13>Enter project name</h13>
                             </p>
-                            <input type="text" id="name" class="form-control form-control-alternative" placeholder="Project Name">
+                            <input type="text" id="name" class="form-control form-control-alternative"
+                                   placeholder="Project Name">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -76,20 +80,23 @@
                             <p>
                                 <h13>Enter email</h13>
                             </p>
-                            <input type="text" id="project_admin_email" class="form-control form-control-alternative" placeholder="Email">
+                            <input type="text" id="project_admin_email" class="form-control form-control-alternative"
+                                   placeholder="Email">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
-            
+
+                    {{ template_slot('administration_email_invitation_content') | safe }}
+
                     <div class="row">
                         <div class="form-group col">
                             <h9>Plugins</h9>
                             <div>
                                 <multiselect-filter
-                                    id="multiselect"
-                                    @register="register"
-                                    instance_name="multiselectFilter"
-                                    :title="'Select plugins to be enabled'">
+                                        id="multiselect"
+                                        @register="register"
+                                        instance_name="multiselectFilter"
+                                        :title="'Select plugins to be enabled'">
                                 </multiselect-filter>
                             </div>
                         </div>

@@ -26,8 +26,9 @@ const deleteUserAPI = async (ids) => {
     return res;
 }
 
-const inviteUserAPI = async (formattedEmails, roles ) => {
+const inviteUserAPI = async (formattedEmails, roles) => {
     const api_url = V.build_api_url('admin', 'users');
+    const {invitation_integration} = V.custom_data
     const res = await fetch (`${api_url}/${getSelectedProjectId()}`,{
         method: 'POST',
         headers: {
@@ -35,7 +36,8 @@ const inviteUserAPI = async (formattedEmails, roles ) => {
         },
         body: JSON.stringify({
             "emails": formattedEmails,
-            "roles": roles
+            "roles": roles,
+            invitation_integration
         })
     });
     return res.json();

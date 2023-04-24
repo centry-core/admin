@@ -245,6 +245,7 @@ const UsersPage = {
                             </button>
                         </div>
                     </div>
+                    <div class="d-flex flex-column mx-3 mt-2"><slot name="invitation_integration"></slot><div>
                 </template>
             </TableCard>
             <Transition>
