@@ -42,7 +42,7 @@ class Slot:  # pylint: disable=E1101,R0903
     """
 
     @web.slot("users_content")
-    @auth.decorators.check_slot([], access_denied_reply=theme.access_denied_part)
+    @auth.decorators.check_slot(["configuration.users"], access_denied_reply=theme.access_denied_part)
     def _projects_content(self, context, slot, payload):
         _ = slot, payload
         #
@@ -52,6 +52,7 @@ class Slot:  # pylint: disable=E1101,R0903
             )
 
     @web.slot('users_styles')
+    @auth.decorators.check_slot(["configuration.users"])
     def styles(self, context, slot, payload):
         with context.app.app_context():
             return self.descriptor.render_template(
@@ -59,7 +60,7 @@ class Slot:  # pylint: disable=E1101,R0903
             )
 
     @web.slot("users_scripts")
-    @auth.decorators.check_slot([])
+    @auth.decorators.check_slot(["configuration.users"])
     def _projects_scripts(self, context, slot, payload):
         _ = slot, payload
         #

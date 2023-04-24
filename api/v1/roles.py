@@ -28,49 +28,78 @@ from tools import auth, db, api_tools  # pylint: disable=E0401
 
 
 class AdminAPI(api_tools.APIModeHandler):
-
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.roles.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def get(self, target_mode):
         roles = auth.get_roles(target_mode)
         return roles
-
+    
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.roles.create"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def post(self, target_mode):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
         auth.add_role(role_name, target_mode)
         return {"ok": True}
 
-    def delete(self, target_mode):
-        role_name = request.json["name"]
-        auth.delete_role(role_name, target_mode)
-        return {"ok": True}
-
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.roles.edit"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})
     def put(self, target_mode):
         name, new_name = request.json["name"], request.json["new_name"]
         auth.update_role_name(name, new_name, target_mode)
         return {"ok": True}
 
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.roles.delete"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+            "developer": {"admin": True, "viewer": False, "editor": False},
+        }})    
+    def delete(self, target_mode):
+        role_name = request.json["name"]
+        auth.delete_role(role_name, target_mode)
+        return {"ok": True}
 
 class ProjectAPI(api_tools.APIModeHandler):
-
+    @auth.decorators.check_api(["configuration.roles.roles.view"])
     def get(self, project_id):
         roles = self.module.context.rpc_manager.call.get_roles(project_id)
         return roles
 
+    @auth.decorators.check_api(["configuration.roles.roles.create"])
     def post(self, project_id):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
         result = self.module.context.rpc_manager.call.add_role(project_id, role_name)
         return {"ok": result}
 
-    def delete(self, project_id):
-        role_name = request.json["name"]
-        result = self.module.context.rpc_manager.call.delete_role(project_id, role_name)
-        return {"ok": result}
-
+    @auth.decorators.check_api(["configuration.roles.roles.edit"])
     def put(self, project_id):
         name, new_name = request.json["name"], request.json["new_name"]
         result = self.module.context.rpc_manager.call.update_role_name(project_id, name,
                                                                        new_name)
+        return {"ok": result}
+
+    @auth.decorators.check_api(["configuration.roles.roles.delete"]) 
+    def delete(self, project_id):
+        role_name = request.json["name"]
+        result = self.module.context.rpc_manager.call.delete_role(project_id, role_name)
         return {"ok": result}
 
 
