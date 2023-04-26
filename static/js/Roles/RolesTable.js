@@ -318,17 +318,14 @@ const RolesTable = {
                 >
                 <template #actions="{master}">
                     <div class="d-flex justify-content-end">
-                        <div class="custom-input" v-if="$root.mode === 'administration'">
-                            <select class="selectpicker bootstrap-select__b" 
-                                data-style="btn" 
-                                v-model="selectedMode"
-                            >
-                                <option v-for="mode in modes">
-                                    {{mode}}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="custom-input custom-input_search custom-input_search__sm position-relative mr-2">
+                        <TextToggle
+                            @register="$root.register"
+                            :instance_name="input_instance_name"
+                            :labels="modes"
+                            v-model="selectedMode"
+                        ></TextToggle>
+                        
+                        <div class="custom-input custom-input_search custom-input_search__sm position-relative ml-2 mr-2">
                             <input type="text" placeholder="Search permissions" id="searchRole">
                             <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
                         </div>
