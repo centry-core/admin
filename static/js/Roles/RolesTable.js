@@ -319,6 +319,7 @@ const RolesTable = {
                 <template #actions="{master}">
                     <div class="d-flex justify-content-end">
                         <TextToggle
+                            v-if="$root.mode === 'administration'"
                             @register="$root.register"
                             :instance_name="input_instance_name"
                             :labels="modes"
