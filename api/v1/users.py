@@ -101,7 +101,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 TaskManager(project_id=project_id).run_task([{
                     'recipients': recipients,
                     'subject': f'Invitation to a Centry project {project_id}',
-                    'debug_sleep': '1'
                 }], invitation_integration)
         except ImportError:
             ...
