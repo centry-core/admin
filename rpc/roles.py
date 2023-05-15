@@ -116,7 +116,7 @@ class RPC:
             return True
 
     @web.rpc("get_permissions_in_project", "admin_get_permissions_in_project")
-    def get_permissions_in_project(self, project_id, user_id, **kwargs) -> list[str]:
+    def get_permissions_in_project(self, project_id: int, user_id: int, **kwargs) -> list[str]:
         with db.with_project_schema_session(project_id) as tenant_session:
             user = tenant_session.query(User).filter(User.auth_id == user_id).first()
             if user:
