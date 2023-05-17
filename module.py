@@ -173,11 +173,7 @@ class Module(module.ModuleModel):
         # Init
         self.descriptor.init_all()
 
-        vc = VaultClient()
-        try:
-            vc.init_project_space()
-        except hvac.exceptions.InvalidRequest:
-            ...
+        VaultClient().create_project_space(quiet=True)
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
