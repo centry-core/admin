@@ -89,15 +89,18 @@
                     {{ template_slot('administration_email_invitation_content') | safe }}
 
                     <div class="row">
-                        <div class="form-group col">
-                            <h9>Plugins</h9>
+                        <div class="col">
+                            <h9>Select plugins for project</h9>
                             <div>
-                                <multiselect-filter
-                                        id="multiselect"
-                                        @register="register"
-                                        instance_name="multiselectFilter"
-                                        :title="'Select plugins to be enabled'">
-                                </multiselect-filter>
+                                <Multiselect-Dropdown
+                                    @register="register"
+                                    placeholder="Select Plugins"
+                                    instance_name="plugin_selector"
+                                    :list_items='["configuration", "performance", "security"]'
+                                    :pre_selected_indexes='[0, 1]'
+                                    v-model="custom_data.plugins"
+                                    :has-search="true"
+                                ></Multiselect-Dropdown>
                             </div>
                         </div>
                     </div>
