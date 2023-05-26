@@ -5,10 +5,10 @@ const MultiselectFilter = {
             inputSearch: '',
             itemsList:[
                 {id:'admin', title:"Administration"},
-                {id:'orch_tool', title:"Orchestration"},
+                // {id:'orch_tool', title:"Orchestration"},
                 {id:'design-system', title:'Design System'},
                 {id:'configuration', title:"Configuration"},
-                {id:'kb', title:"KB"},
+                // {id:'kb', title:"KB"},
                 {id:'performance', title:'Performance'},
                 {id:'security', title:'Security'},
             ],
