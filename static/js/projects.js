@@ -27,7 +27,7 @@ async function projectCreateSubmit() {
         "name": $('#name').val(),
         "project_admin_email": $('#project_admin_email').val(),
         "vuh_limit": 60000,
-        "plugins": V.multiselectFilter?.selectedItems.map(i => i.id) || [],
+        // "plugins": V.multiselectFilter?.selectedItems.map(i => i.id) || [],
         "storage_space_limit": 1000000000,
         "data_retention_limit": 1000000000,
         ...V.custom_data
