@@ -16,6 +16,8 @@
 #   limitations under the License.
 
 """ API """
+import json
+
 from flask import request
 from pydantic import ValidationError
 
@@ -42,7 +44,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         'default': ProjectAPI,
         'administration': AdminAPI,
     }
-    
+
     @auth.decorators.check_api({
         "permissions": ["configuration.users.users.view"],
         "recommended_roles": {
@@ -88,20 +90,35 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             results.append(result)
         try:
             from tools import TaskManager
-            invitation_integration = request.json.get('invitation_integration')
-            if invitation_integration:
+            if invitation_integration := request.json.get('invitation_integration'):
+                try:
+                    invitation_integration = json.loads(
+                        invitation_integration
+                        .replace("'", '"')
+                        .replace("None", "null")
+                    )
+                except json.JSONDecodeError as exc:
+                    log.info(f"Invitation integration exception: {exc}")
+                    pass
+                log.info(f"Invitation integration: {invitation_integration=} "
+                         f"{type(invitation_integration)=}")
+                base_integration = invitation_integration['smtp_integration']
+                log.info(f"Base integration: {base_integration}")
+                email_integration = self.module.context.rpc_manager.call.integrations_get_by_id(
+                    project_id=base_integration['project_id'],
+                    integration_id=base_integration['id'],
+                )
+                log.info(f"Sending invitation to {user_emails} with {email_integration}")
                 recipients = []
                 for i in results:
                     if i['status'] == 'ok':
-                        recipients.append({
-                            'email': i['email'],
-                            'roles': user_roles
-                        })
+                        recipients.append(i['email'])
                     i['email_sent'] = i['status'] == 'ok'
                 TaskManager(project_id=project_id).run_task([{
                     'recipients': recipients,
                     'subject': f'Invitation to a Centry project {project_id}',
-                }], invitation_integration)
+                    'template': invitation_integration['template'],
+                }], email_integration.task_id)
         except ImportError:
             ...
         return results, 200
