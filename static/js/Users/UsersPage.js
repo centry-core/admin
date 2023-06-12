@@ -228,6 +228,7 @@ const UsersPage = {
                                     :key="needRedraw"
                                     @register="register"
                                     placeholder="Select role"
+                                    container_class="bootstrap-select__b"
                                     v-model:modelValue="newUser.roles"
                                     button_class="btn-select__sm btn btn-select dropdown-toggle d-inline-flex align-items-center"
                                     :list_items="allExistedRoles"
