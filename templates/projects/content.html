@@ -61,13 +61,11 @@
                 </div>
             </div>
             <div class="modal-body">
-                <div class="section">
+                <div>
                     <div class="row">
                         <div class="form-group col">
-                            <h9>Project Name</h9>
-                            <p>
-                                <h13>Enter project name</h13>
-                            </p>
+                            <p class="font-h5 font-semibold">Project Name</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter project name</p>
                             <input type="text" id="name" class="form-control form-control-alternative"
                                    placeholder="Project Name">
                             <div class="invalid-feedback"></div>
@@ -76,10 +74,8 @@
 
                     <div class="row">
                         <div class="form-group col">
-                            <h9>Assign project admin</h9>
-                            <p>
-                                <h13>Enter email</h13>
-                            </p>
+                            <p class="font-h5 font-semibold">Assign project admin</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter email</p>
                             <input type="text" id="project_admin_email" class="form-control form-control-alternative"
                                    placeholder="Email">
                             <div class="invalid-feedback"></div>
@@ -88,21 +84,18 @@
 
                     {{ template_slot('administration_email_invitation_content') | safe }}
 
-                    <div class="row">
-                        <div class="col">
-                            <h9>Select plugins for project</h9>
-                            <div>
-                                <Multiselect-Dropdown
-                                    @register="register"
-                                    placeholder="Select Plugins"
-                                    instance_name="plugin_selector"
-                                    :list_items='["configuration", "performance", "security"]'
-                                    :pre_selected_indexes='[0, 1]'
-                                    v-model="custom_data.plugins"
-                                    :has-search="true"
-                                ></Multiselect-Dropdown>
-                            </div>
-                        </div>
+                    <div>
+                        <p class="font-h5 font-semibold mb-1">Select plugins for project</p>
+                        <Multiselect-Dropdown
+                            @register="register"
+                            placeholder="Select Plugins"
+                            instance_name="plugin_selector"
+                            container_class="bootstrap-select__b displacement-left-4"
+                            :list_items='["configuration", "performance", "security"]'
+                            :pre_selected_indexes='[0, 1]'
+                            v-model="custom_data.plugins"
+                            :has-search="true"
+                        ></Multiselect-Dropdown>
                     </div>
                 </div>
             </div>
