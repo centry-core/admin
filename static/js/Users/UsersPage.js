@@ -45,9 +45,7 @@ const UsersPage = {
         }
     },
     mounted() {
-        $(document).on('vue_init', () => {
-            this.fetchUsers();
-        });
+        $(document).on('vue_init', this.fetchUsers)
     },
     methods: {
         fetchUsers() {
@@ -60,16 +58,17 @@ const UsersPage = {
             })
         },
         setTableEvents() {
-            $('#usersTable').on('check.bs.table', (row, $element) => {
+            const usersTable = $('#usersTable')
+            usersTable.on('check.bs.table', (row, $element) => {
                 this.getSelection();
             });
-            $('#usersTable').on('uncheck.bs.table', (row, $element) => {
+            usersTable.on('uncheck.bs.table', (row, $element) => {
                 this.getSelection();
             });
-            $('#usersTable').on('uncheck-all.bs.table', (row, $element) => {
+            usersTable.on('uncheck-all.bs.table', (row, $element) => {
                 this.getSelection();
             });
-            $('#usersTable').on('check-all.bs.table', (rowsAfter, rowsBefore) => {
+            usersTable.on('check-all.bs.table', (rowsAfter, rowsBefore) => {
                 this.getSelection();
             });
         },
@@ -110,6 +109,7 @@ const UsersPage = {
                     title: 'last login',
                     sortable: true,
                     class: 'min-w-175',
+                    formatter: (value, row, index, field) => value && new Date(value + 'Z').toLocaleString(),
                 },
                 {
                     field: 'role',

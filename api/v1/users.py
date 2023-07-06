@@ -61,7 +61,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             user = {'id': user_id, 'roles': roles}
             user.update([u for u in all_users if user['id'] == u['id']][0])
             if user['last_login']:
-                user['last_login'] = user['last_login'].strftime("%d.%m.%Y %H:%M")
+                user['last_login'] = user['last_login'].isoformat(timespec='seconds')
             users_roles.append(user)
         return {
             "total": len(users_roles),
