@@ -89,8 +89,8 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 user_email, project_id, user_roles)
             results.append(result)
         try:
-            from tools import TaskManager
             if invitation_integration := request.json.get('invitation_integration'):
+                from tools import TaskManager
                 try:
                     invitation_integration = json.loads(
                         invitation_integration
