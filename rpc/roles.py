@@ -179,5 +179,4 @@ class RPC:
 
         with db.with_project_schema_session(project_id) as tenant_session:
             user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            return False
             return bool(user)
