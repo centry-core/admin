@@ -1,4 +1,6 @@
-from pydantic import ValidationError
+from typing import Optional
+
+from flask import g
 
 from tools import rpc_tools, db, db_tools
 from ..models.users import User, Role, UserRole, RolePermission
@@ -163,3 +165,19 @@ class RPC:
                         tenant_session.add(user_role)
                 tenant_session.commit()
             return True
+
+    @web.rpc('admin_check_user_in_project', 'check_user_in_project')
+    def check_user_in_project(self, project_id: int, user_id: Optional[int] = None, **kwargs) -> bool:
+        log.info('Checking if user %s is in project %s', user_id, project_id)
+        if not user_id:
+            log.info('User is None. Trying to get user from flask.g ...')
+            try:
+                user_id = int(g.auth.id)
+            except (AttributeError, TypeError, ValueError):
+                return False
+        log.info('Checking if user %s is in project %s', user_id, project_id)
+
+        with db.with_project_schema_session(project_id) as tenant_session:
+            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
+            return False
+            return bool(user)
