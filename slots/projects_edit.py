@@ -56,8 +56,11 @@ class Slot:  # pylint: disable=E1101,R0903
         if project not in project_ids:
             return theme.access_denied_part
         #
-        project_scope_name = f"Project-{project}"
-        scope_map = {item["name"]:item["id"] for item in auth.list_scopes()}
+        from tools import project_constants as pc
+        template = pc['PROJECT_SCHEMA_TEMPLATE']
+        # project_scope_name = f"Project-{project}"
+        project_scope_name = template.format(project)
+        scope_map = {item["name"]: item["id"] for item in auth.list_scopes()}
         #
         if project_scope_name not in scope_map:
             return theme.access_denied_part
