@@ -117,8 +117,9 @@ class RPC:
                 tenant_session.commit()
             return True
 
-    @web.rpc("get_permissions_in_project", "admin_get_permissions_in_project")
+    @web.rpc("get_permissions_in_project")
     def get_permissions_in_project(self, project_id: int, user_id: int, **kwargs) -> list[str]:
+        # log.info('get_permissions_in_project, p: %s, u: %s', project_id, user_id)
         with db.with_project_schema_session(project_id) as tenant_session:
             user = tenant_session.query(User).filter(User.auth_id == user_id).first()
             if user:
@@ -137,7 +138,7 @@ class RPC:
             users = [user.to_json() for user in users]
             return users
 
-    @web.rpc("get_users_roles_in_project", "admin_get_users_roles_in_project")
+    @web.rpc("get_users_roles_in_project")
     def get_users_roles_in_project(self, project_id, **kwargs) -> dict:
         with db.with_project_schema_session(project_id) as tenant_session:
             users = tenant_session.query(User, UserRole, Role).filter(
