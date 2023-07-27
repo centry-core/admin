@@ -53,19 +53,16 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, project_id: int, **kwargs):
-        all_users = auth.list_users()
-        project_users = self.module.context.rpc_manager.call.get_users_roles_in_project(
-            project_id)
-        users_roles = []
-        for user_id, roles in project_users.items():
-            user = {'id': user_id, 'roles': roles}
-            user.update([u for u in all_users if user['id'] == u['id']][0])
+        project_users = self.module.get_users_roles_in_project(project_id, filter_system_user=True)
+        all_users = auth.list_users(user_ids=set(project_users.keys()))
+        for user in all_users:
+            roles = project_users.pop(user['id'], [])
+            user['roles'] = roles
             if user['last_login']:
                 user['last_login'] = user['last_login'].isoformat(timespec='seconds')
-            users_roles.append(user)
         return {
-            "total": len(users_roles),
-            "rows": users_roles,
+            "total": len(all_users),
+            "rows": all_users,
         }, 200
 
     @auth.decorators.check_api({
@@ -144,12 +141,10 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
-    def delete(self, project_id, **kwargs):
+    def delete(self, project_id: int, **kwargs):
         try:
             delete_ids = list(map(int, request.args["id[]"].split(',')))
         except TypeError:
             return 'IDs must be integers', 400
-        for user_id in delete_ids:
-            self.module.context.rpc_manager.call.remove_user_from_project(
-                project_id, user_id)
-        return {'msg': 'users succesfully removed'}, 204
+        self.module.remove_users_from_project(project_id, delete_ids)
+        return {'msg': 'users successfully removed'}, 204
