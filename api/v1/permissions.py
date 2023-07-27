@@ -98,8 +98,8 @@ class ProjectAPI(api_tools.APIModeHandler):
         }})
     def get(self, project_id):  # pylint: disable=R0201
         """ Process """
-        roles = self.module.context.rpc_manager.call.get_roles(project_id)
-        auth_permissions = self.module.context.rpc_manager.call.get_permissions(project_id)
+        roles = self.module.get_roles(project_id)
+        auth_permissions = self.module.get_permissions(project_id)
         all_permissions = auth.local_permissions
         roles_to_permissions = group_roles_by_permissions(auth_permissions, roles)
         all_permissions = sorted(all_permissions)
@@ -132,12 +132,12 @@ class ProjectAPI(api_tools.APIModeHandler):
         log.info(f"{permissions_to_delete=} {permissions_to_add=}")
 
         for permission in permissions_to_add:
-            self.module.context.rpc_manager.call.set_permission_for_role(
+            self.module.set_permission_for_role(
                 project_id,
                 *permission,
             )
         for permission in permissions_to_delete:
-            self.module.context.rpc_manager.call.remove_permission_from_role(
+            self.module.remove_permission_from_role(
                 project_id,
                 *permission,
             )

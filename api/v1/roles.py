@@ -76,31 +76,31 @@ class AdminAPI(api_tools.APIModeHandler):
         auth.delete_role(role_name, target_mode)
         return {"ok": True}
 
+
 class ProjectAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api(["configuration.roles.roles.view"])
-    def get(self, project_id):
-        roles = self.module.context.rpc_manager.call.get_roles(project_id)
+    def get(self, project_id: int):
+        roles = self.module.get_roles(project_id)
         return roles
 
     @auth.decorators.check_api(["configuration.roles.roles.create"])
-    def post(self, project_id):  # pylint: disable=R0201
+    def post(self, project_id: int):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
-        result = self.module.context.rpc_manager.call.add_role(project_id, role_name)
-        return {"ok": result}
+        role = self.module.add_role(project_id, role_name)
+        return {"ok": bool(role)}, 201
 
     @auth.decorators.check_api(["configuration.roles.roles.edit"])
     def put(self, project_id):
         name, new_name = request.json["name"], request.json["new_name"]
-        result = self.module.context.rpc_manager.call.update_role_name(project_id, name,
-                                                                       new_name)
-        return {"ok": result}
+        result = self.module.update_role_name(project_id, name, new_name)
+        return {"ok": result}, 200
 
     @auth.decorators.check_api(["configuration.roles.roles.delete"]) 
     def delete(self, project_id):
         role_name = request.json["name"]
-        result = self.module.context.rpc_manager.call.delete_role(project_id, role_name)
-        return {"ok": result}
+        result = self.module.delete_role(project_id, role_name)
+        return {"ok": result}, 204
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
