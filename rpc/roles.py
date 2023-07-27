@@ -5,7 +5,7 @@ from flask import g
 
 from tools import rpc_tools, db, db_tools
 
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, ProgrammingError
 from ..models.users import User, Role, UserRole, RolePermission
 from pylon.core.tools import web, log
 
@@ -119,18 +119,23 @@ class RPC:
             return True
 
     @web.rpc("admin_get_permissions_in_project", "get_permissions_in_project")
-    def get_permissions_in_project(self, project_id: int, user_id: int, **kwargs) -> list[str]:
+    def get_permissions_in_project(self, project_id: int, user_id: int, **kwargs) -> set[str]:
         # log.info('get_permissions_in_project, p: %s, u: %s', project_id, user_id)
-        with db.with_project_schema_session(project_id) as tenant_session:
-            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            if user:
-                permissions = tenant_session.query(UserRole, RolePermission).filter(
-                    UserRole.user_id == user.id,
-                    RolePermission.role_id == UserRole.role_id,
-                ).all()
-                permissions = [permission.permission for _, permission in permissions]
-                return permissions
-            return []
+        try:
+            with db.with_project_schema_session(project_id) as tenant_session:
+                user = tenant_session.query(User).filter(User.auth_id == user_id).first()
+                if user:
+                    permissions = tenant_session.query(UserRole, RolePermission).filter(
+                        UserRole.user_id == user.id,
+                        RolePermission.role_id == UserRole.role_id,
+                    ).all()
+                    permissions = {permission.permission for _, permission in permissions}
+                    return permissions
+        except ProgrammingError:
+            # this happens if project schema is deleted. We need to clear session then
+
+            ...
+        return set()
 
     @web.rpc("admin_get_users_ids_in_project", "get_users_ids_in_project")
     def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[dict]:
