@@ -35,7 +35,7 @@ class AdminAPI(api_tools.APIModeHandler):
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
-    def get(self, target_mode):
+    def get(self, target_mode: str):
         roles = auth.get_roles(target_mode)
         return roles
     
@@ -46,10 +46,10 @@ class AdminAPI(api_tools.APIModeHandler):
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
-    def post(self, target_mode):  # pylint: disable=R0201
+    def post(self, target_mode: str):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
-        auth.add_role(role_name, target_mode)
+        auth.add_role(name=role_name, mode=target_mode)
         return {"ok": True}
 
     @auth.decorators.check_api({
@@ -71,7 +71,7 @@ class AdminAPI(api_tools.APIModeHandler):
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})    
-    def delete(self, target_mode):
+    def delete(self, target_mode: str):
         role_name = request.json["name"]
         auth.delete_role(role_name, target_mode)
         return {"ok": True}
@@ -87,7 +87,7 @@ class ProjectAPI(api_tools.APIModeHandler):
     def post(self, project_id: int):  # pylint: disable=R0201
         """ Process """
         role_name = request.json["name"]
-        role = self.module.add_role(project_id, role_name)
+        role = self.module.add_role(project_id=project_id, role_names=[role_name])
         return {"ok": bool(role)}, 201
 
     @auth.decorators.check_api(["configuration.roles.roles.edit"])
