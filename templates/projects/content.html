@@ -97,6 +97,136 @@
                             :has-search="true"
                         ></Multiselect-Dropdown>
                     </div>
+
+
+                    <div>
+                        <div class="mt-4 mb-4 d-flex">
+                            <p class="font-h5 font-semibold flex-grow-1">Limit settings</p>
+                            <label class="custom-toggle">
+                                <input type="checkbox"
+                                    id="limit_settings"
+                                    data-target="#selector_limit_settings"
+                                    aria-expanded="limit_settings"
+                                    data-toggle="collapse"
+                                >
+                                <span class="custom-toggle_slider round"></span>
+                            </label>
+                        </div> 
+                        <div class="mb-2 collapse" :class="{ show: limit_settings }" id="selector_limit_settings">
+                            <p class="font-h5 font-semibold flex-grow-1 mb-2">Virtual compute units limit settings</p>
+                            <div class="row">
+                                <div class="col mb-2 align-items-center">
+                                    <div class="font-h6 font-semibold" style="white-space: nowrap">Hard limit, VCU</div>
+                                    <input type="number" class="form-control mt-1" placeholder="VCU hard limit"
+                                           id="vcu_hard_limit"
+                                    >
+                                </div>
+
+                                <div class="col mb-2 align-items-center">
+                                    <div class="font-h6 font-semibold" style="white-space: nowrap">Soft limit, VCU</div>
+                                    <input type="number" class="form-control mt-1" placeholder="VCU soft limit"
+                                           id="vcu_soft_limit"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col mb-1 align-items-center">
+                                    <input
+                                        id="vcu_limit_total_block_false"
+                                        name="vcu_limit_total_block"
+                                        checked
+                                        class="mx-2 custom-radio"
+                                        type="radio"
+                                        value="false"
+                                        >
+                                    <label
+                                        class="mb-0"
+                                        for="vcu_limit_total_block_false">
+                                        <h9 class="font-h6 font-semibold">
+                                        Block platform resources only                           
+                                        </h9>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col mb-3 align-items-center">
+                                    <input
+                                        id="vcu_limit_total_block_true"
+                                        name="vcu_limit_total_block"
+                                        class="mx-2 custom-radio"
+                                        type="radio"
+                                        value="true"
+                                        >
+                                    <label
+                                        class="mb-0"
+                                        for="vcu_limit_total_block_true">
+                                        <h9 class="font-h6 font-semibold">
+                                        Total block
+                                        </h9>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <p class="font-h5 font-semibold flex-grow-1 mb-2">Storage limit settings</p>
+                            <div class="row">
+                                <div class="col mb-2 align-items-center">
+                                    <div class="font-h6 font-semibold" style="white-space: nowrap">Hard limit, GB</div>
+                                    <input type="number" class="form-control mt-1" placeholder="Storage hard limit"
+                                           id="storage_hard_limit"
+                                    >
+                                </div>
+
+                                <div class="col mb-2 align-items-center">
+                                    <div class="font-h6 font-semibold" style="white-space: nowrap">Soft limit, GB</div>
+                                    <input type="number" class="form-control mt-1" placeholder="Storage soft limit"
+                                           id="storage_soft_limit"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col mb-1 align-items-center">
+                                    <input
+                                        id="storage_limit_total_block_false"
+                                        name="storage_limit_total_block"
+                                        checked
+                                        class="mx-2 custom-radio"
+                                        type="radio"
+                                        value="false"
+                                        >
+                                    <label
+                                        class="mb-0"
+                                        for="storage_limit_total_block_false">
+                                        <h9 class="font-h6 font-semibold">
+                                        Block platform resources only                           
+                                        </h9>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col mb-3 align-items-center">
+                                    <input
+                                        id="storage_limit_total_block_true"
+                                        name="storage_limit_total_block"
+                                        class="mx-2 custom-radio"
+                                        type="radio"
+                                        value="true"
+                                        >
+                                    <label
+                                        class="mb-0"
+                                        for="storage_limit_total_block_true">
+                                        <h9 class="font-h6 font-semibold">
+                                        Total block
+                                        </h9>
+                                    </label>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

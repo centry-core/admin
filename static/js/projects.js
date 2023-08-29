@@ -26,11 +26,22 @@ async function projectCreateSubmit() {
     const project_data = {
         "name": $('#name').val(),
         "project_admin_email": $('#project_admin_email').val(),
-        "vuh_limit": 60000,
+        // "vuh_limit": 60000,
         // "plugins": V.multiselectFilter?.selectedItems.map(i => i.id) || [],
-        "storage_space_limit": 1000000000,
+        // "storage_space_limit": 1000000000,
         "data_retention_limit": 1000000000,
         ...V.custom_data
+    }
+    if (document.getElementById("limit_settings").checked) {
+        const limit_settings = {
+            "vcu_hard_limit": parseInt($('#vcu_hard_limit').val(), 10),
+            "vcu_soft_limit": parseInt($('#vcu_soft_limit').val(), 10),
+            "vcu_limit_total_block": document.getElementById("vcu_limit_total_block_true").checked,
+            "storage_hard_limit": parseInt($('#storage_hard_limit').val(), 10),
+            "storage_soft_limit": parseInt($('#storage_soft_limit').val(), 10),
+            "storage_limit_total_block": document.getElementById("storage_limit_total_block_true").checked,
+        }
+        Object.assign(project_data, limit_settings);
     }
     try {
         const resp = await fetch(api_url, {
