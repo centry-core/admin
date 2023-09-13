@@ -2,7 +2,7 @@
 [{% for item in tools.theme.modes.keys() %}"{{ item }}"{% if not loop.last %}, {% endif %}{% endfor %}]
 -->
 <Roles-Table
-    :modes='{{ |safe }}'
+    :modes=''
     instance_name="RolesTable"
     @register="register">
 </Roles-Table>
