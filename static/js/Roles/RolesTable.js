@@ -1,5 +1,5 @@
 const RolesTable = {
-    props: ['instance_name'],
+    props: ['instance_name', 'modes'],
     components: {
         'roles-modal-create': RolesModalCreate,
         'roles-modal-confirm': RolesModalConfirm,
@@ -30,7 +30,6 @@ const RolesTable = {
             deletingRole: null,
             loading: false,
             selectedMode: 'default',
-            modes: ['administration', 'default', 'developer'],
             hasRowError: false,
         }
     },
@@ -325,18 +324,18 @@ const RolesTable = {
                             :labels="modes"
                             v-model="selectedMode"
                         ></TextToggle>
-                        
+
                         <div class="custom-input custom-input_search custom-input_search__sm position-relative ml-2 mr-2">
                             <input type="text" placeholder="Search permissions" id="searchRole">
                             <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
                         </div>
-                        <button v-show="!canEdit" type="button" class="btn btn-secondary btn-icon btn-icon__purple mr-2" 
+                        <button v-show="!canEdit" type="button" class="btn btn-secondary btn-icon btn-icon__purple mr-2"
                             data-toggle="tooltip" data-placement="top" title="Edit roles"
                             @click="changeMode">
                             <i class="icon__18x18 icon-edit"></i>
                         </button>
                         <template v-if="canEdit">
-                            <button type="button" @click="changeMode" 
+                            <button type="button" @click="changeMode"
                                 id="project_submit" class="btn btn-secondary btn-basic">Cancel</button>
                             <button type="button" @click="saveRoles" class="btn btn-basic d-flex align-items-center ml-2">Save
                                 <i v-if="loading" class="preview-loader__white ml-2"></i>
