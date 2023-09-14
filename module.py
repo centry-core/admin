@@ -170,6 +170,37 @@ class Module(module.ModuleModel):
                 }},
             # icon_class="fas fa-info-circle fa-fw",
         )
+        #
+        theme.register_mode_section(
+            "administration", "modes", "Modes",
+            kind="holder",
+            permissions={
+                "permissions": ["modes"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "modes",
+            "users", "Users",
+            title="Users",
+            kind="slot",
+            permissions={
+                "permissions": ["modes.users"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_modes_users_",
+            icon_class="fas fa-server fa-fw",
+        )
         # Init
         self.descriptor.init_all()
 
