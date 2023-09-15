@@ -64,7 +64,13 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process POST """
         data = flask.request.get_json()  # TODO: validation with pydantic
         #
-        user_id = int(data["user_id"])
+        try:
+            user_id = int(data["user_id"])
+        except:  # pylint: disable=W0702
+            user_email = data["user_id"]
+            user = auth.get_user(email=user_email)
+            user_id = user["id"]
+        #
         mode = data["mode"]
         role = data["role"]
         #
