@@ -19,6 +19,18 @@
 // });
 
 
+$("#btn-delete").click(function() {
+  axios.delete(pylon_api_url)
+    .then(function (response) {
+      showNotify("SUCCESS", "Pylon restart requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during Pylon restart request")
+      console.log(error);
+    });
+});
+
+
 function actionsFormatter(value, row, index) {
   return [
     // '<a class="task-delete" href="javascript:void(0)" title="Delete">',
