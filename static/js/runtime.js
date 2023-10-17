@@ -36,6 +36,7 @@ function actionsFormatter(value, row, index) {
     '<a class="task-meta" href="javascript:void(0)" title="Get metadata">',
     '<i class="fa fa-search" style="color: #858796"></i>',
     '</a>',
+    '&nbsp;',
     '<a class="task-update" href="javascript:void(0)" title="Download update">',
     '<i class="fa fa-cloud-download" style="color: #858796"></i>',
     '</a>',
