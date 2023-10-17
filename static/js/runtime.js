@@ -47,11 +47,16 @@ window.actionsEvents = {
   "click .task-meta": function (e, value, row, index) {
     axios.get(plugin_api_url + "/" + row.name)
       .then(function (response) {
-        console.log(response);
-        // $("#table").bootstrapTable("remove", {
-        //   field: "id",
-        //   values: [row.id]
-        // });
+        // console.log(response);
+        if (response.data.ok) {
+          $("#table").bootstrapTable("updateCell", {
+            index: index,
+            field: "repo_version",
+            value: response.data.repo_version
+          });
+        } else {
+          showNotify("ERROR", response.data.error)
+        }
       })
       .catch(function (error) {
         showNotify("ERROR", "Error during plugin metadata request")
