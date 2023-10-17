@@ -171,6 +171,8 @@ class Module(module.ModuleModel):
             # icon_class="fas fa-info-circle fa-fw",
         )
         #
+        # Modes
+        #
         theme.register_mode_section(
             "administration", "modes", "Modes",
             kind="holder",
@@ -199,6 +201,39 @@ class Module(module.ModuleModel):
                 }
             },
             prefix="admin_modes_users_",
+            icon_class="fas fa-server fa-fw",
+        )
+        #
+        # Runtime
+        #
+        theme.register_mode_section(
+            "administration", "runtime", "Runtime",
+            kind="holder",
+            permissions={
+                "permissions": ["runtime"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "runtime",
+            "plugins", "Plugins",
+            title="Plugins",
+            kind="slot",
+            permissions={
+                "permissions": ["runtime.plugins"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_runtime_plugins_",
             icon_class="fas fa-server fa-fw",
         )
         # Init
