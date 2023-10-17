@@ -17,6 +17,9 @@
 
 """ API """
 
+import os
+import signal
+
 import uuid
 import json
 
@@ -35,9 +38,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def delete(self):
         """ Process DELETE """
-        from pylon.core.tools import server  # pylint: disable=E0401,E0611,C0415
-        #
-        server.restart()
+        os.kill(os.getpid(), signal.SIGTERM)
         #
         return {"ok": True}
 
