@@ -85,10 +85,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 "error": "Plugin is not known by repo resolver(s)",
             }
         #
-        # metadata_provider = repo_resolver.get_metadata_provider(plugin)
+        metadata_provider = repo_resolver.get_metadata_provider(plugin)
         #
-        # metadata_url = plugin_info["objects"]["metadata"]
-        # metadata = metadata_provider.get_metadata({"source": metadata_url})
+        metadata_url = plugin_info["objects"]["metadata"]
+        metadata = metadata_provider.get_metadata({"source": metadata_url})
         #
         source_target = plugin_info["source"].copy()
         source_type = source_target.pop("type")
@@ -107,7 +107,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         return {
             "ok": True,
-            "message": "Plugin updated, restart pylon to enable new version",
+            "message": f'Plugin updated to version {metadata.get("version", "0.0.0")}, restart pylon to enable new version',  # pylint: disable=C0301
         }
 
     # @auth.decorators.check_api(["runtime.plugins"])
