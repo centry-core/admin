@@ -63,5 +63,20 @@ window.actionsEvents = {
         showNotify("ERROR", "Error during plugin metadata request")
         console.log(error);
       });
+  },
+  "click .task-update": function (e, value, row, index) {
+    axios.put(plugin_api_url + "/" + row.name)
+      .then(function (response) {
+        // console.log(response);
+        if (response.data.ok) {
+          showNotify("SUCCESS", response.data.message)
+        } else {
+          showNotify("ERROR", response.data.error)
+        }
+      })
+      .catch(function (error) {
+        showNotify("ERROR", "Error during plugin update request")
+        console.log(error);
+      });
   }
 }

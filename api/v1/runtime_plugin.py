@@ -63,26 +63,52 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             "repo_version": metadata.get("version", "0.0.0"),
         }
 
-    # @auth.decorators.check_api(["runtime.plugins"])
-    # def put(self, plugin):  # pylint: disable=R0201
-    #     """ Process PUT """
-    #     data = flask.request.get_json()  # TODO: validation with pydantic
-    #     #
-    #     try:
-    #         user_id = int(data["user_id"])
-    #     except:  # pylint: disable=W0702
-    #         user_email = data["user_id"]
-    #         user = auth.get_user(email=user_email)
-    #         user_id = user["id"]
-    #     #
-    #     mode = data["mode"]
-    #     role = data["role"]
-    #     #
-    #     self.module.context.rpc_manager.call.auth_assign_user_to_role(
-    #         user_id, role, mode
-    #     )
-    #     #
-    #     return {"ok": True}
+    @auth.decorators.check_api(["runtime.plugins"])
+    def put(self, plugin):  # pylint: disable=R0201
+        """ Process PUT """
+        module_manager = self.module.context.module_manager
+        #
+        if "market" not in module_manager.modules:
+            return {
+                "ok": False,
+                "error": "Market plugin is not installed",
+            }
+        #
+        market = module_manager.modules["market"].module
+        repo_resolver = market.repo_resolver
+        #
+        plugin_info = repo_resolver.resolve(plugin)
+        #
+        if plugin_info is None:
+            return {
+                "ok": False,
+                "error": "Plugin is not known by repo resolver(s)",
+            }
+        #
+        # metadata_provider = repo_resolver.get_metadata_provider(plugin)
+        #
+        # metadata_url = plugin_info["objects"]["metadata"]
+        # metadata = metadata_provider.get_metadata({"source": metadata_url})
+        #
+        source_target = plugin_info["source"].copy()
+        source_type = source_target.pop("type")
+        #
+        if source_type != "git":
+            return {
+                "ok": False,
+                "error": "Plugin source type is not supported",
+            }
+        #
+        source_provider = repo_resolver.get_source_provider(plugin)
+        source = source_provider.get_source(source_target)
+        #
+        plugins_provider = module_manager.providers["plugins"]
+        plugins_provider.add_plugin(plugin, source)
+        #
+        return {
+            "ok": True,
+            "message": "Plugin updated, restart pylon to enable new version",
+        }
 
     # @auth.decorators.check_api(["runtime.plugins"])
     # def post(self, plugin):  # pylint: disable=R0201
