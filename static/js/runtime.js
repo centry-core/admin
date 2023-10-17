@@ -33,28 +33,29 @@ $("#btn-delete").click(function() {
 
 function actionsFormatter(value, row, index) {
   return [
-    // '<a class="task-delete" href="javascript:void(0)" title="Delete">',
-    // '<i class="fa fa-trash" style="color: #858796"></i>',
-    // '</a>',
+    '<a class="task-meta" href="javascript:void(0)" title="Get metadata">',
+    '<i class="fa fa-search" style="color: #858796"></i>',
+    '</a>',
+    '<a class="task-update" href="javascript:void(0)" title="Download update">',
+    '<i class="fa fa-cloud-download" style="color: #858796"></i>',
+    '</a>',
   ].join('')
 }
 
 
 window.actionsEvents = {
-  // "click .task-delete": function (e, value, row, index) {
-  //   if (!window.confirm("Delete?")) {
-  //     return;
-  //   }
-  //   axios.delete(api_url + "?id=" + row.id)
-  //     .then(function (response) {
-  //       // console.log(response);
-  //       $("#table").bootstrapTable("remove", {
-  //         field: "id",
-  //         values: [row.id]
-  //       });
-  //     })
-  //     .catch(function (error) {
-  //       console.log(error);
-  //     });
-  // }
+  "click .task-meta": function (e, value, row, index) {
+    axios.get(plugin_api_url + "/" + row.name)
+      .then(function (response) {
+        console.log(response);
+        // $("#table").bootstrapTable("remove", {
+        //   field: "id",
+        //   values: [row.id]
+        // });
+      })
+      .catch(function (error) {
+        showNotify("ERROR", "Error during plugin metadata request")
+        console.log(error);
+      });
+  }
 }
