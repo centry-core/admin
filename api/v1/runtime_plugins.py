@@ -45,6 +45,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             result.append({
                 "name": descriptor.name,
                 "description": descriptor.metadata.get("name", ""),
+                "enabled": True,
+                "prepared": descriptor.prepared,
+                "activated": descriptor.activated,
                 "local_version": descriptor.metadata.get("version", "0.0.0"),
                 "repo_version": "-",
             })
