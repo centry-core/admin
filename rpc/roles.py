@@ -180,6 +180,18 @@ class RPC:
                 tenant_session.commit()
             return True
 
+    @web.rpc("admin_get_user_roles", "get_user_roles")
+    def get_user_roles(self, project_id, user_id) -> list[dict]:
+        with db.with_project_schema_session(project_id) as tenant_session:
+            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
+            if user:
+                user_roles = tenant_session.query(UserRole).with_entities(UserRole.role_id).filter(
+                    UserRole.user_id == user.id).all()
+                user_roles = [role[0] for role in user_roles]
+                roles = tenant_session.query(Role).filter(Role.id.in_(user_roles)).all()
+                return [role.to_json() for role in roles]
+            return []
+
     @web.rpc('admin_check_user_in_project', 'check_user_in_project')
     def check_user_in_project(self, project_id: int, user_id: Optional[int] = None, **kwargs) -> bool:
         # log.info('Checking if user %s is in project %s', user_id, project_id)
