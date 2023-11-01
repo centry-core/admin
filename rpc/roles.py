@@ -203,9 +203,13 @@ class RPC:
                 return False
         log.info('Checking if user %s is in project %s', user_id, project_id)
 
-        with db.with_project_schema_session(project_id) as tenant_session:
-            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            return bool(user)
+        try:
+            with db.with_project_schema_session(project_id) as tenant_session:
+                user = tenant_session.query(User).filter(User.auth_id == user_id).first()
+                return bool(user)
+        except ProgrammingError:
+            # if project schema does not exist
+            return False
 
     @web.rpc('admin_get_project_system_user', 'get_project_system_user')
     def check_user_in_project(self, project_id: int, **kwargs) -> Optional[dict]:
