@@ -3,16 +3,6 @@ from sqlalchemy import Column, Integer, String, UniqueConstraint
 from tools import db_tools, db
 
 
-class User(db_tools.AbstractBaseMixin, db.Base):
-    __tablename__ = "user"
-    __table_args__ = (
-        {"schema": "tenant"},
-    )
-
-    id = Column(Integer, primary_key=True, index=True)
-    auth_id = Column(Integer, index=True, unique=True)
-
-
 class Role(db_tools.AbstractBaseMixin, db.Base):
     __tablename__ = "role"
     __table_args__ = (
