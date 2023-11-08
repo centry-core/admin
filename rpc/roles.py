@@ -130,7 +130,7 @@ class RPC:
         return set()
 
     @web.rpc("admin_get_users_ids_in_project", "get_users_ids_in_project")
-    def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[dict]:
+    def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[int]:
         with db.with_project_schema_session(project_id) as tenant_session:
             users = tenant_session.query(UserRole.user_id).distinct().all()
             users = [user[0] for user in users]
