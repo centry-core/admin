@@ -6,7 +6,7 @@ from flask import g
 from tools import rpc_tools, db, db_tools
 
 from sqlalchemy.exc import NoResultFound, ProgrammingError
-from ..models.users import User, Role, UserRole, RolePermission
+from ..models.users import Role, UserRole, RolePermission
 from pylon.core.tools import web, log
 
 PROJECT_ROLE_NAME = 'default'
@@ -97,13 +97,9 @@ class RPC:
     @web.rpc("admin_add_user_to_project", "add_user_to_project")
     def add_user_to_project(self, project_id: int, user_id: int, role_names: list[str], **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
-            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            if not user:
-                user = User(auth_id=user_id)
-                tenant_session.add(user)
             roles = tenant_session.query(Role).filter(Role.name.in_(role_names)).all()
             for role in roles:
-                user_role = UserRole(user_id=user.id, role_id=role.id)
+                user_role = UserRole(user_id=user_id, role_id=role.id)
                 tenant_session.add(user_role)
             tenant_session.commit()
             return True
@@ -113,8 +109,6 @@ class RPC:
         with db.with_project_schema_session(project_id) as tenant_session:
             tenant_session.query(UserRole).filter(
                 UserRole.user_id.in_(user_ids)).delete()
-            tenant_session.query(User).filter(
-                User.auth_id.in_(user_ids)).delete()
             tenant_session.commit()
             return True
 
@@ -123,14 +117,12 @@ class RPC:
         # log.info('get_permissions_in_project, p: %s, u: %s', project_id, user_id)
         try:
             with db.with_project_schema_session(project_id) as tenant_session:
-                user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-                if user:
-                    permissions = tenant_session.query(UserRole, RolePermission).filter(
-                        UserRole.user_id == user.id,
-                        RolePermission.role_id == UserRole.role_id,
-                    ).all()
-                    permissions = {permission.permission for _, permission in permissions}
-                    return permissions
+                permissions = tenant_session.query(UserRole, RolePermission).filter(
+                    UserRole.user_id == user_id,
+                    RolePermission.role_id == UserRole.role_id,
+                ).all()
+                permissions = {permission.permission for _, permission in permissions}
+                return permissions
         except ProgrammingError:
             # this happens if project schema is deleted. We need to clear session then
 
@@ -138,59 +130,53 @@ class RPC:
         return set()
 
     @web.rpc("admin_get_users_ids_in_project", "get_users_ids_in_project")
-    def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[dict]:
+    def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[int]:
         with db.with_project_schema_session(project_id) as tenant_session:
-            users = tenant_session.query(User).all()
-            users = [user.to_json() for user in users]
+            users = tenant_session.query(UserRole.user_id).distinct().all()
+            users = [user[0] for user in users]
             return users
 
     @web.rpc("admin_get_users_roles_in_project", "get_users_roles_in_project")
     def get_users_roles_in_project(self, project_id: int, filter_system_user: bool = False, **kwargs) -> dict[list]:
         filter_ = [
-            User.id == UserRole.user_id,
             Role.id == UserRole.role_id
         ]
         if filter_system_user:
             system_user = self.get_project_system_user(project_id)
             if system_user:
-                filter_.append(User.auth_id != system_user['id'])
+                filter_.append(UserRole.user_id != system_user['id'])
         with db.with_project_schema_session(project_id) as tenant_session:
-            query = tenant_session.query(User, UserRole, Role).filter(*filter_)
+            query = tenant_session.query(UserRole, Role).filter(*filter_)
             users = query.all()
 
         user_roles = defaultdict(list)
-        for user, _, role in users:
-            user_roles[user.auth_id].append(role.name)
+        for user_role, role in users:
+            user_roles[user_role.user_id].append(role.name)
         return user_roles
 
     @web.rpc("update_roles_for_user", "admin_update_roles_for_user")
     def update_roles_for_user(self, project_id, user_id, new_roles, **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
-            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            if user:
-                user_roles = tenant_session.query(UserRole).filter(
-                    UserRole.user_id == user.id).all()
-                for user_role in user_roles:
-                    tenant_session.delete(user_role)
-                for role_name in new_roles:
-                    role = tenant_session.query(Role).filter(Role.name == role_name).first()
-                    if role:
-                        user_role = UserRole(user_id=user.id, role_id=role.id)
-                        tenant_session.add(user_role)
-                tenant_session.commit()
+            user_roles = tenant_session.query(UserRole).filter(
+                UserRole.user_id == user_id).all()
+            for user_role in user_roles:
+                tenant_session.delete(user_role)
+            for role_name in new_roles:
+                role = tenant_session.query(Role).filter(Role.name == role_name).first()
+                if role:
+                    user_role = UserRole(user_id=user_id, role_id=role.id)
+                    tenant_session.add(user_role)
+            tenant_session.commit()
             return True
 
     @web.rpc("admin_get_user_roles", "get_user_roles")
     def get_user_roles(self, project_id, user_id) -> list[dict]:
         with db.with_project_schema_session(project_id) as tenant_session:
-            user = tenant_session.query(User).filter(User.auth_id == user_id).first()
-            if user:
-                user_roles = tenant_session.query(UserRole).with_entities(UserRole.role_id).filter(
-                    UserRole.user_id == user.id).all()
-                user_roles = [role[0] for role in user_roles]
-                roles = tenant_session.query(Role).filter(Role.id.in_(user_roles)).all()
-                return [role.to_json() for role in roles]
-            return []
+            user_roles = tenant_session.query(UserRole).with_entities(UserRole.role_id).filter(
+                UserRole.user_id == user_id).all()
+            user_roles = [role[0] for role in user_roles]
+            roles = tenant_session.query(Role).filter(Role.id.in_(user_roles)).all()
+            return [role.to_json() for role in roles]
 
     @web.rpc('admin_check_user_in_project', 'check_user_in_project')
     def check_user_in_project(self, project_id: int, user_id: Optional[int] = None, **kwargs) -> bool:
@@ -205,7 +191,7 @@ class RPC:
 
         try:
             with db.with_project_schema_session(project_id) as tenant_session:
-                user = tenant_session.query(User).filter(User.auth_id == user_id).first()
+                user = tenant_session.query(UserRole).filter(UserRole.user_id == user_id).first()
                 return bool(user)
         except ProgrammingError:
             # if project schema does not exist
