@@ -198,7 +198,7 @@ class RPC:
             return False
 
     @web.rpc('admin_get_project_system_user', 'get_project_system_user')
-    def check_user_in_project(self, project_id: int, **kwargs) -> Optional[dict]:
+    def get_project_system_user(self, project_id: int, **kwargs) -> Optional[dict]:
         from tools import auth, project_constants as pc
         try:
             return auth.get_user(email=pc['PROJECT_USER_EMAIL_TEMPLATE'].format(project_id))
