@@ -36,14 +36,14 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process GET """
         module_manager = self.module.context.module_manager
         #
-        if "market" not in module_manager.modules:
+        if "bootstrap" not in module_manager.modules:
             return {
                 "ok": False,
-                "error": "Market plugin is not installed",
+                "error": "Bootstrap plugin is not installed",
             }
         #
-        market = module_manager.modules["market"].module
-        repo_resolver = market.repo_resolver
+        bootstrap = module_manager.modules["bootstrap"].module
+        repo_resolver = bootstrap.repo_resolver
         #
         plugin_info = repo_resolver.resolve(plugin)
         #
@@ -68,14 +68,14 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process PUT """
         module_manager = self.module.context.module_manager
         #
-        if "market" not in module_manager.modules:
+        if "bootstrap" not in module_manager.modules:
             return {
                 "ok": False,
-                "error": "Market plugin is not installed",
+                "error": "Bootstrap plugin is not installed",
             }
         #
-        market = module_manager.modules["market"].module
-        repo_resolver = market.repo_resolver
+        bootstrap = module_manager.modules["bootstrap"].module
+        repo_resolver = bootstrap.repo_resolver
         #
         plugin_info = repo_resolver.resolve(plugin)
         #
