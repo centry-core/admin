@@ -83,25 +83,27 @@ class AdminAPI(api_tools.APIModeHandler):
             return {'error': "Personal projects not set"}, 400
 
         new_data = request.get_json()
-        _, old_data = get_permissions_map(self.module, project_ids[0])
-        old_permissions = set(
-            (r, p['name']) for p in old_data for r, v in p.items() if v)
+        # _, old_data = get_permissions_map(self.module, project_ids[0])
+        # old_permissions = set(
+        #     (r, p['name']) for p in old_data for r, v in p.items() if v)
         new_permissions = set(
             (r, p['name']) for p in new_data for r, v in p.items() if v)
-        permissions_to_delete = old_permissions - new_permissions
-        permissions_to_add = new_permissions - old_permissions
+        # permissions_to_delete = old_permissions - new_permissions
+        # permissions_to_add = new_permissions - old_permissions
 
         for project_id in project_ids:
-            for permission in permissions_to_add:
+            self.module.remove_all_permissions(project_id)
+
+            for permission in new_permissions:
                 self.module.set_permission_for_role(
                     project_id,
                     *permission,
                 )
-            for permission in permissions_to_delete:
-                self.module.remove_permission_from_role(
-                    project_id,
-                    *permission,
-                )
+            # for permission in permissions_to_delete:
+            #     self.module.remove_permission_from_role(
+            #         project_id,
+            #         *permission,
+            #     )
         return {"ok": True}
 
 

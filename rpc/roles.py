@@ -94,6 +94,13 @@ class RPC:
                     tenant_session.commit()
             return True
 
+    @web.rpc("admin_remove_all_permissions", "remove_all_permissions")
+    def remove_all_permissions(self, project_id: int) -> bool:
+        with db.with_project_schema_session(project_id) as tenant_session:
+            tenant_session.query(RolePermission).delete()
+            tenant_session.commit()
+            return True
+
     @web.rpc("admin_add_user_to_project", "add_user_to_project")
     def add_user_to_project(self, project_id: int, user_id: int, role_names: list[str], **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
