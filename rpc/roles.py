@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, List
 
 from flask import g
 
@@ -66,15 +66,25 @@ class RPC:
     def set_permission_for_role(
             self, project_id: int, role_name: str, permission: str
     ) -> bool:
+        return self.set_permissions_for_role(
+            project_id=project_id, role_name=role_name, permissions=[permission]
+        )
+
+    @web.rpc("admin_set_permissions_for_role", "set_permissions_for_role")
+    def set_permissions_for_role(
+            self, project_id: int, role_name: str, permissions: List[str],
+    ) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
             role = tenant_session.query(Role).filter(
                 Role.name == role_name,
             ).first()
             if role:
-                permission = RolePermission(role_id=role.id, permission=permission)
-                tenant_session.add(permission)
+                for p in permissions:
+                    permission = RolePermission(role_id=role.id, permission=p)
+                    tenant_session.add(permission)
                 tenant_session.commit()
-            return True
+                return True
+        return False
 
     @web.rpc("admin_remove_permission_from_role", "remove_permission_from_role")
     def remove_permission_from_role(
@@ -92,13 +102,6 @@ class RPC:
                 if permission:
                     tenant_session.delete(permission)
                     tenant_session.commit()
-            return True
-
-    @web.rpc("admin_remove_all_permissions", "remove_all_permissions")
-    def remove_all_permissions(self, project_id: int) -> bool:
-        with db.with_project_schema_session(project_id) as tenant_session:
-            tenant_session.query(RolePermission).delete()
-            tenant_session.commit()
             return True
 
     @web.rpc("admin_add_user_to_project", "add_user_to_project")

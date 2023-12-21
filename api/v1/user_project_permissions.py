@@ -20,7 +20,9 @@ from itertools import groupby
 from flask import request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
-from tools import auth, api_tools  # pylint: disable=E0401
+from tools import auth, api_tools, db
+from collections import defaultdict
+from ...models.users import RolePermission
 
 
 def group_roles_by_permissions(auth_permissions, roles):
@@ -41,9 +43,9 @@ def get_permissions_map(module, project_id: int) -> tuple[list, list]:
     permissions_map = [{
         "name": permission,
         **{role["name"]: permission in roles_to_permissions[role["name"]] for
-        role in roles}
-        } for permission in all_permissions
-        ]
+           role in roles}
+    } for permission in all_permissions
+    ]
     return all_permissions, permissions_map
 
 
@@ -52,8 +54,8 @@ class AdminAPI(api_tools.APIModeHandler):
         "permissions": ["configuration.roles.user_project_permissions.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": True, "viewer": False, "editor": False},
-            "developer": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": False, "viewer": False, "editor": False},
+            "developer": {"admin": False, "viewer": False, "editor": False},
         }})
     def get(self):  # pylint: disable=R0201
         """ Process """
@@ -73,8 +75,8 @@ class AdminAPI(api_tools.APIModeHandler):
         "permissions": ["configuration.roles.user_project_permissions.edit"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": True, "viewer": False, "editor": False},
-            "developer": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": False, "viewer": False, "editor": False},
+            "developer": {"admin": False, "viewer": False, "editor": False},
         }})
     def put(self):  # pylint: disable=R0201
         """ Process """
@@ -82,29 +84,25 @@ class AdminAPI(api_tools.APIModeHandler):
         if not project_ids:
             return {'error': "Personal projects not set"}, 400
 
-        new_data = request.get_json()
-        # _, old_data = get_permissions_map(self.module, project_ids[0])
-        # old_permissions = set(
-        #     (r, p['name']) for p in old_data for r, v in p.items() if v)
-        new_permissions = set(
-            (r, p['name']) for p in new_data for r, v in p.items() if v)
-        # permissions_to_delete = old_permissions - new_permissions
-        # permissions_to_add = new_permissions - old_permissions
-
+        role_map = defaultdict(list)
+        for p in request.json:
+            role_name = p.pop('name')
+            for pr in filter(lambda x: x[1] and isinstance(x[1], bool), p.items()):
+                role_map[pr[0]].append(role_name)
+        # log.info(f'role_map, {role_map}')
         for project_id in project_ids:
-            self.module.remove_all_permissions(project_id)
-
-            for permission in new_permissions:
-                self.module.set_permission_for_role(
-                    project_id,
-                    *permission,
+            # log.info(f'doing project {project_id}')
+            with db.with_project_schema_session(project_id) as tenant_session:
+                tenant_session.query(RolePermission).delete()
+                tenant_session.commit()
+            for role_name, permissions in role_map.items():
+                # log.info(f'\tsetting for role: {role_name}, permissions: {permissions}')
+                self.module.set_permissions_for_role(
+                    project_id=project_id,
+                    role_name=role_name,
+                    permissions=permissions
                 )
-            # for permission in permissions_to_delete:
-            #     self.module.remove_permission_from_role(
-            #         project_id,
-            #         *permission,
-            #     )
-        return {"ok": True}
+        return {"ok": True, 'role_map': dict(role_map)}, 200
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
