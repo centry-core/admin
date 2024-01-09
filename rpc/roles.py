@@ -180,7 +180,8 @@ class RPC:
             return True
 
     @web.rpc("admin_get_user_roles", "get_user_roles")
-    def get_user_roles(self, project_id, user_id) -> list[dict]:
+    def get_user_roles(self, project_id: int, user_id: int) -> list[dict]:
+        assert project_id is not None, 'project_id cannot be None'
         with db.with_project_schema_session(project_id) as tenant_session:
             user_roles = tenant_session.query(UserRole).with_entities(UserRole.role_id).filter(
                 UserRole.user_id == user_id).all()
