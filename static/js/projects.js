@@ -34,6 +34,9 @@ async function projectCreateSubmit() {
     }
     if (document.getElementById("limit_settings").checked) {
         const limit_settings = {
+            "test_duration_limit": parseInt($('#test_duration_limit').val(), 10),
+            "memory_limit": parseInt($('#memory_limit').val(), 10),
+            "cpu_limit": parseInt($('#cpu_limit').val(), 10),
             "vcu_hard_limit": parseInt($('#vcu_hard_limit').val(), 10),
             "vcu_soft_limit": parseInt($('#vcu_soft_limit').val(), 10),
             "vcu_limit_total_block": document.getElementById("vcu_limit_total_block_true").checked,
