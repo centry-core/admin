@@ -49,15 +49,19 @@ class Method:  # pylint: disable=E1101,R0903
         if flask.g.auth.id == "-":
             return
         #
+        theme_project_mode_endpoints = [
+            "theme.route_section",
+            "theme.route_section_subsection",
+            "theme.route_section_subsection_page",
+        ]
+        #
+        if self.descriptor.config.get("theme_index_is_project_mode", True):
+            theme_project_mode_endpoints.append("theme.index")
+        #
         project_mode_target = \
             (
                     request.endpoint is not None and
-                    request.endpoint in [
-                        "theme.index",
-                        "theme.route_section",
-                        "theme.route_section_subsection",
-                        "theme.route_section_subsection_page",
-                    ]
+                    request.endpoint in theme_project_mode_endpoints
             ) or (
                     request.endpoint is not None and
                     request.endpoint.startswith("theme.route_mode_") and
