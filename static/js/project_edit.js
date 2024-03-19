@@ -1,5 +1,5 @@
 function userAddSubmit() {
-  fetch('/api/v1/admin/users/' + project + '/', {
+  fetch(window.url_prefix + '/api/v1/admin/users/' + project + '/', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({

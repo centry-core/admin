@@ -9,7 +9,7 @@ const EmptyPage = {
     methods: {
         async handle_project_change(event) {
             await activeProject.set(this.selected_project)
-            window.location.href = '/'
+            window.location.href = window.url_prefix + '/-/configuration/artifacts/'
         }
     },
     template: `
@@ -22,14 +22,14 @@ const EmptyPage = {
                     <h3>Welcome back!</h3>
                     <p>Select the project to continue</p>
                     <div class="d-flex w-100">
-                        <select v-model="selected_project" 
-                            class="selectpicker bootstrap-select__b flex-grow-1 mr-2" 
+                        <select v-model="selected_project"
+                            class="selectpicker bootstrap-select__b flex-grow-1 mr-2"
                             data-style="btn"
                             data-placeholder="Select project"
                             >
                             <option value="" selected disabled hidden>Select project</option>
-                            <option v-for="project in user_projects" 
-                                :value="project.id" 
+                            <option v-for="project in user_projects"
+                                :value="project.id"
                                 :key="project.id"
                                 >
                                 [[ project.name ]]

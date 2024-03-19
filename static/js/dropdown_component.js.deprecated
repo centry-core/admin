@@ -15,6 +15,7 @@ const MultiselectFilter = {
             refSearchId: 'refSearchCbx'+Math.round(Math.random() * 1000),
             selectedItems: [],
             closeOnItem: true,
+            url_prefix: window.url_prefix,
         }
     },
     computed: {
@@ -44,13 +45,13 @@ const MultiselectFilter = {
     template: `
         <div id="complexList" class="complex-list complex-list__filter bootstrap-select">
             <button class="btn dropdown-toggle position-relative text-left d-flex align-items-center"
-                type="button"   
+                type="button"
                 data-toggle="dropdown"
                 aria-haspopup="true"
                 aria-expanded="false">
                 <slot name="label"></slot>
                 <p class="d-flex mb-0">
-                    <span class="font-h5">{{ title }}</span>  
+                    <span class="font-h5">{{ title }}</span>
                     <span class="complex-list_filled ml-1 text-gray-600">({{ selectedItems.length }}/{{ itemsList.length }} selected)</span>
                 </p>
             </button>
@@ -62,7 +63,7 @@ const MultiselectFilter = {
                             type="text"
                             placeholder="Search"
                             v-model="inputSearch">
-                        <img src="/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
+                        <img src="{{ url_prefix }}/design-system/static/assets/ico/search.svg" class="icon-search position-absolute">
                     </div>
                 </div>
                 <ul class="my-0">
