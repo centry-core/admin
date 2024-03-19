@@ -91,8 +91,8 @@
                             placeholder="Select Plugins"
                             instance_name="plugin_selector"
                             container_class="bootstrap-select__b displacement-left-4"
-                            :list_items='["configuration", "performance", "security", "engagements", "models"]'
-                            :pre_selected_indexes='[0, 1]'
+                            :list_items='{{ plugins_available | safe }}'
+                            :pre_selected_indexes='{{ plugins_preselected | safe }}'
                             v-model="custom_data.plugins"
                             :has-search="true"
                         ></Multiselect-Dropdown>
@@ -111,7 +111,7 @@
                                 >
                                 <span class="custom-toggle_slider round"></span>
                             </label>
-                        </div> 
+                        </div>
                         <div class="mb-2 collapse" :class="{ show: limit_settings }" id="selector_limit_settings">
                             <p class="font-h5 font-semibold flex-grow-1 mb-2">Virtual compute units limit settings</p>
                             <div class="row">
@@ -144,7 +144,7 @@
                                         class="mb-0"
                                         for="vcu_limit_total_block_false">
                                         <h9 class="font-h6 font-semibold">
-                                        Block platform resources only                           
+                                        Block platform resources only
                                         </h9>
                                     </label>
                                 </div>
@@ -199,7 +199,7 @@
                                         class="mb-0"
                                         for="storage_limit_total_block_false">
                                         <h9 class="font-h6 font-semibold">
-                                        Block platform resources only                           
+                                        Block platform resources only
                                         </h9>
                                     </label>
                                 </div>

@@ -17,6 +17,8 @@
 
 """ Slot """
 
+import json
+
 # from pylon.core.tools import log  # pylint: disable=E0611,E0401
 from pylon.core.tools import web  # pylint: disable=E0611,E0401
 
@@ -44,9 +46,34 @@ class Slot:  # pylint: disable=E1101,R0903
     def _projects_content(self, context, slot, payload):
         _ = slot, payload
         #
+        plugins_cfg = self.descriptor.config.get("plugins", {})
+        #
+        plugins_available = json.dumps(
+            plugins_cfg.get(
+                "available", [
+                    "configuration",
+                    "performance",
+                    "security",
+                    "engagements",
+                    "models",
+                ]
+            )
+        )
+        #
+        plugins_preselected = json.dumps(
+            plugins_cfg.get(
+                "preselected", [
+                    0,
+                    1,
+                ]
+            )
+        )
+        #
         with context.app.app_context():
             return self.descriptor.render_template(
                 "projects/content.html",
+                plugins_available=plugins_available,
+                plugins_preselected=plugins_preselected
             )
 
     @web.slot("admin_mode_projects_scripts")
