@@ -238,8 +238,36 @@ class Module(module.ModuleModel):
         )
         # Init
         self.descriptor.init_all()
-
-        VaultClient().create_project_space(quiet=True)
+        #
+        vault_client = VaultClient()  # for administration mode
+        vault_client.create_project_space(quiet=True)
+        #
+        secrets = vault_client.get_all_secrets()
+        if "auth_token" not in secrets:
+            #
+            try:
+                system_user_id = self.context.rpc_manager.call.auth_get_user(
+                    email="system@centry.user",
+                )["id"]
+            except:  # pylint: disable=W0702
+                system_user_id = None
+            #
+            if system_user_id is not None:
+                all_tokens = self.context.rpc_manager.call.auth_list_tokens(
+                    system_user_id
+                )
+                #
+                if len(all_tokens) < 1:
+                    token_id = self.context.rpc_manager.call.auth_add_token(
+                        system_user_id, "api",
+                    )
+                else:
+                    token_id = all_tokens[0]["id"]
+                #
+                token = self.context.rpc_manager.call.auth_encode_token(token_id)
+                #
+                secrets["auth_token"] = token
+                vault_client.set_secrets(secrets)
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
