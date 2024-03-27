@@ -33,8 +33,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process GET """
         result = []
         #
-        for pylon_id in sorted(self.remote_runtimes.keys()):
-            runtime_info = self.remote_runtimes[pylon_id]["runtime_info"]
+        for pylon_id in sorted(self.module.remote_runtimes.keys()):
+            runtime_info = self.module.remote_runtimes[pylon_id]["runtime_info"]
             #
             for plugin in sorted(runtime_info, key=lambda x: x["name"]):
                 item = plugin.copy()

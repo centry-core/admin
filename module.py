@@ -238,6 +238,22 @@ class Module(module.ModuleModel):
             prefix="admin_runtime_plugins_",
             icon_class="fas fa-server fa-fw",
         )
+        theme.register_mode_subsection(
+            "administration", "runtime",
+            "remote", "Remote",
+            title="Remote",
+            kind="slot",
+            permissions={
+                "permissions": ["runtime.plugins"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_runtime_remote_",
+            icon_class="fas fa-server fa-fw",
+        )
         # Init
         self.descriptor.init_all()
         #
