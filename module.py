@@ -32,6 +32,8 @@ class Module(module.ModuleModel):
         #
         # self.db = Holder()  # pylint: disable=C0103
         # self.db.tbl = Holder()
+        #
+        self.remote_runtimes = {}
 
     def init(self):
         """ Init module """
