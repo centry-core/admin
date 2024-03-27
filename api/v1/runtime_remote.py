@@ -17,6 +17,7 @@
 
 """ API """
 
+import time
 import flask  # pylint: disable=E0401,W0611
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
@@ -33,8 +34,14 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process GET """
         result = []
         #
-        for pylon_id in sorted(self.module.remote_runtimes.keys()):
-            runtime_info = self.module.remote_runtimes[pylon_id]["runtime_info"]
+        for pylon_id in list(sorted(self.module.remote_runtimes.keys())):
+            data = self.module.remote_runtimes[pylon_id]
+            #
+            if time.time() - data["timestamp"] > 60:  # 4 announces missing (for 15s interval)
+                self.module.remote_runtimes.pop(pylon_id, None)
+                continue
+            #
+            runtime_info = data["runtime_info"]
             #
             for plugin in sorted(runtime_info, key=lambda x: x["name"]):
                 item = plugin.copy()

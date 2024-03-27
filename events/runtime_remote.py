@@ -17,6 +17,8 @@
 
 """ Event """
 
+import time
+
 from pylon.core.tools import log, web  # pylint: disable=E0611,E0401,W0611
 
 
@@ -35,4 +37,20 @@ class Event:  # pylint: disable=R0903,E1101
         if not pylon_id:
             return
         #
-        self.remote_runtimes[pylon_id] = payload.copy()
+        data = payload.copy()
+        data["timestamp"] = time.time()
+        self.remote_runtimes[pylon_id] = data
+
+    @web.event("bootstrap_runtime_info_prune")
+    def _bootstrap_runtime_info_prune(self, context, event, payload):  # pylint: disable=R0914
+        _ = context, event
+        #
+        if not isinstance(payload, dict):
+            return
+        #
+        pylon_id = payload.get("pylon_id", "")
+        #
+        if not pylon_id:
+            return
+        #
+        self.remote_runtimes.pop(pylon_id, None)
