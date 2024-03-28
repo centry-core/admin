@@ -59,7 +59,53 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process POST """
         data = flask.request.get_json()
         #
-        log.info("Data: %s", data)
+        if "data" not in data or not data["data"]:
+            return {"ok": True}
+        #
+        targets = {}
+        #
+        for item in data["data"]:
+            pylon_id = item.get("pylon_id", "")
+            #
+            if not pylon_id:
+                continue
+            #
+            if pylon_id not in targets:
+                targets[pylon_id] = []
+            #
+            plugin_state = item.get("state", False)
+            plugin_name = item.get("name", "")
+            #
+            if not plugin_state or not plugin_name:
+                continue
+            #
+            if plugin_name not in targets[pylon_id]:
+                targets[pylon_id].append(plugin_name)
+        #
+        events = []
+        #
+        for pylon_id, plugins in targets.items():
+            if not plugins:
+                continue
+            #
+            log.info("Requesting plugin update(s): %s -> %s", pylon_id, plugins)
+            #
+            event_data = {
+                "pylon_id": pylon_id,
+                "plugins": plugins,
+                "restart": True,
+            }
+            #
+            if pylon_id == self.module.context.id:
+                events.append(event_data)
+            else:
+                events.insert(0, event_data)
+        #
+        for event_item in events:
+            self.module.context.event_manager.fire_event(
+                "bootstrap_runtime_update",
+                event_item,
+            )
         #
         return {"ok": True}
 
