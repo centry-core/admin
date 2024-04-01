@@ -61,7 +61,7 @@ async function projectCreateSubmit() {
 
             if (notAdmin && !newSections?.includes(currentSection) && newSections?.length > 0) {
                 const section = newSections[0]
-                location.href = `/-/${section}`
+                location.href = window.url_prefix + `/-/${section}`
                 $('select.selectpicker[name="section_select"]').val(section)
             } else {
                 handle_update_table()
@@ -97,13 +97,13 @@ const handle_delete_project = async (project_id) => {
 
 function projectActionFormatter(value, row, index) {
     const delete_btn = `
-        <button 
-            class="btn btn-default btn-xs btn-table btn-icon__xs ml-1" 
+        <button
+            class="btn btn-default btn-xs btn-table btn-icon__xs ml-1"
             onclick="handle_delete_project(${row.id})"
         ><i class="icon__18x18 icon-delete"></i></button>
     `
     return '<div class="d-flex justify-content-end">' +
-        '<a href="/~/administration/~/projects/list/edit?project=' + row.id + '" class="btn btn-default btn-xs btn-table btn-icon__xs"><i class="fas fa-sync"></i></a>'
+        '<a href="' + window.url_prefix + '/~/administration/~/projects/list/edit?project=' + row.id + '" class="btn btn-default btn-xs btn-table btn-icon__xs"><i class="fas fa-sync"></i></a>'
         + delete_btn + '</div>'
 
 }

@@ -106,6 +106,35 @@ class Module(module.ModuleModel):
             # icon_class="fas fa-server fa-fw",
             # weight=2,
         )
+        theme.register_mode_page(
+            "administration", "projects",
+            "list", "edit",
+            title="Edit",
+            kind="slot",
+            permissions={
+                "permissions": ["projects.projects"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }},
+            prefix="admin_mode_projects_edit_",
+        )
+        #
+        theme.register_mode_section(
+            "administration", "configuration", "Configuration",
+            kind="holder",
+            location="left",
+            permissions={
+                "permissions": ["configuration"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": True, "editor": True},
+                    "default": {"admin": True, "viewer": True, "editor": True},
+                    "developer": {"admin": True, "viewer": True, "editor": True},
+                }},
+            # icon_class="fas fa-info-circle fa-fw",
+        )
+        #
         theme.register_mode_subsection(
             "administration", "configuration",
             "roles", "Roles",
@@ -149,28 +178,6 @@ class Module(module.ModuleModel):
                     "developer": {"admin": True, "viewer": False, "editor": False},
                 }},
             prefix="users_",
-        )
-        theme.register_mode_page(
-            "administration", "projects",
-            "list", "edit",
-            title="Edit",
-            kind="slot",
-            permissions=["projects.projects"],
-            prefix="admin_mode_projects_edit_",
-        )
-
-        theme.register_mode_section(
-            "administration", "configuration", "Configuration",
-            kind="holder",
-            location="left",
-            permissions={
-                "permissions": ["configuration"],
-                "recommended_roles": {
-                    "administration": {"admin": True, "viewer": True, "editor": True},
-                    "default": {"admin": True, "viewer": True, "editor": True},
-                    "developer": {"admin": True, "viewer": True, "editor": True},
-                }},
-            # icon_class="fas fa-info-circle fa-fw",
         )
         #
         # Modes
