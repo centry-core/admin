@@ -41,7 +41,6 @@ class Slot:  # pylint: disable=E1101,R0903
 
     """
 
-
     @web.slot("admin_mode_projects_edit_content")
     @auth.decorators.check_slot(["projects.projects"], access_denied_reply=theme.access_denied_part)
     def _project_edit_content(self, context, slot, payload):
