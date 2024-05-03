@@ -3,7 +3,8 @@ function userAddSubmit() {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        "name": $('#user_name').val(),
+        "emails": [$('#user_name').val()],
+        "roles": [$('#user_role').val()]
       })
   }).then(response => {
       $("#userAddModal").modal('hide');
