@@ -3,12 +3,28 @@
         <div class="card mt-3 card-table-sm">
             <div class="card-header">
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-2">
+                        <h4>Manual</h4>
+                    </div>
+                    <div class="col-8 form-group">
+                        <input type="text" id="ipt-manual" class="form-control form-control-alternative"
+                               placeholder="pylon-id-1:plugin_1,plugin_2;pylon-id-2:plugin_3">
+                    </div>
+                    <div class="col-2">
+                        <div class="d-flex justify-content-end">
+                            <button id="btn-manual" type="button" class="btn btn-secondary btn-sm mr-2"><i class="fas fa-arrow-circle-down"></i> &nbsp; Manual apply</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
                         <h4>Remote</h4>
                     </div>
                     <div class="col-8">
+                    </div>
+                    <div class="col-2">
                         <div class="d-flex justify-content-end">
-                            <button id="btn-update" type="button" class="btn btn-secondary btn-sm btn-icon__sm mr-2"><i class="fas fa-arrow-circle-down"></i></button>
+                            <button id="btn-update" type="button" class="btn btn-secondary btn-sm mr-2"><i class="fas fa-arrow-circle-down"></i> &nbsp; Update selected</button>
                         </div>
                     </div>
                 </div>
@@ -25,13 +41,13 @@
                     <thead class="thead-light">
                         <tr>
                             <th scope="col" data-field="state" data-checkbox="true"></th>
-                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="pylon_id">Pylon</th>
+                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="500" data-field="pylon_id">Pylon</th>
                             <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="name">Name</th>
                             <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="description">Description</th>
-                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="prepared">Prepared</th>
-                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="activated">Activated</th>
-                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="local_version">Local version</th>
-                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="repo_version">Repo version</th>
+                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="prepared">Prepared</th>
+                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="activated">Activated</th>
+                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="local_version">Local version</th>
+                            <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="repo_version">Repo version</th>
                         </tr>
                     </thead>
                     <tbody>
