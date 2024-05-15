@@ -140,11 +140,18 @@ class RPC:
         return set()
 
     @web.rpc("admin_get_users_ids_in_project", "get_users_ids_in_project")
-    def get_users_ids_in_project(self, project_id: int, **kwargs) -> list[int]:
-        with db.with_project_schema_session(project_id) as tenant_session:
-            users = tenant_session.query(UserRole.user_id).distinct().all()
-            users = [user[0] for user in users]
-            return users
+    def get_users_ids_in_project(self, project_id: int, filter_system_user: bool = False, **kwargs) -> list[int]:
+        system_user_id = None
+        if filter_system_user:
+            system_user = self.get_project_system_user(project_id)
+            if system_user:
+                system_user_id = int(system_user['id'])
+        with db.get_session(project_id) as session:
+            q = session.query(UserRole.user_id).distinct()
+            if system_user_id:
+                q = q.where(UserRole.user_id != system_user_id)
+            users = q.all()
+            return [i[0] for i in users]
 
     @web.rpc("admin_get_users_roles_in_project", "get_users_roles_in_project")
     def get_users_roles_in_project(self, project_id: int, filter_system_user: bool = False, **kwargs) -> dict[list]:
