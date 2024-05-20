@@ -21,6 +21,14 @@ class RPC:
             roles = [role.to_json() for role in roles]
             return roles
 
+    @web.rpc("admin_get_role", "get_role")
+    def get_role(self, project_id: int, role_name: str, **kwargs) -> Optional[dict]:
+        with db.with_project_schema_session(project_id) as tenant_session:
+            role = tenant_session.query(Role).filter(Role.name == role_name).first()
+            if role:
+                return role.to_json()
+            return None
+
     @web.rpc("admin_add_role", "add_role")
     def add_role(self, project_id: int, role_names: list[str], **kwargs) -> dict:
         with db.with_project_schema_session(project_id) as tenant_session:
