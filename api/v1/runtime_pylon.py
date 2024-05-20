@@ -19,6 +19,7 @@
 
 import os
 import signal
+import subprocess
 
 import uuid
 import json
@@ -38,7 +39,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def delete(self):
         """ Process DELETE """
-        os.kill(os.getpid(), signal.SIGTERM)
+        pylon_pid = os.getpid()
+        subprocess.Popen(  # pylint: disable=R1732
+            ["/bin/bash", "-c", f"bash -c 'sleep 1; kill {pylon_pid}' &"]
+        )
         #
         return {"ok": True}
 
