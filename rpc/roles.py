@@ -86,6 +86,55 @@ class RPC:
                 return True
         return False
 
+    @web.rpc("admin_get_permissions_for_role", "get_permissions_for_role")
+    def get_permissions_for_role(
+            self, project_id: int, role_name: str,
+    ) -> List[str]:
+        result = []
+        #
+        with db.with_project_schema_session(project_id) as tenant_session:
+            role = tenant_session.query(Role).filter(
+                Role.name == role_name,
+            ).first()
+            #
+            if role:
+                #
+                permissions = tenant_session.query(RolePermission).filter(
+                    RolePermission.role_id == role.id).all()
+                #
+                for perm in permissions:
+                    result.append(perm.permission)
+                #
+                return result
+        #
+        return result
+
+    @web.rpc("admin_add_permissions_for_role", "add_permissions_for_role")
+    def add_permissions_for_role(
+            self, project_id: int, role_name: str, permissions: List[str],
+    ) -> bool:
+        #
+        with db.with_project_schema_session(project_id) as tenant_session:
+            role = tenant_session.query(Role).filter(
+                Role.name == role_name,
+            ).first()
+            #
+            if role:
+                #
+                for perm in permissions:
+                    permission = tenant_session.query(RolePermission).filter(
+                        RolePermission.role_id == role.id).filter(
+                        RolePermission.permission == perm).first()
+                    #
+                    if not permission:
+                        permission = RolePermission(role_id=role.id, permission=perm)
+                        tenant_session.add(permission)
+                #
+                tenant_session.commit()
+                return True
+        #
+        return False
+
     @web.rpc("admin_remove_permission_from_role", "remove_permission_from_role")
     def remove_permission_from_role(
             self, project_id: int, role_name: str, permission: str
