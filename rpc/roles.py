@@ -6,6 +6,14 @@ from flask import g
 from tools import rpc_tools, db, db_tools
 
 from sqlalchemy.exc import NoResultFound, ProgrammingError
+from sqlalchemy.sql.expression import (
+    table,
+    column,
+    literal,
+    select,
+    union,
+)
+
 from ..models.users import Role, UserRole, RolePermission
 from pylon.core.tools import web, log
 
@@ -271,6 +279,51 @@ class RPC:
         except ProgrammingError:
             # if project schema does not exist
             return False
+
+    @web.rpc('admin_check_user_in_projects', 'check_user_in_projects')
+    def check_user_in_projects(self, project_ids: list[int], user_id: Optional[int] = None, **kwargs) -> list[int]:
+        if not user_id:
+            log.info('User is None. Trying to get user from flask.g ...')
+            try:
+                user_id = int(g.auth.id)
+            except (AttributeError, TypeError, ValueError):
+                return []
+        #
+        expressions = []
+        #
+        from tools import project_constants as pc
+        project_schema_tpl = pc["PROJECT_SCHEMA_TEMPLATE"]
+        #
+        for project_id in project_ids:
+            project_table = table(
+                UserRole.__table__.name,
+                column(UserRole.user_id.name),
+                schema=project_schema_tpl.format(project_id),
+            )
+            #
+            expressions.append(
+                select(
+                    literal(project_id).label("project_id")
+                ).where(
+                    project_table.c.user_id == user_id
+                )
+            )
+        #
+        query = union(*expressions)
+        #
+        with db.with_project_schema_session(None) as session:
+            result = session.execute(query).all()
+            user_project_ids = set()
+            #
+            for row in result:
+                user_project_ids.add(row.project_id)
+            #
+            user_project_ids = list(user_project_ids)
+            user_project_ids.sort()
+            #
+            return user_project_ids
+        #
+        return []
 
     @web.rpc('admin_get_project_system_user', 'get_project_system_user')
     def get_project_system_user(self, project_id: int, **kwargs) -> Optional[dict]:
