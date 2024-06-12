@@ -37,7 +37,7 @@ const RolesModalCreate = {
         <div class="modal-card">
             <p class="font-bold font-h3 mb-4 text-capitalize">{{ modalType }} role</p>
             <div class="custom-input need-validation mb-4 w-100" :class="{'invalid-input': hasError}">
-                <label for="BucketName" class="font-semibold mb-1">Name</label>
+                <label for="BucketName" class="font-semibold font-h4 mb-1">Name</label>
                 <input
                     id="roleName"
                     type="text"
