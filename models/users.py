@@ -1,38 +1,52 @@
-from sqlalchemy import Column, Integer, String, UniqueConstraint
+from sqlalchemy import Integer, String, UniqueConstraint, ForeignKey
 
-from tools import db_tools, db
+from tools import db_tools, db, config as c
+
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 
-class Role(db_tools.AbstractBaseMixin, db.Base):
-    __tablename__ = "role"
+class Role(db.Base):
+    __tablename__ = 'role'
     __table_args__ = (
-        UniqueConstraint("name"),
-        {"schema": "tenant"}
+        {'schema': c.POSTGRES_TENANT_SCHEMA},
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+
+    permissions = relationship(
+        'RolePermission',
+        lazy='dynamic',
+        uselist=True
+    )
+    users = relationship(
+        'UserRole',
+        lazy=True,
+        uselist=True
     )
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(64), nullable=False)
 
-
-class RolePermission(db_tools.AbstractBaseMixin, db.Base):
-    __tablename__ = f"role_permission"
+class RolePermission(db.Base):
+    __tablename__ = 'role_permission'
     __table_args__ = (
-        UniqueConstraint("role_id", "permission"),
-        {"schema": "tenant"}
+        UniqueConstraint('role_id', 'permission', name='_role_permission_uc'),
+        {'schema': c.POSTGRES_TENANT_SCHEMA},
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    role_id: Mapped[int] = mapped_column(ForeignKey(
+        f'{c.POSTGRES_TENANT_SCHEMA}.{Role.__tablename__}.id'
+    ), nullable=False)
+    permission = mapped_column(String(128), nullable=False)
+
+
+class UserRole(db.Base):
+    __tablename__ = 'user_role'
+    __table_args__ = (
+        UniqueConstraint('user_id', 'role_id', name='_user_role_uc'),
+        {"schema": c.POSTGRES_TENANT_SCHEMA},
     )
 
-    id = Column(Integer, primary_key=True)
-    role_id = Column(Integer, nullable=False)
-    permission = Column(String(64))
-
-
-class UserRole(db_tools.AbstractBaseMixin, db.Base):
-    __tablename__ = "user_role"
-    __table_args__ = (
-        UniqueConstraint("user_id", "role_id"),
-        {"schema": "tenant"}
-    )
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, nullable=False)
-    role_id = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    role_id: Mapped[int] = mapped_column(ForeignKey(
+        f'{c.POSTGRES_TENANT_SCHEMA}.{Role.__tablename__}.id'
+    ), nullable=False)

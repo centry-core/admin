@@ -16,45 +16,20 @@
 #   limitations under the License.
 
 """ API """
-from itertools import groupby
 from flask import request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
-from tools import auth, api_tools, db
+from tools import auth, api_tools, db, config as c
 from collections import defaultdict
-from ...models.users import RolePermission
-
-
-def group_roles_by_permissions(auth_permissions, roles):
-    auth_permissions = sorted(auth_permissions, key=lambda x: x['name'])
-    roles_to_permissions = {role["name"]: set() for role in roles}
-    for key, group_items in groupby(auth_permissions, key=lambda x: x['name']):
-        for item in group_items:
-            roles_to_permissions[key].add(item['permission'])
-    return roles_to_permissions
-
-
-def get_permissions_map(module, project_id: int) -> tuple[list, list]:
-    roles = module.get_roles(project_id)
-    auth_permissions = module.get_permissions(project_id)
-    all_permissions = auth.local_permissions
-    roles_to_permissions = group_roles_by_permissions(auth_permissions, roles)
-    all_permissions = sorted(all_permissions)
-    permissions_map = [{
-        "name": permission,
-        **{role["name"]: permission in roles_to_permissions[role["name"]] for
-           role in roles}
-    } for permission in all_permissions
-    ]
-    return all_permissions, permissions_map
+from ...models.users import Role
 
 
 class AdminAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.user_project_permissions.view"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": False, "viewer": False, "editor": False},
+            c.ADMINISTRATION_MODE: {"admin": True, "viewer": False, "editor": False},
+            c.DEFAULT_MODE: {"admin": False, "viewer": False, "editor": False},
             "developer": {"admin": False, "viewer": False, "editor": False},
         }})
     def get(self):  # pylint: disable=R0201
@@ -64,53 +39,92 @@ class AdminAPI(api_tools.APIModeHandler):
             return {'error': "Personal projects not set"}, 400
 
         project_id = project_ids[0]
-        all_permissions, permissions_map = get_permissions_map(self.module, project_id)
 
-        return {
-            "total": len(all_permissions),
-            "rows": permissions_map
-        }
+        roles = self.module.get_roles(project_id)
+        auth_permissions = self.module.get_permissions(project_id)
+        all_permissions = auth.local_permissions
+        role_map = defaultdict(set)
+        for i in auth_permissions:
+            role_map[i['name']].add(i['permission'])
+
+        if request.args.get('old_format') is None:
+            role_map = dict(role_map)
+            for i in role_map.keys():
+                role_map[i] = sorted(role_map[i])
+            return role_map, 200
+
+        permissions_map = [{
+            "name": permission,
+            **{
+                role["name"]: permission in role_map[role["name"]]
+                for role in roles
+            }
+        } for permission in sorted(all_permissions)]
+
+        return permissions_map, 200
 
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.user_project_permissions.edit"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": False, "viewer": False, "editor": False},
+            c.ADMINISTRATION_MODE: {"admin": True, "viewer": False, "editor": False},
+            c.DEFAULT_MODE: {"admin": False, "viewer": False, "editor": False},
             "developer": {"admin": False, "viewer": False, "editor": False},
         }})
     def put(self):  # pylint: disable=R0201
         """ Process """
-        project_ids = self.module.context.rpc_manager.call.projects_get_personal_project_ids()
-        if not project_ids:
-            return {'error': "Personal projects not set"}, 400
+        for_team_projects = request.args.get('team_projects') is not None
 
-        role_map = defaultdict(list)
-        for p in request.json:
-            role_name = p.pop('name')
-            for pr in filter(lambda x: x[1] and isinstance(x[1], bool), p.items()):
-                role_map[pr[0]].append(role_name)
-        # log.info(f'role_map, {role_map}')
+        if isinstance(request.json, list):
+            role_map = defaultdict(list)
+            for i in request.json:
+                role_name = i.pop('name')
+                for k, v in i.items():
+                    if v:
+                        role_map[k].append(role_name)
+        elif isinstance(request.json, dict):
+            role_map = request.json
+        else:
+            return {'error': f'Unknown payload type {type(request.json)}'}, 400
+
+        personal_project_ids = self.module.context.rpc_manager.call.projects_get_personal_project_ids()
+        if not personal_project_ids:
+            return {'error': "Personal projects not set"}, 400
+        personal_project_ids = set(personal_project_ids)
+        project_ids = personal_project_ids
+        if for_team_projects:
+            from tools import VaultClient
+            secrets = VaultClient().get_all_secrets()
+            ai_project_id = secrets.get('ai_project_id')
+            if ai_project_id:
+                ai_project_id = int(ai_project_id)
+            project_ids = [
+                i['id']
+                for i in self.module.context.rpc_manager.call.project_list()
+                if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
+            ]
+        log.info(f'changing permissions for projects: {project_ids}')
+
         for project_id in project_ids:
-            # log.info(f'doing project {project_id}')
-            with db.with_project_schema_session(project_id) as tenant_session:
-                tenant_session.query(RolePermission).delete()
-                tenant_session.commit()
-            for role_name, permissions in role_map.items():
-                # log.info(f'\tsetting for role: {role_name}, permissions: {permissions}')
-                self.module.set_permissions_for_role(
-                    project_id=project_id,
-                    role_name=role_name,
-                    permissions=permissions
-                )
-        return {"ok": True, 'role_map': dict(role_map)}, 200
+            with db.get_session(project_id) as session:
+                roles = session.query(Role).where(Role.name.in_(role_map.keys())).all()
+                for role in roles:
+                    role.permissions.delete(synchronize_session='fetch')
+                    self.module.set_permissions_for_role(
+                        project_id=project_id,
+                        role_name=role.name,
+                        permissions=role_map[role.name],
+                        session=session,
+                        commit=False
+                    )
+                session.commit()
+        return {'role_map': dict(role_map)}, 200
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
-    url_params = [
-        "",
-        "<string:mode>",
-    ]
+    url_params = api_tools.with_modes([
+        '',
+    ])
 
     mode_handlers = {
-        'administration': AdminAPI,
+        c.ADMINISTRATION_MODE: AdminAPI,
     }
