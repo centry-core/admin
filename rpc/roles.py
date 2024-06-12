@@ -13,11 +13,24 @@ from sqlalchemy.sql.expression import (
     select,
     union,
 )
+from ..models.pd.role import RoleDetailModel
 
 from ..models.users import Role, UserRole, RolePermission
 from pylon.core.tools import web, log
 
 PROJECT_ROLE_NAME = 'default'
+
+
+def set_permissions(session, role_name: str, permissions: List[str], commit: bool = True) -> None:
+    role = session.query(Role).filter(
+        Role.name == role_name,
+    ).first()
+    if role:
+        for p in permissions:
+            permission = RolePermission(role_id=role.id, permission=p)
+            session.add(permission)
+        if commit:
+            session.commit()
 
 
 class RPC:
@@ -26,7 +39,7 @@ class RPC:
     def get_roles(self, project_id: int, **kwargs) -> list[dict]:
         with db.with_project_schema_session(project_id) as tenant_session:
             roles = tenant_session.query(Role).all()
-            roles = [role.to_json() for role in roles]
+            roles = [RoleDetailModel.from_orm(role).dict() for role in roles]
             return roles
 
     @web.rpc("admin_get_role", "get_role")
@@ -34,7 +47,7 @@ class RPC:
         with db.with_project_schema_session(project_id) as tenant_session:
             role = tenant_session.query(Role).filter(Role.name == role_name).first()
             if role:
-                return role.to_json()
+                return RoleDetailModel.from_orm(role).dict()
             return None
 
     @web.rpc("admin_add_role", "add_role")
@@ -44,7 +57,7 @@ class RPC:
                 role = Role(name=role_name)
                 tenant_session.add(role)
             tenant_session.commit()
-            return role.to_json()
+            return RoleDetailModel.from_orm(role).dict()
 
     @web.rpc("admin_delete_role", "delete_role")
     def delete_role(self, project_id: int, role_name: str, **kwargs) -> bool:
@@ -81,7 +94,7 @@ class RPC:
     @web.rpc("admin_set_permission_for_role", "set_permission_for_role")
     def set_permission_for_role(
             self, project_id: int, role_name: str, permission: str
-    ) -> bool:
+    ) -> None:
         return self.set_permissions_for_role(
             project_id=project_id, role_name=role_name, permissions=[permission]
         )
@@ -89,18 +102,27 @@ class RPC:
     @web.rpc("admin_set_permissions_for_role", "set_permissions_for_role")
     def set_permissions_for_role(
             self, project_id: int, role_name: str, permissions: List[str],
-    ) -> bool:
-        with db.with_project_schema_session(project_id) as tenant_session:
-            role = tenant_session.query(Role).filter(
-                Role.name == role_name,
-            ).first()
-            if role:
-                for p in permissions:
-                    permission = RolePermission(role_id=role.id, permission=p)
-                    tenant_session.add(permission)
-                tenant_session.commit()
-                return True
-        return False
+            session=None, commit: bool = True
+    ) -> None:
+        if session:
+            set_permissions(
+                session=session,
+                role_name=role_name,
+                permissions=permissions,
+                commit=False
+            )
+            if commit:
+                session.commit()
+        else:
+            with db.get_session(project_id) as session:
+                set_permissions(
+                    session=session,
+                    role_name=role_name,
+                    permissions=permissions,
+                    commit=False
+                )
+                if commit:
+                    session.commit()
 
     @web.rpc("admin_get_permissions_for_role", "get_permissions_for_role")
     def get_permissions_for_role(
@@ -259,7 +281,7 @@ class RPC:
                 UserRole.user_id == user_id).all()
             user_roles = [role[0] for role in user_roles]
             roles = tenant_session.query(Role).filter(Role.id.in_(user_roles)).all()
-            return [role.to_json() for role in roles]
+            return [RoleDetailModel.from_orm(role).dict() for role in roles]
 
     @web.rpc('admin_check_user_in_project', 'check_user_in_project')
     def check_user_in_project(self, project_id: int, user_id: Optional[int] = None, **kwargs) -> bool:
