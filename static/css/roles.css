@@ -18,12 +18,12 @@
     background-image: none !important;
 }
 
-.fixed-columns-right {
-    border-left: solid 1px var(--lines);
-}
-.fixed-columns {
-    border-right: solid 1px var(--lines);
-}
+/*.fixed-columns-right {*/
+/*    border-left: solid 1px var(--lines);*/
+/*}*/
+/*.fixed-columns {*/
+/*    border-right: solid 1px var(--lines);*/
+/*}*/
 .th-inner .icon__18x18:hover {
     background: var(--basic);
 }
