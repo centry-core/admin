@@ -355,3 +355,10 @@ class RPC:
         except (NoResultFound, RuntimeError):
             ...
         return
+
+    @web.rpc('admin_get_distinct_user_ids', 'get_distinct_user_ids')
+    def get_distinct_user_ids(self, project_id: int, **kwargs) -> List[int]:
+        with db.with_project_schema_session(project_id) as tenant_session:
+            result = tenant_session.query(UserRole.user_id).distinct().all()
+            user_ids = [row[0] for row in result]
+            return list(user_ids)
