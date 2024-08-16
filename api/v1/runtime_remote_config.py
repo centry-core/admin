@@ -48,7 +48,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 if plugin["name"] != target_plugin:
                     continue
                 #
-                config_data = yaml.dump(plugin.get("config", ""))
+                if flask.request.args.get("raw", "false") == "true":
+                    config_data = plugin.get("config_data", "")
+                else:
+                    config_data = yaml.dump(plugin.get("config", ""))
                 #
                 return {"config": config_data}
         #

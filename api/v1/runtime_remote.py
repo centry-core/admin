@@ -47,6 +47,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 item = plugin.copy()
                 item["pylon_id"] = pylon_id
                 item.pop("config", None)
+                item.pop("config_data", None)
                 #
                 result.append(item)
         #

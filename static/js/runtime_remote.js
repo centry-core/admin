@@ -64,6 +64,18 @@ $("#btn-cfg-load").click(function() {
 });
 
 
+$("#btn-cfg-load-raw").click(function() {
+  axios.get(remote_edit_api_url + "/" + edit_config_row.pylon_id + ":" + edit_config_row.name + "?raw=true")
+    .then(function (response) {
+      $("#input-cfg-edit").val(response.data.config);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config retrieval")
+      console.log(error);
+    });
+});
+
+
 $("#btn-cfg-save").click(function() {
   var result = $("#input-cfg-edit").val();
   axios.post(remote_edit_api_url + "/" + edit_config_row.pylon_id + ":" + edit_config_row.name, {data: result})
