@@ -64,6 +64,20 @@ $("#btn-cfg-load").click(function() {
 });
 
 
+$("#btn-cfg-save").click(function() {
+  var result = $("#input-cfg-edit").val();
+  axios.post(remote_edit_api_url + "/" + edit_config_row.pylon_id + ":" + edit_config_row.name, {data: result})
+    .then(function (response) {
+      showNotify("SUCCESS", "Config save requested")
+      $("#modal-edit-config").modal("hide");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config save")
+      console.log(error);
+    });
+});
+
+
 function editConfigActionsFormatter(value, row, index) {
   return [
     '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
