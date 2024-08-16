@@ -79,20 +79,8 @@
 
             <form id="form-edit-config">
               <div class="form-group">
-                <label for="input-name">Name</label>
-                <input type="text" class="form-control" name="name" id="input-name" placeholder="">
-              </div>
-              <div class="form-group">
-                <label for="input-description">Description</label>
-                <input type="text" class="form-control" name="description" id="input-description" placeholder="">
-              </div>
-              <div class="form-group">
-                <label for="input-source-url">Source URL</label>
-                <input type="text" class="form-control" name="source_url" id="input-source-url" placeholder="">
-              </div>
-              <div class="form-group">
-                <label for="input-source-branch">Source branch</label>
-                <input type="text" class="form-control" name="source_branch" id="input-source-branch" placeholder="" value="main">
+                <label for="input-cfg-edit">Config</label>
+                <textarea class="col-12" rows="10" id="input-cfg-edit" name="cfg_edit"></textarea>
               </div>
             </form>
 
@@ -101,7 +89,8 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btn-save">Save</button>
+        <button type="button" class="btn btn-secondary" id="btn-cfg-load">Load</button>
+        <button type="button" class="btn btn-secondary" id="btn-cfg-save">Save</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -110,6 +99,7 @@
 
 <script>
   var remote_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_remote/administration";
+  var remote_edit_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_remote_config/administration";
   var edit_config_row = {};
 </script>
 

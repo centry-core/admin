@@ -48,14 +48,27 @@ $("#btn-manual").click(function() {
 
 $("#modal-edit-config").on("show.bs.modal", function (e) {
   $("#form-edit-config").get(0).reset();
-  $("#modal-edit-plugin").val(edit_config_row.name);
+  $("#modal-edit-plugin").text(edit_config_row.name);
+});
+
+
+$("#btn-cfg-load").click(function() {
+  axios.get(remote_edit_api_url + "/" + edit_config_row.pylon_id + ":" + edit_config_row.name)
+    .then(function (response) {
+      console.log(response);
+      $("#input-cfg-edit").val(response.config);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config retrieval")
+      console.log(error);
+    });
 });
 
 
 function editConfigActionsFormatter(value, row, index) {
   return [
     '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
-    '<i class="fa fa-file-text-o" style="color: #858796"></i>',
+    '<i class="fa fa-file-text" style="color: #858796"></i>',
     '</a>',
   ].join('')
 }
