@@ -55,8 +55,7 @@ $("#modal-edit-config").on("show.bs.modal", function (e) {
 $("#btn-cfg-load").click(function() {
   axios.get(remote_edit_api_url + "/" + edit_config_row.pylon_id + ":" + edit_config_row.name)
     .then(function (response) {
-      console.log(response);
-      $("#input-cfg-edit").val(response.config);
+      $("#input-cfg-edit").val(response.data.config);
     })
     .catch(function (error) {
       showNotify("ERROR", "Error during config retrieval")
