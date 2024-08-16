@@ -48,6 +48,7 @@
                             <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="activated">Activated</th>
                             <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="local_version">Local version</th>
                             <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-width="50" data-field="repo_version">Repo version</th>
+                            <th scope="col" data-align="right" data-cell-style="cellStyle" data-formatter="editConfigActionsFormatter" data-events="editConfigActionsEvents">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,13 +59,58 @@
 
 </div>
 
-
-
 <script src="{{ url_for('admin.static', filename='js/vendor/jquery.serialize-object.min.js') }}"></script>
 <script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
 
+<div id="modal-edit-config" class="modal modal-small fixed-left fade shadow-sm" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-aside" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit config: <span id="modal-edit-plugin"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+
+          <div class="col">
+
+            <form id="form-edit-config">
+              <div class="form-group">
+                <label for="input-name">Name</label>
+                <input type="text" class="form-control" name="name" id="input-name" placeholder="">
+              </div>
+              <div class="form-group">
+                <label for="input-description">Description</label>
+                <input type="text" class="form-control" name="description" id="input-description" placeholder="">
+              </div>
+              <div class="form-group">
+                <label for="input-source-url">Source URL</label>
+                <input type="text" class="form-control" name="source_url" id="input-source-url" placeholder="">
+              </div>
+              <div class="form-group">
+                <label for="input-source-branch">Source branch</label>
+                <input type="text" class="form-control" name="source_branch" id="input-source-branch" placeholder="" value="main">
+              </div>
+            </form>
+
+          </div> <!-- col -->
+        </div> <!-- row -->
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-save">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> <!-- modal -->
+
 <script>
   var remote_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_remote/administration";
+  var edit_config_row = {};
 </script>
 
 <script src="{{ url_for('admin.static', filename='js/runtime_remote.js') }}"></script>

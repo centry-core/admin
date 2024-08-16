@@ -44,3 +44,26 @@ $("#btn-manual").click(function() {
       console.log(error);
     });
 });
+
+
+$("#modal-edit-config").on("show.bs.modal", function (e) {
+  $("#form-edit-config").get(0).reset();
+  $("#modal-edit-plugin").val(edit_config_row.name);
+});
+
+
+function editConfigActionsFormatter(value, row, index) {
+  return [
+    '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
+    '<i class="fa fa-file-text-o" style="color: #858796"></i>',
+    '</a>',
+  ].join('')
+}
+
+
+window.editConfigActionsEvents = {
+  "click .task-edit-config": function (e, value, row, index) {
+    edit_config_row = row;
+    $("#modal-edit-config").modal("show");
+  }
+}
