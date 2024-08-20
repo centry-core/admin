@@ -56,13 +56,13 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         pylon_id = data.get("pylon_id", None)
         #
         if not pylon_id:
-            return {"ok": True, "logs": []}
+            return {"ok": True, "logs": ""}
         #
         if pylon_id not in self.module.remote_runtimes:
-            return {"ok": True, "logs": []}
+            return {"ok": True, "logs": ""}
         #
         data = self.module.remote_runtimes[pylon_id]
-        return {"ok": True, "logs": data.get("logs", [])}
+        return {"ok": True, "logs": "\n".join(data.get("logs", []))}
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
