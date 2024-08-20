@@ -261,6 +261,55 @@ class Module(module.ModuleModel):
             prefix="admin_runtime_remote_",
             icon_class="fas fa-server fa-fw",
         )
+        #
+        # Migration
+        #
+        theme.register_mode_section(
+            "administration", "migration", "Migration",
+            kind="holder",
+            permissions={
+                "permissions": ["migration"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "migration",
+            "db", "DB",
+            title="DB",
+            kind="slot",
+            permissions={
+                "permissions": ["migration.db"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_migration_db_",
+            icon_class="fas fa-server fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "migration",
+            "permissions", "Permissions",
+            title="Permissions",
+            kind="slot",
+            permissions={
+                "permissions": ["migration.permissions"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_migration_permissions_",
+            icon_class="fas fa-server fa-fw",
+        )
         # Init
         self.descriptor.init_all()
         #
