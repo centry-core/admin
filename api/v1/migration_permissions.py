@@ -57,13 +57,13 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             #
             # Get projects
             #
+            personal_project_ids = \
+                self.module.context.rpc_manager.call.projects_get_personal_project_ids()
+            #
+            if not personal_project_ids:
+                return {"error": "Personal projects not set"}, 400
+            #
             if mode == "add_user_project_defaults":
-                personal_project_ids = \
-                    self.module.context.rpc_manager.call.projects_get_personal_project_ids()
-                #
-                if not personal_project_ids:
-                    return {"error": "Personal projects not set"}, 400
-                #
                 project_ids = personal_project_ids
             elif mode == "add_team_project_defaults":
                 from tools import VaultClient  # pylint: disable=E0401,C0415
