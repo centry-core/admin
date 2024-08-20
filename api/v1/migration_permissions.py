@@ -36,7 +36,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         logs = []
         #
-        if mode == "add_user_project_defaults":
+        if mode in ["add_user_project_defaults", "add_team_project_defaults"]:
             #
             # Build default role map
             #
@@ -55,15 +55,34 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 default_role_map[item["name"]] = list(default_role_map[item["name"]])
                 default_role_map[item["name"]].sort()
             #
-            # Get personal projects
+            # Get projects
             #
-            personal_project_ids = \
-                self.module.context.rpc_manager.call.projects_get_personal_project_ids()
+            if mode == "add_user_project_defaults":
+                personal_project_ids = \
+                    self.module.context.rpc_manager.call.projects_get_personal_project_ids()
+                #
+                if not personal_project_ids:
+                    return {"error": "Personal projects not set"}, 400
+                #
+                project_ids = personal_project_ids
+            elif mode == "add_team_project_defaults":
+                from tools import VaultClient  # pylint: disable=E0401,C0415
+                #
+                secrets = VaultClient().get_all_secrets()
+                ai_project_id = secrets.get('ai_project_id')
+                #
+                if ai_project_id:
+                    ai_project_id = int(ai_project_id)
+                #
+                project_ids = [
+                    i['id']
+                    for i in self.module.context.rpc_manager.call.project_list()
+                    if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
+                ]
+            else:
+                project_ids = []
             #
-            if not personal_project_ids:
-                return {"error": "Personal projects not set"}, 400
-            #
-            for project_id in personal_project_ids:
+            for project_id in project_ids:
                 #
                 # Build project role map
                 #

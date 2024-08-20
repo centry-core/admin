@@ -11,3 +11,17 @@ $("#btn-add-user-project-defaults").click(function() {
       console.log(error);
     });
 });
+
+$("#btn-add-team-project-defaults").click(function() {
+  $("#textarea-logs").val("");
+  //
+  axios.post(migration_permissions_api_url, {mode: "add_team_project_defaults"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Action performed")
+      $("#textarea-logs").val(response.data.logs);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during action")
+      console.log(error);
+    });
+});
