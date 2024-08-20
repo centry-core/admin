@@ -50,3 +50,13 @@ class Slot:  # pylint: disable=E1101,R0903
             return self.descriptor.render_template(
                 "runtime_remote/scripts.html",
             )
+
+    @web.slot("admin_runtime_pylons_scripts")
+    @auth.decorators.check_slot(["runtime.plugins"], access_denied_reply=theme.access_denied_part)
+    def _pylons_scripts(self, context, slot, payload):
+        _ = slot, payload
+        #
+        with context.app.app_context():
+            return self.descriptor.render_template(
+                "runtime_pylons/scripts.html",
+            )

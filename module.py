@@ -261,6 +261,22 @@ class Module(module.ModuleModel):
             prefix="admin_runtime_remote_",
             icon_class="fas fa-server fa-fw",
         )
+        theme.register_mode_subsection(
+            "administration", "runtime",
+            "pylons", "Pylons",
+            title="Pylons",
+            kind="slot",
+            permissions={
+                "permissions": ["runtime.plugins"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_runtime_pylons_",
+            icon_class="fas fa-server fa-fw",
+        )
         #
         # Migration
         #
