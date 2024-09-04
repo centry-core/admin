@@ -10,6 +10,8 @@
                     <div class="d-flex justify-content-end">
                         <button type="button" class="btn btn-32 btn-secondary" data-toggle="modal"
                                 data-target="#projectCreateModal"><i class="fas fa-plus"></i></button>
+                        <button type="button" class="btn btn-32 btn-secondary" data-toggle="modal"
+                                data-target="#userInviteModal"><i class="fas fa-envelope"></i></button>
                     </div>
                 </div>
             </div>
@@ -254,6 +256,45 @@
 
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-small fixed-left fade shadow-sm" tabindex="-1" role="dialog" id="userInviteModal">
+    <div class="modal-dialog modal-dialog-aside" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row w-100">
+                    <div class="col">
+                        <h2>Invite user</h2>
+                    </div>
+                    <div class="col-xs">
+                        <button type="button" class="btn  btn-secondary" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                        &nbsp;
+                        <button type="button" id="invite_submit" class="btn btn-basic">Invite</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <p class="font-h5 font-semibold">User Name</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter user name</p>
+                            <input type="text" id="user_name" class="form-control form-control-alternative" placeholder="User Name">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <p class="font-h5 font-semibold">User Email</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter user email</p>
+                            <input type="text" id="user_email" class="form-control form-control-alternative" placeholder="user@e.mail">
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- modal-body -->
         </div>
     </div>
 </div>
