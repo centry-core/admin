@@ -29,7 +29,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     """ API """
 
     @auth.decorators.check_api(["migration.permissions"])
-    def post(self):  # pylint: disable=R0912,R0914
+    def post(self):  # pylint: disable=R0912,R0914,R0915
         """ Process POST """
         data = flask.request.get_json()
         mode = data.get("mode", "unknown")
@@ -127,6 +127,119 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     self.module.context.rpc_manager.call.admin_set_permission_for_role(
                         project_id, permission["role"], permission["permission"]
                     )
+        elif mode in [
+                "add_user_project_permissions", "add_team_project_permissions",
+                "delete_user_project_permissions", "delete_team_project_permissions",
+        ]:
+            #
+            # Parse input permissions
+            #
+            permission_items = data.get("permissions", "").strip()
+            #
+            input_permissions = [
+                item.split(":", 1) for item in permission_items.splitlines()
+            ]
+            #
+            # Get projects
+            #
+            personal_project_ids = \
+                self.module.context.rpc_manager.call.projects_get_personal_project_ids()
+            #
+            if not personal_project_ids:
+                return {"error": "Personal projects not set"}, 400
+            #
+            if mode in ["add_user_project_permissions", "delete_user_project_permissions"]:
+                project_ids = personal_project_ids
+            elif mode in ["add_team_project_permissions", "delete_team_project_permissions"]:
+                from tools import VaultClient  # pylint: disable=E0401,C0415
+                #
+                secrets = VaultClient().get_all_secrets()
+                ai_project_id = secrets.get('ai_project_id')
+                #
+                if ai_project_id:
+                    ai_project_id = int(ai_project_id)
+                #
+                project_ids = [
+                    i['id']
+                    for i in self.module.context.rpc_manager.call.project_list()
+                    if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
+                ]
+            else:
+                project_ids = []
+            #
+            for project_id in project_ids:
+                #
+                # Build project role map
+                #
+                project_roles = self.module.get_roles(project_id)
+                project_permissions = self.module.get_permissions(project_id)
+                #
+                project_role_map = {}
+                #
+                for item in project_roles:
+                    project_role_map[item["name"]] = set()
+                #
+                for item in project_permissions:
+                    project_role_map[item["name"]].add(item["permission"])
+                #
+                for item in project_roles:
+                    project_role_map[item["name"]] = list(project_role_map[item["name"]])
+                    project_role_map[item["name"]].sort()
+                #
+                # Perform
+                #
+                if mode in ["add_user_project_permissions", "add_team_project_permissions"]:
+                    #
+                    # Diff
+                    #
+                    missing_roles = []
+                    missing_permissions = []
+                    #
+                    for role, permission in input_permissions:
+                        if role not in project_role_map:
+                            missing_roles.append(role)
+                        #
+                        role_permissions = project_role_map.get(role, [])
+                        #
+                        if permission not in role_permissions:
+                            missing_permissions.append({"role": role, "permission": permission})
+                    #
+                    logs.append(f"Project {project_id}: {missing_roles=} {missing_permissions=}")
+                    #
+                    # Apply
+                    #
+                    if missing_roles:
+                        self.module.context.rpc_manager.call.admin_add_role(
+                            project_id, missing_roles
+                        )
+                    #
+                    for permission in missing_permissions:
+                        self.module.context.rpc_manager.call.admin_set_permission_for_role(
+                            project_id, permission["role"], permission["permission"]
+                        )
+                elif mode in ["delete_user_project_permissions", "delete_team_project_permissions"]:
+                    #
+                    # Data
+                    #
+                    removed_permissions = []
+                    #
+                    # Apply
+                    #
+                    for role, permission in input_permissions:
+                        if role not in project_role_map:
+                            continue
+                        #
+                        role_permissions = project_role_map.get(role, [])
+                        #
+                        if permission in role_permissions:
+                            self.module.context.rpc_manager.call.admin_remove_permission_from_role(
+                                project_id, role, permission
+                            )
+                            removed_permissions.append(f"{role}:{permission}")
+                    #
+                    # Log
+                    #
+                    logs.append(f"Project {project_id}: {removed_permissions=}")
         #
         else:
             logs.append(f"Current mode: {mode}")
