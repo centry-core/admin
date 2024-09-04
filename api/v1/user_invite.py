@@ -69,15 +69,17 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             #
             if auth_user_id is None:
                 # Create new user record
-                auth_user_id = self.context.rpc_manager.call.auth_add_user(user_email, user_name)
+                auth_user_id = self.module.context.rpc_manager.call.auth_add_user(
+                    user_email, user_name
+                )
                 #
-                self.context.rpc_manager.call.auth_add_user_group(auth_user_id, 1)
+                self.module.context.rpc_manager.call.auth_add_user_group(auth_user_id, 1)
             #
             cirro_token = invite["token"]
             auth_ref = f"cirro:invite:token:{cirro_token}"
             #
             try:
-                self.context.rpc_manager.call.auth_add_user_provider(auth_user_id, auth_ref)
+                self.module.context.rpc_manager.call.auth_add_user_provider(auth_user_id, auth_ref)
             except:  # pylint: disable=W0702
                 pass
         except BaseException as ex:  # pylint: disable=W0718
