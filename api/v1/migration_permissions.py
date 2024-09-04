@@ -127,7 +127,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     self.module.context.rpc_manager.call.admin_set_permission_for_role(
                         project_id, permission["role"], permission["permission"]
                     )
-        elif mode in [
+        elif mode in [  # pylint: disable=R1702
                 "add_user_project_permissions", "add_team_project_permissions",
                 "delete_user_project_permissions", "delete_team_project_permissions",
         ]:
@@ -136,9 +136,15 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             #
             permission_items = data.get("permissions", "").strip()
             #
-            input_permissions = [
-                item.split(":", 1) for item in permission_items.splitlines()
-            ]
+            input_permissions = []
+            #
+            for item in permission_items.splitlines():
+                permission, roles = item.split(":", 1)
+                roles = roles.split(",")
+                #
+                input_permissions.append(
+                    (permission, roles)
+                )
             #
             # Get projects
             #
@@ -195,14 +201,15 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     missing_roles = []
                     missing_permissions = []
                     #
-                    for role, permission in input_permissions:
-                        if role not in project_role_map:
-                            missing_roles.append(role)
-                        #
-                        role_permissions = project_role_map.get(role, [])
-                        #
-                        if permission not in role_permissions:
-                            missing_permissions.append({"role": role, "permission": permission})
+                    for permission, roles in input_permissions:
+                        for role in roles:
+                            if role not in project_role_map:
+                                missing_roles.append(role)
+                            #
+                            role_permissions = project_role_map.get(role, [])
+                            #
+                            if permission not in role_permissions:
+                                missing_permissions.append({"role": role, "permission": permission})
                     #
                     logs.append(f"Project {project_id}: {missing_roles=} {missing_permissions=}")
                     #
@@ -225,17 +232,18 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     #
                     # Apply
                     #
-                    for role, permission in input_permissions:
-                        if role not in project_role_map:
-                            continue
-                        #
-                        role_permissions = project_role_map.get(role, [])
-                        #
-                        if permission in role_permissions:
-                            self.module.context.rpc_manager.call.admin_remove_permission_from_role(
-                                project_id, role, permission
-                            )
-                            removed_permissions.append(f"{role}:{permission}")
+                    for permission, roles in input_permissions:
+                        for role in roles:
+                            if role not in project_role_map:
+                                continue
+                            #
+                            role_permissions = project_role_map.get(role, [])
+                            #
+                            if permission in role_permissions:
+                                self.module.context.rpc_manager.call.admin_remove_permission_from_role(  # pylint: disable=C0301
+                                    project_id, role, permission
+                                )
+                                removed_permissions.append(f"{role}:{permission}")
                     #
                     # Log
                     #
