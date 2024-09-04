@@ -110,28 +110,28 @@ function projectActionFormatter(value, row, index) {
 
 $(document).on('vue_init', () => {
     $('#project_submit').on('click', projectCreateSubmit)
-})
 
-$("#userInviteModal").on("show.bs.modal", function (e) {
-  $("#user_name").val("");
-  $("#user_email").val("");
-});
-
-$("#invite_submit").click(function() {
-  var user_name = $("#user_name").val();
-  var user_email = $("#user_email").val();
-  //
-  axios.post(user_invite_url, {user_name: user_name, user_email: user_email})
-    .then(function (response) {
-      if (response.data.ok) {
-        showNotify("SUCCESS", "User invite requested");
-        $("#userInviteModal").modal("hide");
-      } else {
-        showNotify("ERROR", response.data.error);
-      }
-    })
-    .catch(function (error) {
-      showNotify("ERROR", "Error during invite request");
-      console.log(error);
+    $("#userInviteModal").on("show.bs.modal", function (e) {
+      $("#user_name").val("");
+      $("#user_email").val("");
     });
-});
+
+    $("#invite_submit").click(function() {
+      var user_name = $("#user_name").val();
+      var user_email = $("#user_email").val();
+      //
+      axios.post(user_invite_url, {user_name: user_name, user_email: user_email})
+        .then(function (response) {
+          if (response.data.ok) {
+            showNotify("SUCCESS", "User invite requested");
+            $("#userInviteModal").modal("hide");
+          } else {
+            showNotify("ERROR", response.data.error);
+          }
+        })
+        .catch(function (error) {
+          showNotify("ERROR", "Error during invite request");
+          console.log(error);
+        });
+    });
+})
