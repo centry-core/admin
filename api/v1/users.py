@@ -120,8 +120,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 }], email_integration.task_id)
         except ImportError:
             ...
-        log.debug(f'{results=}')
-        log.debug(f'{added_ids=}')
         self.module.context.event_manager.fire_event(
             "user_added_to_project", {'project_id': project_id, 'user_ids': added_ids},
         )
