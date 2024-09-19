@@ -337,9 +337,9 @@ class RPC:
 
         user_project_ids = set()
 
-        for chunked_expressions in chunked_iterable(expressions):
-            query = union(*chunked_expressions)
-            with db.with_project_schema_session(None) as session:
+        with db.with_project_schema_session(None) as session:
+            for chunked_expressions in chunked_iterable(expressions):
+                query = union(*chunked_expressions)
                 result = session.execute(query).all()
                 for row in result:
                     user_project_ids.add(row.project_id)

@@ -85,6 +85,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
                 user_email, project_id, user_roles)
             results.append(result)
+        added_ids = set()
         try:
             if invitation_integration := request.json.get('invitation_integration'):
                 from tools import TaskManager
@@ -109,6 +110,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 recipients = []
                 for i in results:
                     if i['status'] == 'ok':
+                        added_ids.add(i['id'])
                         recipients.append(i['email'])
                     i['email_sent'] = i['status'] == 'ok'
                 TaskManager(project_id=project_id).run_task([{
@@ -118,8 +120,10 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 }], email_integration.task_id)
         except ImportError:
             ...
+        log.debug(f'{results=}')
+        log.debug(f'{added_ids=}')
         self.module.context.event_manager.fire_event(
-            "user_project_action", {'project_id': project_id},
+            "user_added_to_project", {'project_id': project_id, 'user_ids': added_ids},
         )
         return results, 200
 
@@ -151,6 +155,6 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             return 'IDs must be integers', 400
         self.module.remove_users_from_project(project_id, delete_ids)
         self.module.context.event_manager.fire_event(
-            "user_project_action", {'project_id': project_id},
+            "user_removed_from_project", {'project_id': project_id, 'user_ids': delete_ids},
         )
         return {'msg': 'users successfully removed'}, 204
