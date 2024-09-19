@@ -118,6 +118,9 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
                 }], email_integration.task_id)
         except ImportError:
             ...
+        self.module.context.event_manager.fire_event(
+            "user_project_action", {'project_id': project_id},
+        )
         return results, 200
 
     @auth.decorators.check_api({
@@ -147,4 +150,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         except TypeError:
             return 'IDs must be integers', 400
         self.module.remove_users_from_project(project_id, delete_ids)
+        self.module.context.event_manager.fire_event(
+            "user_project_action", {'project_id': project_id},
+        )
         return {'msg': 'users successfully removed'}, 204
