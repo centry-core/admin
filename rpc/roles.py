@@ -331,21 +331,23 @@ class RPC:
                 )
             )
         #
-        query = union(*expressions)
-        #
+        def chunked_iterable(iterable, chunk_size=100):
+            for i in range(0, len(iterable), chunk_size):
+                yield iterable[i:i + chunk_size]
+
+        user_project_ids = set()
+
         with db.with_project_schema_session(None) as session:
-            result = session.execute(query).all()
-            user_project_ids = set()
-            #
-            for row in result:
-                user_project_ids.add(row.project_id)
-            #
-            user_project_ids = list(user_project_ids)
-            user_project_ids.sort()
-            #
-            return user_project_ids
-        #
-        return []
+            for chunked_expressions in chunked_iterable(expressions):
+                query = union(*chunked_expressions)
+                result = session.execute(query).all()
+                for row in result:
+                    user_project_ids.add(row.project_id)
+
+        user_project_ids = list(user_project_ids)
+        user_project_ids.sort()
+
+        return user_project_ids
 
     @web.rpc('admin_get_project_system_user', 'get_project_system_user')
     def get_project_system_user(self, project_id: int, **kwargs) -> Optional[dict]:
