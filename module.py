@@ -326,6 +326,71 @@ class Module(module.ModuleModel):
             prefix="admin_migration_permissions_",
             icon_class="fas fa-server fa-fw",
         )
+        #
+        # Invites
+        #
+        theme.register_mode_section(
+            "administration", "invites", "Invites",
+            kind="holder",
+            permissions={
+                "permissions": ["invites"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "invites",
+            "platform", "Platform",
+            title="Platform",
+            kind="slot",
+            permissions={
+                "permissions": ["invites.platform"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_invites_platform_",
+            icon_class="fas fa-server fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "invites",
+            "bulkusers", "Bulk users",
+            title="Bulk users",
+            kind="slot",
+            permissions={
+                "permissions": ["invites.bulkusers"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_invites_bulkusers_",
+            icon_class="fas fa-server fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "invites",
+            "bulkprojects", "Bulk projects",
+            title="Bulk projects",
+            kind="slot",
+            permissions={
+                "permissions": ["invites.bulkprojects"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_invites_bulkprojects_",
+            icon_class="fas fa-server fa-fw",
+        )
         # Init
         self.descriptor.init_all()
         #
