@@ -17,8 +17,6 @@
 
 """ API """
 
-import json
-
 import flask  # pylint: disable=E0401,W0611
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
@@ -35,9 +33,26 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process POST """
         data = flask.request.get_json()
         #
+        if "user_id" not in data:
+            return {"error": "user_id not set"}, 400
+        #
+        if "roles" not in data:
+            return {"error": "roles not set"}, 400
+        #
+        if "projects" not in data:
+            return {"error": "projects not set"}, 400
+        #
         logs = []
         #
-        logs.append(f"Data: {json.dumps(data)}")
+        user_id = int(data["user_id"])
+        new_roles = [item.strip() for item in data["roles"].split(",")]
+        #
+        for project in data["projects"]:
+            project_id = project["id"]
+            project_name = project["name"]
+            #
+            self.module.admin_update_roles_for_user(project_id, user_id, new_roles)
+            logs.append(f"Added user {user_id} to {project_id} ({project_name}) as {new_roles}")
         #
         return {
             "ok": True,
