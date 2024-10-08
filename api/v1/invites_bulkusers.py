@@ -46,10 +46,14 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         for user in auth.list_users():
             user_id = user["id"]
+            user_name = user["name"]
+            #
+            if user_name.startswith(":system:project:"):
+                logs.append(f"Skipping user {user_id} ({user_name})")
+                continue
             #
             self.module.update_roles_for_user(project_id, user_id, new_roles)
-            #
-            logs.append(f"Added user {user_id} to {project_id} as {new_roles}")
+            logs.append(f"Added user {user_id} ({user_name}) to {project_id} as {new_roles}")
         #
         return {
             "ok": True,
