@@ -45,6 +45,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         new_roles = [item.strip() for item in data["roles"].split(",")]
         #
         for user in auth.list_users():
+            log.debug("User: %s", user)
+            #
             user_id = user["id"]
             user_name = user["name"]
             #
