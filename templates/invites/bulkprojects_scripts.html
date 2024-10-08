@@ -36,7 +36,7 @@
         <table class="table table-borderless"
             id="table"
             data-toggle="table"
-            :data-url="build_api_url('admin', 'projects')"
+            data-url="{{ tools.context.url_prefix }}/api/v1/admin/projects/administration"
             data-unique-id="id"
             data-pagination="false"
           >
