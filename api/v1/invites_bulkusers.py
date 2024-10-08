@@ -50,7 +50,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             user_id = user["id"]
             user_name = user["name"]
             #
-            if user_name.startswith(":system:project:"):
+            if user_name is not None and user_name.startswith(":system:project:"):
                 logs.append(f"Skipping user {user_id} ({user_name})")
                 continue
             #
