@@ -36,7 +36,11 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         logs = []
         #
-        if mode in ["add_user_project_defaults", "add_team_project_defaults"]:
+        if mode in [
+                "add_user_project_defaults",
+                "add_team_project_defaults",
+                "add_public_project_defaults",
+        ]:
             #
             # Build default role map
             #
@@ -79,6 +83,16 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     for i in self.module.context.rpc_manager.call.project_list()
                     if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
                 ]
+            elif mode == "add_public_project_defaults":
+                from tools import VaultClient  # pylint: disable=E0401,C0415
+                #
+                secrets = VaultClient().get_all_secrets()
+                ai_project_id = secrets.get('ai_project_id')
+                #
+                if ai_project_id:
+                    ai_project_id = int(ai_project_id)
+                #
+                project_ids = [ai_project_id]
             else:
                 project_ids = []
             #
@@ -128,8 +142,12 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                         project_id, permission["role"], permission["permission"]
                     )
         elif mode in [  # pylint: disable=R1702
-                "add_user_project_permissions", "add_team_project_permissions",
-                "delete_user_project_permissions", "delete_team_project_permissions",
+                "add_user_project_permissions",
+                "add_team_project_permissions",
+                "add_public_project_permissions",
+                "delete_user_project_permissions",
+                "delete_team_project_permissions",
+                "delete_public_project_permissions",
         ]:
             #
             # Parse input permissions
@@ -170,6 +188,16 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     for i in self.module.context.rpc_manager.call.project_list()
                     if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
                 ]
+            elif mode in ["add_public_project_permissions", "delete_public_project_permissions"]:
+                from tools import VaultClient  # pylint: disable=E0401,C0415
+                #
+                secrets = VaultClient().get_all_secrets()
+                ai_project_id = secrets.get('ai_project_id')
+                #
+                if ai_project_id:
+                    ai_project_id = int(ai_project_id)
+                #
+                project_ids = [ai_project_id]
             else:
                 project_ids = []
             #
@@ -194,7 +222,11 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 #
                 # Perform
                 #
-                if mode in ["add_user_project_permissions", "add_team_project_permissions"]:
+                if mode in [
+                        "add_user_project_permissions",
+                        "add_team_project_permissions",
+                        "add_public_project_permissions",
+                ]:
                     #
                     # Diff
                     #
@@ -224,7 +256,11 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                         self.module.context.rpc_manager.call.admin_set_permission_for_role(
                             project_id, permission["role"], permission["permission"]
                         )
-                elif mode in ["delete_user_project_permissions", "delete_team_project_permissions"]:
+                elif mode in [
+                        "delete_user_project_permissions",
+                        "delete_team_project_permissions",
+                        "delete_public_project_permissions",
+                ]:
                     #
                     # Data
                     #
