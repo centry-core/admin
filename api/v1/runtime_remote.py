@@ -96,6 +96,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 "pylon_id": pylon_id,
                 "plugins": plugins,
                 "restart": True,
+                "pylon_pid": 1,
             }
             #
             if pylon_id == self.module.context.id:
