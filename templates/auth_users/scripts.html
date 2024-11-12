@@ -1,0 +1,58 @@
+<div class="container-fluid">
+
+  <div class="card mt-3 card-table-sm">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-4">
+          <h4>Auth users</h4>
+        </div>
+        <div class="col-8">
+        </div>
+      </div> <!-- row -->
+    </div>
+    <div class="card-body">
+      <div class="row p-3 m-3">
+        <div class="col-10">
+          <h5 class="mr-3 col-2">Users</h5>
+          <table class="table table-borderless col-8"
+              id="table"
+              data-toggle="table"
+              data-url="{{ tools.context.url_prefix }}/api/v1/admin/auth_users/administration"
+              data-unique-id="id"
+              data-pagination="false"
+            >
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col" data-field="state" data-checkbox="true"></th>
+                  <th scope="col" data-field="id" data-sortable="true" data-visible="true">ID</th>
+                  <th scope="col" data-field="email" data-sortable="true">Email</th>
+                  <th scope="col" data-field="name" data-sortable="true">Name</th>
+                  <th scope="col" data-field="last_login" data-sortable="true">Last login</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+        </div> <!-- col -->
+        <div class="col-2">
+          <div class="d-flex justify-content-end">
+            <button id="btn-delete-users" type="button" class="btn btn-secondary btn-sm mr-2">
+              <i class="icon__18x18 icon-delete"></i> &nbsp; Delete user(s)
+            </button>
+          </div>
+        </div> <!-- col -->
+      </div> <!-- row -->
+    </div> <!-- card-body -->
+  </div>
+
+</div>
+
+
+<script src="{{ url_for('admin.static', filename='js/vendor/jquery.serialize-object.min.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
+
+<script>
+  var auth_users_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/auth_users/administration";
+</script>
+
+<script src="{{ url_for('admin.static', filename='js/auth_users.js') }}"></script>

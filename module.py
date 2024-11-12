@@ -391,6 +391,39 @@ class Module(module.ModuleModel):
             prefix="admin_invites_bulkprojects_",
             icon_class="fas fa-server fa-fw",
         )
+        #
+        # Users
+        #
+        theme.register_mode_section(
+            "administration", "users", "Users",
+            kind="holder",
+            permissions={
+                "permissions": ["admin.auth.users"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "users",
+            "users", "Users",
+            title="Users",
+            kind="slot",
+            permissions={
+                "permissions": ["admin.auth.users"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_auth_users_",
+            icon_class="fas fa-server fa-fw",
+        )
         # Init
         self.descriptor.init_all()
         #
