@@ -47,19 +47,27 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         """ Process POST """
         data = flask.request.get_json()
         #
-        if "users" not in data:
-            return {"error": "users not set"}, 400
-        #
         if "action" not in data:
             return {"error": "action not set"}, 400
         #
         action = data["action"]
         #
-        for user in data["users"]:
-            user_id = user["id"]
-            #
-            if action == "delete":
-                auth.delete_user(user_id)
+        if action == "delete" and "users" not in data:
+            return {"error": "users not set"}, 400
+        #
+        if action == "create" and "user_name" not in data:
+            return {"error": "user_name not set"}, 400
+        #
+        if action == "create" and "user_email" not in data:
+            return {"error": "user_email not set"}, 400
+        #
+        if action == "delete":
+            for user in data["users"]:
+                auth.delete_user(user["id"])
+        #
+        if action == "create":
+            user_id = auth.add_user(data["user_email"], data["user_name"])
+            auth.add_user_group(user_id, 1)
         #
         return {
             "ok": True,

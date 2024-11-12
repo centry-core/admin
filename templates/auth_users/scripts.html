@@ -35,6 +35,9 @@
         </div> <!-- col -->
         <div class="col-2">
           <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary btn-sm mr-2" data-toggle="modal" data-target="#userCreateModal">
+              <i class="fas fa-plus"></i> &nbsp; Create user
+            </button>
             <button id="btn-delete-users" type="button" class="btn btn-secondary btn-sm mr-2">
               <i class="icon__18x18 icon-delete"></i> &nbsp; Delete user
             </button>
@@ -44,6 +47,46 @@
     </div> <!-- card-body -->
   </div>
 
+</div> <!-- container-fluid -->
+
+
+<div class="modal modal-small fixed-left fade shadow-sm" tabindex="-1" role="dialog" id="userCreateModal">
+    <div class="modal-dialog modal-dialog-aside" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row w-100">
+                    <div class="col">
+                        <h2>Create user</h2>
+                    </div>
+                    <div class="col-xs">
+                        <button type="button" class="btn  btn-secondary" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                        &nbsp;
+                        <button type="button" id="create_submit" class="btn btn-basic">Create</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <p class="font-h5 font-semibold">User Name</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter user name</p>
+                            <input type="text" id="user_name" class="form-control form-control-alternative" placeholder="User Name">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <p class="font-h5 font-semibold">User Email</p>
+                            <p class="font-h6 font-weight-400 mb-1">Enter user email</p>
+                            <input type="text" id="user_email" class="form-control form-control-alternative" placeholder="user@e.mail">
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- modal-body -->
+        </div>
+    </div>
 </div>
 
 
