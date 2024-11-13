@@ -16,6 +16,11 @@ $("#btn-load").click(function() {
 });
 
 
+$("#refresh-table").click(function() {
+  $("#table").bootstrapTable("refresh", {});
+});
+
+
 function pylonsActionsFormatter(value, row, index) {
   return [
     '<a class="task-show-logs" href="javascript:void(0)" title="Show logs">',
