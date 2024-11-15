@@ -1,0 +1,92 @@
+<div class="container-fluid">
+
+{% for item in tasknodes %}
+
+        <div class="card mt-3 card-table-sm">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-2">
+                        <h4>TaskNode: {{ item.task_node }}: global_pool_state</h4>
+                    </div>
+                    <div class="col-8">
+                    </div>
+                    <div class="col-2">
+                        <div class="d-flex justify-content-end">
+                          <button type="button" class="btn btn-32 btn-secondary refresh-table-button" data-target="#table-{{ item.plugin }}-pool">
+                            <i class="fas fa-refresh"></i>
+                          </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless"
+                    id="table-{{ item.plugin }}-pool"
+                    data-toggle="table"
+                    data-url="{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration/?node={{ item.task_node }}&scope=pool"
+                    data-pagination="false"
+                    data-click-to-select="false"
+                  >
+
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" data-sortable="true" data-field="pool">Pool</th>
+                            <th scope="col" data-sortable="true" data-field="state">State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mt-3 card-table-sm">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-2">
+                        <h4>TaskNode: {{ item.task_node }}: global_task_state</h4>
+                    </div>
+                    <div class="col-8">
+                    </div>
+                    <div class="col-2">
+                        <div class="d-flex justify-content-end">
+                          <button type="button" class="btn btn-32 btn-secondary refresh-table-button" data-target="#table-{{ item.plugin }}-task">
+                            <i class="fas fa-refresh"></i>
+                          </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless"
+                    id="table-{{ item.plugin }}-task"
+                    data-toggle="table"
+                    data-url="{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration/?node={{ item.task_node }}&scope=task"
+                    data-pagination="false"
+                    data-click-to-select="false"
+                  >
+
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col" data-sortable="true" data-field="task_id">Task ID</th>
+                            <th scope="col" data-sortable="true" data-field="state">State</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+{% endfor %}
+
+</div>
+
+<script src="{{ url_for('admin.static', filename='js/vendor/jquery.serialize-object.min.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
+
+<script>
+  var tasknodes_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration";
+</script>
+
+<script src="{{ url_for('admin.static', filename='js/runtime_tasknodes.js') }}"></script>

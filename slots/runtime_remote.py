@@ -60,3 +60,30 @@ class Slot:  # pylint: disable=E1101,R0903
             return self.descriptor.render_template(
                 "runtime_pylons/scripts.html",
             )
+
+    @web.slot("admin_runtime_tasknodes_scripts")
+    @auth.decorators.check_slot(["runtime.plugins"], access_denied_reply=theme.access_denied_part)
+    def _pylons_scripts(self, context, slot, payload):
+        _ = slot, payload
+        #
+        with context.app.app_context():
+            module_manager = self.context.module_manager
+            #
+            tasknodes = []
+            check_plugins = ["worker_client", "datasources", "applications"]
+            #
+            for plugin_name in check_plugins:
+                if plugin_name in module_manager.modules:
+                    plugin = module_manager.modules[plugin_name].module
+                    #
+                    if hasattr(plugin, "task_node") and \
+                            getattr(plugin, "task_node", None) is not None:
+                        tasknodes.append({
+                            "plugin": plugin_name,
+                            "task_node": f"{plugin_name}.task_node",
+                        })
+            #
+            return self.descriptor.render_template(
+                "runtime_tasknodes/scripts.html",
+                tasknodes=tasknodes,
+            )
