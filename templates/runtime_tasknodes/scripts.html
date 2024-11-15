@@ -12,6 +12,9 @@
                     </div>
                     <div class="col-2">
                         <div class="d-flex justify-content-end">
+                          <button type="button" class="btn btn-32 btn-secondary refresh-pool-button" data-node="{{ item.task_node }}" data-target="#table-{{ item.plugin }}-pool">
+                            <i class="fas fa-wifi"></i>
+                          </button>
                           <button type="button" class="btn btn-32 btn-secondary refresh-table-button" data-target="#table-{{ item.plugin }}-pool">
                             <i class="fas fa-refresh"></i>
                           </button>
@@ -51,6 +54,9 @@
                     </div>
                     <div class="col-2">
                         <div class="d-flex justify-content-end">
+                          <button type="button" class="btn btn-32 btn-secondary refresh-task-button" data-node="{{ item.task_node }}" data-target="#table-{{ item.plugin }}-task">
+                            <i class="fas fa-wifi"></i>
+                          </button>
                           <button type="button" class="btn btn-32 btn-secondary refresh-table-button" data-target="#table-{{ item.plugin }}-task">
                             <i class="fas fa-refresh"></i>
                           </button>
@@ -89,7 +95,7 @@
 <script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
 
 <script>
-  var tasknodes_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration";
+  var tasknodes_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration/";
 </script>
 
 <script src="{{ url_for('admin.static', filename='js/runtime_tasknodes.js') }}"></script>
