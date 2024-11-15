@@ -63,7 +63,7 @@ class Slot:  # pylint: disable=E1101,R0903
 
     @web.slot("admin_runtime_tasknodes_scripts")
     @auth.decorators.check_slot(["runtime.plugins"], access_denied_reply=theme.access_denied_part)
-    def _pylons_scripts(self, context, slot, payload):
+    def _tasknodes_scripts(self, context, slot, payload):
         _ = slot, payload
         #
         with context.app.app_context():
