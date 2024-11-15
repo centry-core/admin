@@ -57,9 +57,12 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     if scope == "task":
                         with task_node.lock:
                             for task_id, state in task_node.global_task_state.items():
+                                result_state = state.copy()
+                                result_state.pop("result", None)
+                                #
                                 result.append({
                                     "task_id": task_id,
-                                    "state": str(state),
+                                    "state": str(result_state),
                                 })
         #
         return {
