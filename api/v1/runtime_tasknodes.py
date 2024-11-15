@@ -78,6 +78,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                                         "runner": state.get("runner", None),
                                         "status": status,
                                         "meta": meta,
+                                        "node": node,
                                     })
             #
             return {
