@@ -48,21 +48,28 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 if task_node is not None:
                     if scope == "pool":
                         with task_node.lock:
-                            for pool, state in task_node.global_pool_state.items():
-                                result.append({
-                                    "pool": pool,
-                                    "state": str(state),
-                                })
+                            for state in task_node.global_pool_state.values():
+                                for node in state.values():
+                                    result.append({
+                                        "pool": node.get("pool", None),
+                                        "ident": node.get("ident", None),
+                                        "task_limit": node.get("task_limit", None),
+                                        "running_tasks": node.get("running_tasks", None),
+                                    })
                     #
                     if scope == "task":
                         with task_node.lock:
-                            for task_id, state in task_node.global_task_state.items():
-                                result_state = state.copy()
-                                result_state.pop("result", None)
+                            for state in task_node.global_task_state.values():
+                                meta = state.get("meta", None)
+                                if meta is not None:
+                                    meta = str(meta)
                                 #
                                 result.append({
-                                    "task_id": task_id,
-                                    "state": str(result_state),
+                                    "task_id": state.get("task_id", None),
+                                    "requestor": state.get("requestor", None),
+                                    "runner": state.get("runner", None),
+                                    "status": state.get("status", None),
+                                    "meta": meta,
                                 })
         #
         return {
