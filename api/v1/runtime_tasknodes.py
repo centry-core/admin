@@ -64,11 +64,15 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                                 if meta is not None:
                                     meta = str(meta)
                                 #
+                                status = state.get("status", None)
+                                if status == "stopped":
+                                    continue
+                                #
                                 result.append({
                                     "task_id": state.get("task_id", None),
                                     "requestor": state.get("requestor", None),
                                     "runner": state.get("runner", None),
-                                    "status": state.get("status", None),
+                                    "status": status,
                                     "meta": meta,
                                 })
         #
