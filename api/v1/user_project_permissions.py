@@ -73,6 +73,8 @@ class AdminAPI(api_tools.APIModeHandler):
     def put(self):  # pylint: disable=R0201
         """ Process """
         for_team_projects = request.args.get('team_projects') is not None
+        create_role_if_not_exist = request.args.get('create_role_if_not_exist') is not None
+        append_user_role = request.args.get('append_user_role') is not None
 
         if isinstance(request.json, list):
             role_map = defaultdict(list)
@@ -107,6 +109,11 @@ class AdminAPI(api_tools.APIModeHandler):
         for project_id in project_ids:
             with db.get_session(project_id) as session:
                 roles = session.query(Role).where(Role.name.in_(role_map.keys())).all()
+                if create_role_if_not_exist:
+                    roles_not_exist_in_project = set(role_map.keys()) - {r.name for r in roles}
+                    if roles_not_exist_in_project:
+                        role = self.module.add_role(project_id=project_id, role_names=list(roles_not_exist_in_project))
+                    roles = session.query(Role).where(Role.name.in_(role_map.keys())).all()
                 for role in roles:
                     role.permissions.delete(synchronize_session='fetch')
                     self.module.set_permissions_for_role(
@@ -117,6 +124,14 @@ class AdminAPI(api_tools.APIModeHandler):
                         commit=False
                     )
                 session.commit()
+                if append_user_role:
+                    project_users = self.module.get_users_roles_in_project(project_id, filter_system_user=True)
+                    for user_id, user_roles in project_users.items():
+                        if missing_user_roles := set(role_map.keys()) - set(user_roles):
+                            user_roles.extend(missing_user_roles)
+                            self.module.context.rpc_manager.call.update_roles_for_user(
+                                project_id, user_id, user_roles
+                            )
         return {'role_map': dict(role_map)}, 200
 
 
