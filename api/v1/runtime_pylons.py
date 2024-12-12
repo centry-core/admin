@@ -54,6 +54,17 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         data = flask.request.get_json()
         #
         pylon_id = data.get("pylon_id", None)
+        action = data.get("action", None)
+        #
+        if pylon_id and action:
+            self.module.context.event_manager.fire_event(
+                "bootstrap_runtime_update",
+                {
+                    "pylon_id": pylon_id,
+                    "actions": [action],
+                    "restart": False,
+                },
+            )
         #
         if not pylon_id:
             return {"ok": True, "logs": ""}

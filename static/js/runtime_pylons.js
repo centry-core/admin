@@ -16,6 +16,30 @@ $("#btn-load").click(function() {
 });
 
 
+$("#btn-enable-debug-mode").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "enable_debug_mode"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Enabling debug mode requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during logs retrieval");
+      console.log(error);
+    });
+});
+
+
+$("#btn-disable-debug-mode").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "disable_debug_mode"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Disabling debug mode requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during logs retrieval");
+      console.log(error);
+    });
+});
+
+
 $("#refresh-table").click(function() {
   $("#table").bootstrapTable("refresh", {});
 });
@@ -24,7 +48,7 @@ $("#refresh-table").click(function() {
 function pylonsActionsFormatter(value, row, index) {
   return [
     '<a class="task-show-logs" href="javascript:void(0)" title="Show logs">',
-    '<i class="fa fa-file-text" style="color: #858796"></i>',
+    '  <i class="fa fa-file-text" style="color: #858796"></i>',
     '</a>',
   ].join('')
 }
