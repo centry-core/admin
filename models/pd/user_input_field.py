@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic.v1 import BaseModel, EmailStr
 
 
 class UserInputFieldPD(BaseModel):
