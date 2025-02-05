@@ -57,7 +57,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         }
 
     @auth.decorators.check_api(["runtime.plugins"])
-    def post(self):
+    def post(self):  # pylint: disable=R0912
         """ Process POST """
         data = flask.request.get_json()
         #
