@@ -17,10 +17,10 @@ $("#btn-reload").click(function() {
   //
   axios.post(remote_api_url, {data: data, action: "reload"})
     .then(function (response) {
-      showNotify("SUCCESS", "Update and restart requested")
+      showNotify("SUCCESS", "Reload requested")
     })
     .catch(function (error) {
-      showNotify("ERROR", "Error during update and restart request")
+      showNotify("ERROR", "Error during reload request")
       console.log(error);
     });
 });
