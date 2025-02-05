@@ -1,7 +1,21 @@
 $("#btn-update").click(function() {
   var data = $("#table").bootstrapTable("getSelections");
   //
-  axios.post(remote_api_url, {data: data})
+  axios.post(remote_api_url, {data: data, action: "update"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Update and restart requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during update and restart request")
+      console.log(error);
+    });
+});
+
+
+$("#btn-reload").click(function() {
+  var data = $("#table").bootstrapTable("getSelections");
+  //
+  axios.post(remote_api_url, {data: data, action: "reload"})
     .then(function (response) {
       showNotify("SUCCESS", "Update and restart requested")
     })

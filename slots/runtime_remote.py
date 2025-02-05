@@ -49,6 +49,7 @@ class Slot:  # pylint: disable=E1101,R0903
         with context.app.app_context():
             return self.descriptor.render_template(
                 "runtime_remote/scripts.html",
+                reload_enabled=self.descriptor.config.get("reload_enabled", False),
             )
 
     @web.slot("admin_runtime_pylons_scripts")

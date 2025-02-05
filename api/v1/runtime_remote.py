@@ -64,6 +64,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         if "data" not in data or not data["data"]:
             return {"ok": True}
         #
+        action = data.get("action", "update")
+        #
         targets = {}
         #
         for item in data["data"]:
@@ -90,19 +92,34 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             if not plugins:
                 continue
             #
-            log.info("Requesting plugin update(s): %s -> %s", pylon_id, plugins)
+            if action == "update":
+                log.info("Requesting plugin update(s): %s -> %s", pylon_id, plugins)
+                #
+                event_data = {
+                    "pylon_id": pylon_id,
+                    "plugins": plugins,
+                    "restart": True,
+                    "pylon_pid": 1,
+                }
+                #
+                if pylon_id == self.module.context.id:
+                    events.append(event_data)
+                else:
+                    events.insert(0, event_data)
             #
-            event_data = {
-                "pylon_id": pylon_id,
-                "plugins": plugins,
-                "restart": True,
-                "pylon_pid": 1,
-            }
-            #
-            if pylon_id == self.module.context.id:
-                events.append(event_data)
-            else:
-                events.insert(0, event_data)
+            elif action == "reload":
+                log.info("Requesting plugin reload(s): %s -> %s", pylon_id, plugins)
+                #
+                event_data = {
+                    "pylon_id": pylon_id,
+                    "reload": plugins,
+                    "restart": False,
+                }
+                #
+                if pylon_id == self.module.context.id:
+                    events.append(event_data)
+                else:
+                    events.insert(0, event_data)
         #
         for event_item in events:
             self.module.context.event_manager.fire_event(
