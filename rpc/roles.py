@@ -259,17 +259,17 @@ class RPC:
         return user_roles
 
     @web.rpc("update_roles_for_user", "admin_update_roles_for_user")
-    def update_roles_for_user(self, project_id, user_id, new_roles, **kwargs) -> bool:
+    def update_roles_for_user(self, project_id: int, user_ids: List[int], new_roles: List[str], **kwargs) -> bool:
         with db.with_project_schema_session(project_id) as tenant_session:
-            user_roles = tenant_session.query(UserRole).filter(
-                UserRole.user_id == user_id).all()
-            for user_role in user_roles:
-                tenant_session.delete(user_role)
+            tenant_session.query(UserRole).filter(
+                UserRole.user_id.in_(user_ids)
+            ).delete()
             for role_name in new_roles:
                 role = tenant_session.query(Role).filter(Role.name == role_name).first()
-                if role:
-                    user_role = UserRole(user_id=user_id, role_id=role.id)
-                    tenant_session.add(user_role)
+                for user_id in user_ids:
+                    if role:
+                        user_role = UserRole(user_id=user_id, role_id=role.id)
+                        tenant_session.add(user_role)
             tenant_session.commit()
             return True
 

@@ -133,10 +133,17 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def put(self, project_id: int, **kwargs):
-        user_id = request.json["id"]
+        user_ids = request.json.get("ids", [])
+        user_id = request.json.get("id")
+
+        if user_id:
+            if user_ids:
+                return {'msg': 'You cannot pass both "id" and "ids" at the same time'}, 400
+            user_ids.append(user_id)
+
         new_user_roles = request.json["roles"]
         result = self.module.context.rpc_manager.call.update_roles_for_user(
-            project_id, user_id, new_user_roles)
+            project_id, user_ids, new_user_roles)
         return {'msg': f'roles updated' if result else 'something is wrong'}, 200
 
     @auth.decorators.check_api({
