@@ -1,4 +1,7 @@
-from pydantic.v1 import BaseModel
+try:
+    from pydantic.v1 import BaseModel
+except:  # pylint: disable=W0702
+    from pydantic import BaseModel
 
 
 class RoleDetailModel(BaseModel):
