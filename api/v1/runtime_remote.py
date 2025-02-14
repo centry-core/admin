@@ -103,8 +103,6 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                         if pylon_id not in targets:
                             continue
                         #
-                        zfile.mkdir(pylon_id)
-                        #
                         data = self.module.remote_runtimes[pylon_id]
                         #
                         try:
