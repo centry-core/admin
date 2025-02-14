@@ -144,9 +144,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     #
                     log.info("Importing config from: %s", file_data.filename)
                     #
+                    zip_data = io.BytesIO(file_data.stream.read())
                     target_events = {}
                     #
-                    with zipfile.ZipFile(file_data.stream) as zfile:
+                    with zipfile.ZipFile(zip_data) as zfile:
                         for item in zfile.namelist():
                             if "/" not in item:
                                 continue
