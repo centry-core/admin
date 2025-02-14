@@ -12,6 +12,62 @@ $("#btn-update").click(function() {
 });
 
 
+$("#btn-update-with-reqs").click(function() {
+  var data = $("#table").bootstrapTable("getSelections");
+  //
+  axios.post(remote_api_url, {data: data, action: "update_with_reqs"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Update and restart requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during update and restart request")
+      console.log(error);
+    });
+});
+
+
+$("#btn-purge-reqs").click(function() {
+  var data = $("#table").bootstrapTable("getSelections");
+  //
+  axios.post(remote_api_url, {data: data, action: "purge_reqs"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Purge and restart requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during purge and restart request")
+      console.log(error);
+    });
+});
+
+
+$("#btn-delete").click(function() {
+  var data = $("#table").bootstrapTable("getSelections");
+  //
+  axios.post(remote_api_url, {data: data, action: "delete"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Deletion and restart requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during deletion and restart request")
+      console.log(error);
+    });
+});
+
+
+// $("#btn-export-configs").click(function() {
+//   var data = $("#table").bootstrapTable("getSelections");
+//   //
+//   axios.post(remote_api_url, {data: data, action: "export_configs"})
+//     .then(function (response) {
+//       showNotify("SUCCESS", "Deletion and restart requested")
+//     })
+//     .catch(function (error) {
+//       showNotify("ERROR", "Error during deletion and restart request")
+//       console.log(error);
+//     });
+// });
+
+
 $("#btn-reload").click(function() {
   var data = $("#table").bootstrapTable("getSelections");
   //

@@ -66,6 +66,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         action = data.get("action", "update")
         #
+        # Collect targets
+        #
         targets = {}
         #
         for item in data["data"]:
@@ -107,6 +109,58 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 else:
                     events.insert(0, event_data)
             #
+            elif action == "update_with_reqs":
+                log.info("Requesting plugin update(s)+req(s): %s -> %s", pylon_id, plugins)
+                #
+                event_data = {
+                    "pylon_id": pylon_id,
+                    "plugins": plugins,
+                    "actions": [
+                        ["delete_requirements", plugins],
+                    ],
+                    "restart": True,
+                    "pylon_pid": 1,
+                }
+                #
+                if pylon_id == self.module.context.id:
+                    events.append(event_data)
+                else:
+                    events.insert(0, event_data)
+            #
+            elif action == "purge_reqs":
+                log.info("Requesting reqs purge(s): %s -> %s", pylon_id, plugins)
+                #
+                event_data = {
+                    "pylon_id": pylon_id,
+                    "actions": [
+                        ["delete_requirements", plugins],
+                    ],
+                    "restart": True,
+                    "pylon_pid": 1,
+                }
+                #
+                if pylon_id == self.module.context.id:
+                    events.append(event_data)
+                else:
+                    events.insert(0, event_data)
+            #
+            elif action == "delete":
+                log.info("Requesting plugin delete(s): %s -> %s", pylon_id, plugins)
+                #
+                plugins_del = [f"!{plugin}" for plugin in plugins]
+                #
+                event_data = {
+                    "pylon_id": pylon_id,
+                    "plugins": plugins_del,
+                    "restart": True,
+                    "pylon_pid": 1,
+                }
+                #
+                if pylon_id == self.module.context.id:
+                    events.append(event_data)
+                else:
+                    events.insert(0, event_data)
+            #
             elif action == "reload":
                 log.info("Requesting plugin reload(s): %s -> %s", pylon_id, plugins)
                 #
@@ -120,6 +174,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     events.append(event_data)
                 else:
                     events.insert(0, event_data)
+        #
+        # Emit events
         #
         for event_item in events:
             self.module.context.event_manager.fire_event(
