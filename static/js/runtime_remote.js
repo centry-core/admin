@@ -154,10 +154,20 @@ $("#btn-cfg-save").click(function() {
 });
 
 
+$("#btn-import-configs").click(function() {
+  $("#modal-import-config").modal("show");
+});
+
+
+$("#modal-import-config").on("show.bs.modal", function (e) {
+  $("#form-import-config").get(0).reset();
+});
+
+
 function editConfigActionsFormatter(value, row, index) {
   return [
     '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
-    '<i class="fa fa-file-text" style="color: #858796"></i>',
+    '  <i class="fa fa-file-text" style="color: #858796"></i>',
     '</a>',
   ].join('')
 }
