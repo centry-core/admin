@@ -49,6 +49,29 @@ $("#modal-pylon-config").on("show.bs.modal", function (e) {
 });
 
 
+$("#btn-cfg-load").click(function() {
+  axios.get(config_api_url + "/" + config_row.pylon_id)
+    .then(function (response) {
+      $("#input-cfg-edit").val(response.data.config);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config retrieval")
+      console.log(error);
+    });
+});
+
+
+$("#btn-cfg-load-raw").click(function() {
+  axios.get(config_api_url + "/" + config_row.pylon_id + "?raw=true")
+    .then(function (response) {
+      $("#input-cfg-edit").val(response.data.config);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config retrieval")
+      console.log(error);
+    });
+});
+
 // Table
 
 $("#refresh-table").click(function() {
