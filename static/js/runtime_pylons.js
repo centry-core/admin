@@ -1,3 +1,5 @@
+// Logs
+
 $("#modal-pylon-logs").on("show.bs.modal", function (e) {
   $("#modal-logs-pylon").text(logs_row.pylon_id);
   $("#input-logs").val("");
@@ -39,6 +41,15 @@ $("#btn-disable-debug-mode").click(function() {
     });
 });
 
+// Configs
+
+$("#modal-pylon-config").on("show.bs.modal", function (e) {
+  $("#modal-config-pylon").text(config_row.pylon_id);
+  $("#input-cfg-edit").val("");
+});
+
+
+// Table
 
 $("#refresh-table").click(function() {
   $("#table").bootstrapTable("refresh", {});
@@ -47,6 +58,10 @@ $("#refresh-table").click(function() {
 
 function pylonsActionsFormatter(value, row, index) {
   return [
+    '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
+    '  <i class="fa fa-cog" style="color: #858796"></i>',
+    '</a>',
+    '&nbsp;',
     '<a class="task-show-logs" href="javascript:void(0)" title="Show logs">',
     '  <i class="fa fa-file-text" style="color: #858796"></i>',
     '</a>',
@@ -55,6 +70,10 @@ function pylonsActionsFormatter(value, row, index) {
 
 
 window.pylonsActionsEvents = {
+  "click .task-edit-config": function (e, value, row, index) {
+    config_row = row;
+    $("#modal-pylon-config").modal("show");
+  },
   "click .task-show-logs": function (e, value, row, index) {
     logs_row = row;
     $("#modal-pylon-logs").modal("show");
