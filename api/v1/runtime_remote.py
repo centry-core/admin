@@ -106,8 +106,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                         data = self.module.remote_runtimes[pylon_id]
                         #
                         try:
-                            pylon_settings = data["pylon_settings"]
-                            zfile.writestr(f"{pylon_id}/pylon.yml", pylon_settings["tunable"])
+                            pylon_settings = data["pylon_settings"]["tunable"]
+                            #
+                            if pylon_settings:
+                                zfile.writestr(f"{pylon_id}/pylon.yml", pylon_settings)
                         except:  # pylint: disable=W0702
                             pass
                         #
@@ -119,6 +121,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                                 continue
                             #
                             config_data = plugin.get("config_data", "")
+                            #
+                            if not config_data:
+                                continue
+                            #
                             zfile.writestr(f"{pylon_id}/{plugin_name}.yml", config_data)
                 #
                 file_obj.seek(0)
