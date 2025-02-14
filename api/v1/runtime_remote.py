@@ -17,6 +17,8 @@
 
 """ API """
 
+import io
+import json
 import time
 import flask  # pylint: disable=E0401,W0611
 
@@ -57,8 +59,32 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         }
 
     @auth.decorators.check_api(["runtime.plugins"])
-    def post(self):  # pylint: disable=R0912
+    def post(self):  # pylint: disable=R0912,R0915
         """ Process POST """
+        #
+        # Special: config export
+        #
+        if "action" in flask.request.form:
+            action = flask.request.form["action"]
+            #
+            if action == "export_configs":
+                data = json.loads(flask.request.form.get("data", "[]"))
+                #
+                log.info("Got data: %s", data)
+                #
+                file_obj = io.BytesIO()
+                #
+                return flask.send_file(
+                    file_obj,
+                    mimetype="application/zip",
+                    as_attachment=True,
+                    download_name=f"config_export_{int(time.time())}.zip",
+                )
+            #
+            return {"ok": False}
+        #
+        # Normal
+        #
         data = flask.request.get_json()
         #
         if "data" not in data or not data["data"]:

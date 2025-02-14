@@ -101,6 +101,11 @@
 
 </div>
 
+<form id="form-export-configs" style="display: none;" method="post" action="{{ tools.context.url_prefix }}/api/v1/admin/runtime_remote/administration" target="_blank">
+  <input type="hidden" id="form-export-configs-data" name="data" value="">
+  <input type="hidden" name="action" value="export_configs">
+</form>
+
 <script src="{{ url_for('admin.static', filename='js/vendor/jquery.serialize-object.min.js') }}"></script>
 <script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
 

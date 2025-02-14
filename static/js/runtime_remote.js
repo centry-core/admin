@@ -54,18 +54,12 @@ $("#btn-delete").click(function() {
 });
 
 
-// $("#btn-export-configs").click(function() {
-//   var data = $("#table").bootstrapTable("getSelections");
-//   //
-//   axios.post(remote_api_url, {data: data, action: "export_configs"})
-//     .then(function (response) {
-//       showNotify("SUCCESS", "Deletion and restart requested")
-//     })
-//     .catch(function (error) {
-//       showNotify("ERROR", "Error during deletion and restart request")
-//       console.log(error);
-//     });
-// });
+$("#btn-export-configs").click(function() {
+  var data = $("#table").bootstrapTable("getSelections");
+  //
+  $("#form-export-configs-data").val(JSON.stringify(data));
+  $("#form-export-configs").submit();
+});
 
 
 $("#btn-reload").click(function() {
