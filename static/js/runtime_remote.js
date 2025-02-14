@@ -167,7 +167,7 @@ $("#modal-import-config").on("show.bs.modal", function (e) {
 $("#btn-cfg-import").click(function() {
   var data = new FormData();
   data.append("action", "import_configs");
-  data.append("file", $("#input-cfg-import").files[0]);
+  data.append("file", $("#input-cfg-import")[0].files[0]);
   //
   axios.post(remote_api_url, data)
     .then(function (response) {

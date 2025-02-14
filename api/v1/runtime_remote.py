@@ -138,8 +138,17 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     download_name=f"config_export_{int(time.time())}.zip",
                 )
             #
-            elif action == "import_configs":
-                log.info("Config import: %s", flask.request.files)
+            if action == "import_configs":
+                if "file" in flask.request.files:
+                    file_data = flask.request.files["file"]
+                    #
+                    log.info("Importing config from: %s", file_data.filename)
+                    #
+                    with zipfile.ZipFile(file_data.stream) as zfile:
+                        for item in zfile.namelist():
+                            log.info("-> %s", item)
+                #
+                return {"ok": True}
             #
             return {"ok": False}
         #
