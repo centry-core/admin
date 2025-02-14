@@ -75,7 +75,7 @@ $("#btn-cfg-load-raw").click(function() {
 
 $("#btn-cfg-save").click(function() {
   var result = $("#input-cfg-edit").val();
-  axios.post(config_api_url + "/" + edit_config_row.pylon_id, {action: "save", data: result})
+  axios.post(config_api_url + "/" + config_row.pylon_id, {action: "save", data: result})
     .then(function (response) {
       showNotify("SUCCESS", "Config save requested")
       $("#modal-pylon-config").modal("hide");
@@ -88,7 +88,7 @@ $("#btn-cfg-save").click(function() {
 
 
 $("#btn-cfg-restart").click(function() {
-  axios.post(config_api_url + "/" + edit_config_row.pylon_id, {action: "restart"})
+  axios.post(config_api_url + "/" + config_row.pylon_id, {action: "restart"})
     .then(function (response) {
       showNotify("SUCCESS", "Restart requested")
       $("#modal-pylon-config").modal("hide");
