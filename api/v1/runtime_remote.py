@@ -144,9 +144,43 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     #
                     log.info("Importing config from: %s", file_data.filename)
                     #
+                    target_events = {}
+                    #
                     with zipfile.ZipFile(file_data.stream) as zfile:
                         for item in zfile.namelist():
-                            log.info("-> %s", item)
+                            if "/" not in item:
+                                continue
+                            #
+                            pylon_id, name = item.split("/", 1)
+                            #
+                            if pylon_id not in target_events:
+                                target_events[pylon_id] = {
+                                    "pylon_id": pylon_id,
+                                    "configs": {},
+                                    "actions": [],
+                                    "restart": False,
+                                }
+                            #
+                            if not name.endswith(".yml"):
+                                continue
+                            #
+                            base_name = name.rsplit(".", 1)[0]
+                            #
+                            with zfile.open(name) as ifile:
+                                base_data = ifile.read().decode()
+                            #
+                            if base_name == "pylon":
+                                target_events[pylon_id]["actions"].append(
+                                    ["update_pylon_config", base_data]
+                                )
+                            else:
+                                target_events[pylon_id]["configs"][base_name] = base_data
+                    #
+                    for event_data in target_events.values():
+                        self.module.context.event_manager.fire_event(
+                            "bootstrap_runtime_update",
+                            event_data,
+                        )
                 #
                 return {"ok": True}
             #
