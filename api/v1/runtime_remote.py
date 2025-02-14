@@ -166,7 +166,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                             #
                             base_name = name.rsplit(".", 1)[0]
                             #
-                            with zfile.open(name) as ifile:
+                            with zfile.open(item) as ifile:
                                 base_data = ifile.read().decode()
                             #
                             if base_name == "pylon":
