@@ -164,6 +164,22 @@ $("#modal-import-config").on("show.bs.modal", function (e) {
 });
 
 
+$("#btn-cfg-import").click(function() {
+  var data = new FormData();
+  data.append("action", "import_configs");
+  data.append("file", $("#input-cfg-import").files[0]);
+  //
+  axios.post(remote_api_url, data)
+    .then(function (response) {
+      showNotify("SUCCESS", "Config import requested")
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during config import request")
+      console.log(error);
+    });
+});
+
+
 function editConfigActionsFormatter(value, row, index) {
   return [
     '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',

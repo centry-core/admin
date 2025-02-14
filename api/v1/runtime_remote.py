@@ -138,6 +138,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     download_name=f"config_export_{int(time.time())}.zip",
                 )
             #
+            elif action == "import_configs":
+                log.info("Config import: %s", flask.request.files)
+            #
             return {"ok": False}
         #
         # Normal
