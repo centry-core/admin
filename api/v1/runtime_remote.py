@@ -20,6 +20,8 @@
 import io
 import json
 import time
+import zipfile
+
 import flask  # pylint: disable=E0401,W0611
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
@@ -59,7 +61,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         }
 
     @auth.decorators.check_api(["runtime.plugins"])
-    def post(self):  # pylint: disable=R0912,R0915
+    def post(self):  # pylint: disable=R0912,R0915,R0914
         """ Process POST """
         #
         # Special: config export
@@ -70,9 +72,60 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             if action == "export_configs":
                 data = json.loads(flask.request.form.get("data", "[]"))
                 #
-                log.info("Got data: %s", data)
+                # ---
+                #
+                targets = {}
+                #
+                for item in data:
+                    pylon_id = item.get("pylon_id", "")
+                    #
+                    if not pylon_id:
+                        continue
+                    #
+                    if pylon_id not in targets:
+                        targets[pylon_id] = []
+                    #
+                    plugin_state = item.get("state", False)
+                    plugin_name = item.get("name", "")
+                    #
+                    if not plugin_state or not plugin_name:
+                        continue
+                    #
+                    if plugin_name not in targets[pylon_id]:
+                        targets[pylon_id].append(plugin_name)
+                #
+                # ---
                 #
                 file_obj = io.BytesIO()
+                #
+                with zipfile.ZipFile(file_obj, mode="w", compression=zipfile.ZIP_DEFLATED) as zfile:
+                    for pylon_id in list(sorted(self.module.remote_runtimes.keys())):
+                        if pylon_id not in targets:
+                            continue
+                        #
+                        zfile.mkdir(pylon_id)
+                        #
+                        data = self.module.remote_runtimes[pylon_id]
+                        #
+                        try:
+                            pylon_settings = data["pylon_settings"]
+                            zfile.writestr(f"{pylon_id}/pylon.yml", pylon_settings["tunable"])
+                        except:  # pylint: disable=W0702
+                            pass
+                        #
+                        runtime_info = data["runtime_info"]
+                        for plugin in sorted(runtime_info, key=lambda x: x["name"]):
+                            plugin_name = plugin["name"]
+                            #
+                            if plugin_name not in targets[pylon_id]:
+                                continue
+                            #
+                            config_data = plugin.get("config_data", "")
+                            zfile.writestr(f"{pylon_id}/{plugin_name}.yml", config_data)
+                #
+                file_obj.seek(0)
+                #
+                # ---
                 #
                 return flask.send_file(
                     file_obj,
