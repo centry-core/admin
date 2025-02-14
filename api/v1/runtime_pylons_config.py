@@ -48,32 +48,41 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         return {"config": ""}
 
-    # @auth.decorators.check_api(["runtime.plugins"])
-    # def post(self, target_pylon_id):
-    #     """ Process POST """
-    #     data = flask.request.get_json()
-    #     #
-    #     pylon_id = data.get("pylon_id", None)
-    #     action = data.get("action", None)
-    #     #
-    #     if pylon_id and action:
-    #         self.module.context.event_manager.fire_event(
-    #             "bootstrap_runtime_update",
-    #             {
-    #                 "pylon_id": pylon_id,
-    #                 "actions": [action],
-    #                 "restart": False,
-    #             },
-    #         )
-    #     #
-    #     if not pylon_id:
-    #         return {"ok": True, "logs": ""}
-    #     #
-    #     if pylon_id not in self.module.remote_runtimes:
-    #         return {"ok": True, "logs": ""}
-    #     #
-    #     data = self.module.remote_runtimes[pylon_id]
-    #     return {"ok": True, "logs": "\n".join(data.get("logs", []))}
+    @auth.decorators.check_api(["runtime.plugins"])
+    def post(self, target_pylon_id):
+        """ Process POST """
+        data = flask.request.get_json()
+        #
+        action = data.get("action", None)
+        #
+        if action == "restart":
+            log.info("Requesting pylon restart: %s", target_pylon_id)
+            #
+            self.module.context.event_manager.fire_event(
+                "bootstrap_runtime_update",
+                {
+                    "pylon_id": target_pylon_id,
+                    "restart": True,
+                    "pylon_pid": 1,
+                },
+            )
+        #
+        elif action == "save":
+            if "data" in data and data["data"]:
+                log.info("Requesting pylon config update: %s", target_pylon_id)
+                #
+                self.module.context.event_manager.fire_event(
+                    "bootstrap_runtime_update",
+                    {
+                        "pylon_id": target_pylon_id,
+                        "actions": [
+                            ["update_pylon_config", data["data"]],
+                        ],
+                        "restart": False,
+                    },
+                )
+        #
+        return {"ok": True}
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
