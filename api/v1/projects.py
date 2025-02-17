@@ -42,12 +42,13 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
             )
             #
             is_personal_project = project["name"].startswith("project_user_")
+            project_admin_ids = []
             #
             if is_personal_project:
-                project_admin_ids = [
+                project_admin_ids.extend(
                     user_id for user_id, user_roles in project_users.items()
                     if "editor" in user_roles
-                ]
+                )
             #
             project_admin_ids.extend(
                 user_id for user_id, user_roles in project_users.items()
