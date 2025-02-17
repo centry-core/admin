@@ -41,16 +41,18 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
                 filter_system_user=True,
             )
             #
-            project_admin_ids = [
-                user_id for user_id, user_roles in project_users.items()
-                if "admin" in user_roles
-            ]
+            is_personal_project = project["name"].startswith("project_user_")
             #
-            if not project_admin_ids:
+            if is_personal_project:
                 project_admin_ids = [
                     user_id for user_id, user_roles in project_users.items()
                     if "editor" in user_roles
                 ]
+            #
+            project_admin_ids.extend(
+                user_id for user_id, user_roles in project_users.items()
+                if "admin" in user_roles
+            )
             #
             user_infos = auth.list_users(user_ids=set(project_admin_ids))
             #
