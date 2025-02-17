@@ -54,9 +54,16 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
             #
             user_infos = auth.list_users(user_ids=set(project_admin_ids))
             #
+            admin_names = []
+            for user in user_infos:
+                if user["name"] is not None:
+                    admin_names.append(user["name"])
+                else:
+                    admin_names.append(str(user["email"]))
+            #
             result_item = project.copy()
             result_item["project_name"] = result_item["name"]
-            result_item["admin_name"] = ", ".join(user["name"] for user in user_infos)
+            result_item["admin_name"] = ", ".join(admin_names)
             #
             result.append(result_item)
         #
