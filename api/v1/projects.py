@@ -21,7 +21,7 @@ from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 from tools import auth, api_tools  # pylint: disable=E0401
 
 
-class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
+class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
     @auth.decorators.check_api({
         "permissions": ["projects.projects.projects.view"],
         "recommended_roles": {
@@ -29,13 +29,28 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
-    def get(self):  # pylint: disable=R0201
+    def get(self):
         """ Process """
+        result = []
+        #
         all_projects = self.module.context.rpc_manager.call.project_list()
         #
+        for project in all_projects:
+            project_users = self.module.get_users_roles_in_project(
+                project["id"],
+                filter_system_user=True,
+            )
+            #
+            log.info("Project users: %s", project_users)
+            #
+            result_item = project.copy()
+            result_item["project_name"] = result_item["name"]
+            #
+            result.append(result_item)
+        #
         return {
-            "total": len(all_projects),
-            "rows": all_projects,
+            "total": len(result),
+            "rows": result,
         }
 
 
