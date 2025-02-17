@@ -24,7 +24,8 @@
               data-url="{{ tools.context.url_prefix }}/api/v1/admin/users/administration/{{ project }}/">
               <thead class="thead-light">
                   <tr>
-                      <th data-visible="false" data-field="id">ID</th>
+                      <th data-visible="true" data-sortable="true" data-field="id">ID</th>
+                      <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="email">Email</th>
                       <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="name">Name</th>
                       <th scope="col" data-sortable="true" data-cell-style="nameStyle" data-field="roles">Roles</th>
                   </tr>
