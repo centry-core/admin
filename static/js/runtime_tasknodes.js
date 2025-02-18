@@ -59,6 +59,7 @@ $("#modal-task-logs").on("hide.bs.modal", function (e) {
 
 $(document).on("vue_init", () => {
   window.socket.on("log_data", (data) => {
+    console.log(data);
     $("#input-logs").val(
       $("#input-logs").val() + "\n" + data.line
     );
