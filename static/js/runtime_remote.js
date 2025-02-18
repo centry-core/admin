@@ -180,6 +180,11 @@ $("#btn-cfg-import").click(function() {
 });
 
 
+$("#refresh-table").click(function() {
+  $("#table").bootstrapTable("refresh", {});
+});
+
+
 function editConfigActionsFormatter(value, row, index) {
   return [
     '<a class="task-edit-config" href="javascript:void(0)" title="Edit config">',
