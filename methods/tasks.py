@@ -22,6 +22,8 @@ import arbiter
 from pylon.core.tools import log  # pylint: disable=E0611,E0401
 from pylon.core.tools import web  # pylint: disable=E0611,E0401
 
+from ..tasks import db_tasks
+
 
 class Method:  # pylint: disable=E1101,R0903
     """
@@ -57,10 +59,17 @@ class Method:  # pylint: disable=E1101,R0903
             stop_node_task_wait=3,
             result_max_wait=3,
             result_transport="memory",
+            start_attempts=1,
         )
         #
         self.task_node.start()
+        #
+        self.task_node.register_task(db_tasks.create_tables, "create_tables")
+        self.task_node.register_task(db_tasks.propose_migrations, "propose_migrations")
 
     @web.deinit()
     def _tasks_deinit(self):
+        self.task_node.unregister_task(db_tasks.propose_migrations, "propose_migrations")
+        self.task_node.unregister_task(db_tasks.create_tables, "create_tables")
+        #
         self.task_node.stop()
