@@ -59,8 +59,6 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                                         meta = str(meta)
                                     #
                                     status = state.get("status", None)
-                                    if status == "stopped":
-                                        continue
                                     #
                                     result.append({
                                         "task_id": state.get("task_id", None),
@@ -75,46 +73,47 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 "total": len(result),
                 "rows": result,
             }
-        # #
-        # # refresh
-        # #
-        # if action == "refresh":
-        #     if node is None or scope is None:
-        #         return {
-        #             "ok": False,
-        #             "error": "node or scope not set",
-        #         }
-        #     #
-        #     plugin_name, task_node_name = node.split(".", 1)
-        #     #
-        #     if plugin_name not in module_manager.modules:
-        #         return {
-        #             "ok": False,
-        #             "error": "unknown plugin",
-        #         }
-        #     #
-        #     plugin = module_manager.modules[plugin_name].module
-        #     task_node = getattr(plugin, task_node_name, None)
-        #     #
-        #     if task_node is None:
-        #         return {
-        #             "ok": False,
-        #             "error": "unknown node",
-        #         }
-        #     #
-        #     if scope == "pool":
-        #         task_node.query_pool_state()
-        #     elif scope == "task":
-        #         task_node.query_task_state()
-        #     else:
-        #         return {
-        #             "ok": False,
-        #             "error": "unknown scope",
-        #         }
-        #     #
-        #     return {
-        #         "ok": True,
-        #     }
+        #
+        # start
+        #
+        if action == "start":
+            if node is None or scope is None:
+                return {
+                    "ok": False,
+                    "error": "node or scope not set",
+                }
+            #
+            plugin_name, task_node_name = node.split(".", 1)
+            #
+            if plugin_name not in module_manager.modules:
+                return {
+                    "ok": False,
+                    "error": "unknown plugin",
+                }
+            #
+            plugin = module_manager.modules[plugin_name].module
+            task_node = getattr(plugin, task_node_name, None)
+            #
+            if task_node is None:
+                return {
+                    "ok": False,
+                    "error": "unknown node",
+                }
+            #
+            task_id = task_node.start_task(
+                scope,
+                pool="admin",
+            )
+            #
+            if task_id is None:
+                return {
+                    "ok": False,
+                    "error": "unknown task",
+                }
+            #
+            return {
+                "ok": True,
+            }
         #
         # stop
         #

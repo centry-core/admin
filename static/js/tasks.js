@@ -4,21 +4,21 @@ $(".refresh-table-button").click(function() {
 
 
 $("#btn-start-task").click(function() {
-  // var target = $(this).data("target");
-  // //
-  // axios.get(tasks_api_url, {params: {action: "refresh", scope: "task"}})
-  //   .then(function (response) {
-  //     if (response.data.ok) {
-  //       showNotify("SUCCESS", "Refresh request completed");
-  //       $(target).bootstrapTable("refresh", {});
-  //     } else {
-  //       showNotify("ERROR", response.data.error);
-  //     }
-  //   })
-  //   .catch(function (error) {
-  //     showNotify("ERROR", "Error during refresh request");
-  //     console.log(error);
-  //   });
+  var task = $("#task-selector").val();
+  //
+  axios.get(tasks_api_url, {params: {action: "start", scope: task}})
+    .then(function (response) {
+      if (response.data.ok) {
+        showNotify("SUCCESS", "Task start requested");
+        $("#table-task").bootstrapTable("refresh", {});
+      } else {
+        showNotify("ERROR", response.data.error);
+      }
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during task start request");
+      console.log(error);
+    });
 });
 
 
