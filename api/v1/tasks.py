@@ -103,6 +103,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             task_id = task_node.start_task(
                 scope,
                 pool="admin",
+                meta={
+                    "task": scope,
+                },
             )
             #
             if task_id is None:
