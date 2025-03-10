@@ -20,6 +20,7 @@
 import logging
 
 from centry_logging.handlers.eventnode import EventNodeLogHandler  # pylint: disable=E0611,E0401
+from centry_logging.formatters.secret import SecretFormatter  # pylint: disable=E0611,E0401
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
 from tools import context  # pylint: disable=E0401
@@ -57,6 +58,7 @@ class make_logger:  # pylint: disable=C0103
                 "stream_id": "",  # until datasources are updated
             }
         })
+        self.handler.setFormatter(SecretFormatter())
         #
         self.logger = logging.Logger(f"{self.task_name}:{self.task_id}")
         self.logger.setLevel(logging.INFO)
