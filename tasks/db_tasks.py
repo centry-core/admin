@@ -68,15 +68,15 @@ def propose_migrations():
         #
         log.info("Getting all metadata")
         all_metadata = db.get_all_metadata()
-        log.info("All metadata: %s", all_metadata)
+        log.info("All metadata: %s", all_metadata.sorted_tables)
         #
         log.info("Getting shared metadata")
         shared_metadata = db.get_shared_metadata()
-        log.info("Shared metadata: %s", shared_metadata)
+        log.info("Shared metadata: %s", shared_metadata.sorted_tables)
         #
         log.info("Getting tenant metadata")
         tenant_metadata = db.get_tenant_specific_metadata()
-        log.info("Tenant metadata: %s", tenant_metadata)
+        log.info("Tenant metadata: %s", tenant_metadata.sorted_tables)
         #
         end_ts = time.time()
         log.info("Exiting (duration = %s)", end_ts - start_ts)
