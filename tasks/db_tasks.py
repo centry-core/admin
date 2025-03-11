@@ -83,7 +83,10 @@ def propose_migrations():  # pylint: disable=R0914
             log.info("Comparing shared metadata")
             with db.get_session(None) as shared_db:
                 def _non_auth_name(name, type_, parent_names):  # pylint: disable=W0613
-                    return "auth_core" not in name
+                    if name is not None:
+                        return "auth_core" not in name
+                    #
+                    return True
                 #
                 migration_ctx = MigrationContext.configure(
                     connection=shared_db.connection(),
