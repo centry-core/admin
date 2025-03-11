@@ -17,6 +17,8 @@
 
 """ Task """
 
+import time
+
 from tools import context  # pylint: disable=E0401
 
 from .logs import make_logger
@@ -27,6 +29,7 @@ def create_tables():
     #
     with make_logger() as log:
         log.info("Starting")
+        start_ts = time.time()
         #
         try:
             project_list = context.rpc_manager.timeout(120).project_list(
@@ -49,6 +52,9 @@ def create_tables():
                     tenant_db.commit()
         except:  # pylint: disable=W0702
             log.exception("Got exception, stopping")
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
 
 
 def propose_migrations():
@@ -56,3 +62,21 @@ def propose_migrations():
     #
     with make_logger() as log:
         log.info("Starting")
+        start_ts = time.time()
+        #
+        from tools import db  # pylint: disable=C0415,E0401
+        #
+        log.info("Getting all metadata")
+        all_metadata = db.get_all_metadata()
+        log.info("All metadata: %s", all_metadata)
+        #
+        log.info("Getting shared metadata")
+        shared_metadata = db.get_shared_metadata()
+        log.info("Shared metadata: %s", shared_metadata)
+        #
+        log.info("Getting tenant metadata")
+        tenant_metadata = db.get_tenant_specific_metadata()
+        log.info("Tenant metadata: %s", tenant_metadata)
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
