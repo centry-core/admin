@@ -69,19 +69,26 @@ def propose_migrations():
         log.info("Starting")
         start_ts = time.time()
         #
-        from tools import db  # pylint: disable=C0415,E0401
-        #
-        log.info("Getting all metadata")
-        all_metadata = db.get_all_metadata()
-        log.info("All metadata: %s", all_metadata.sorted_tables)
-        #
-        log.info("Getting shared metadata")
-        shared_metadata = db.get_shared_metadata()
-        log.info("Shared metadata: %s", shared_metadata.sorted_tables)
-        #
-        log.info("Getting tenant metadata")
-        tenant_metadata = db.get_tenant_specific_metadata()
-        log.info("Tenant metadata: %s", tenant_metadata.sorted_tables)
+        try:
+            from tools import db  # pylint: disable=C0415,E0401
+            #
+            log.info("Getting shared metadata")
+            shared_metadata = db.get_shared_metadata()
+            #
+            from alembic.migration import MigrationContext  # pylint: disable=C0415,E0401
+            from alembic.autogenerate import compare_metadata  # pylint: disable=C0415,E0401
+            #
+            log.info("Comparing shared metadata")
+            with db.get_session(None) as shared_db:
+                migration_ctx = MigrationContext.configure(
+                    connection=shared_db.connection(),
+                )
+                #
+                db_diff = compare_metadata(migration_ctx, shared_metadata)
+                #
+                log.info("DB diff: %s", db_diff)
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping")
         #
         end_ts = time.time()
         log.info("Exiting (duration = %s)", end_ts - start_ts)
