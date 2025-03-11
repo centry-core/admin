@@ -118,6 +118,9 @@ def propose_migrations():  # pylint: disable=R0914
                     from tools import project_constants as pc  # pylint: disable=E0401,C0415
                     project_schema = pc["PROJECT_SCHEMA_TEMPLATE"].format(project["id"])
                     #
+                    for table in tenant_metadata.sorted_tables:
+                        table.schema = project_schema
+                    #
                     def _project_schema_name(name, type_, parent_names):  # pylint: disable=W0613
                         if type_ == "schema":
                             return name == project_schema
