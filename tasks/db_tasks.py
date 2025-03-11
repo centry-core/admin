@@ -71,6 +71,9 @@ def propose_migrations():  # pylint: disable=R0914
         #
         try:
             from tools import db  # pylint: disable=C0415,E0401
+            from tools import config as c  # pylint: disable=C0415,E0401
+            #
+            from sqlalchemy import MetaData  # pylint: disable=C0415,E0401
             #
             from alembic.migration import MigrationContext  # pylint: disable=C0415,E0401
             from alembic.autogenerate import compare_metadata  # pylint: disable=C0415,E0401
@@ -102,8 +105,12 @@ def propose_migrations():  # pylint: disable=R0914
             #
             # ---
             #
-            log.info("Getting project metadata")
-            tenant_metadata = db.get_tenant_specific_metadata()
+            def _get_tenant_specific_metadata(target_schema):
+                meta = MetaData(schema=target_schema)
+                for table in db.Base.metadata.tables.values():
+                    if table.schema == c.POSTGRES_TENANT_SCHEMA:
+                        table.tometadata(meta, schema=target_schema)
+                return meta
             #
             log.info("Getting project list")
             project_list = context.rpc_manager.timeout(120).project_list(
@@ -113,13 +120,17 @@ def propose_migrations():  # pylint: disable=R0914
             if project_list:
                 project = project_list[0]
                 #
-                log.info("Comparing project metadata: %s", project)
+                log.info("Processing project: %s", project)
                 with db.get_session(project["id"]) as tenant_db:
                     from tools import project_constants as pc  # pylint: disable=E0401,C0415
                     project_schema = pc["PROJECT_SCHEMA_TEMPLATE"].format(project["id"])
                     #
-                    for table in tenant_metadata.sorted_tables:
-                        table.schema = project_schema
+                    log.info("Getting project metadata")
+                    tenant_metadata = _get_tenant_specific_metadata(project_schema)
+                    #
+                    # Shoud fix key -> table relation after such changes
+                    # for table in tenant_metadata.sorted_tables:
+                    #     table.schema = project_schema
                     #
                     def _project_schema_name(name, type_, parent_names):  # pylint: disable=W0613
                         if type_ == "schema":
@@ -135,6 +146,7 @@ def propose_migrations():  # pylint: disable=R0914
                         },
                     )
                     #
+                    log.info("Comparing project metadata")
                     db_diffs = compare_metadata(migration_ctx, tenant_metadata)
                     #
                     for db_diff in db_diffs:
