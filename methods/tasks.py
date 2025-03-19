@@ -23,6 +23,7 @@ from pylon.core.tools import log  # pylint: disable=E0611,E0401
 from pylon.core.tools import web  # pylint: disable=E0611,E0401
 
 from ..tasks import db_tasks
+from ..tasks import indexer_tasks
 
 
 class Method:  # pylint: disable=E1101,R0903
@@ -66,9 +67,13 @@ class Method:  # pylint: disable=E1101,R0903
         #
         self.task_node.register_task(db_tasks.create_tables, "create_tables")
         self.task_node.register_task(db_tasks.propose_migrations, "propose_migrations")
+        #
+        self.task_node.register_task(indexer_tasks.indexer_migrate, "indexer_migrate")
 
     @web.deinit()
     def _tasks_deinit(self):
+        self.task_node.unregister_task(indexer_tasks.indexer_migrate, "indexer_migrate")
+        #
         self.task_node.unregister_task(db_tasks.propose_migrations, "propose_migrations")
         self.task_node.unregister_task(db_tasks.create_tables, "create_tables")
         #
