@@ -5,8 +5,9 @@ $(".refresh-table-button").click(function() {
 
 $("#btn-start-task").click(function() {
   var task = $("#task-selector").val();
+  var param = $("#task-param").val();
   //
-  axios.get(tasks_api_url, {params: {action: "start", scope: task}})
+  axios.get(tasks_api_url, {params: {action: "start", scope: task + ":" + param}})
     .then(function (response) {
       if (response.data.ok) {
         showNotify("SUCCESS", "Task start requested");

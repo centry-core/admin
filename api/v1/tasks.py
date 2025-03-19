@@ -100,11 +100,16 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     "error": "unknown node",
                 }
             #
+            task_name, task_param = scope.split(":", 1)
+            #
             task_id = task_node.start_task(
-                scope,
+                task_name,
+                kwargs={
+                    "param": task_param,
+                },
                 pool="admin",
                 meta={
-                    "task": scope,
+                    "task": task_name,
                 },
             )
             #

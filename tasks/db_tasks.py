@@ -24,7 +24,7 @@ from tools import context  # pylint: disable=E0401
 from .logs import make_logger
 
 
-def create_tables():
+def create_tables(*args, **kwargs):
     """ Task """
     #
     with make_logger() as log:
@@ -62,7 +62,7 @@ def create_tables():
         log.info("Exiting (duration = %s)", end_ts - start_ts)
 
 
-def propose_migrations():  # pylint: disable=R0914
+def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
     """ Task """
     #
     with make_logger() as log:
