@@ -58,12 +58,24 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         }})
     def get(self, project_id: int, **kwargs):
         project_users = self.module.get_users_roles_in_project(project_id, filter_system_user=True)
-        all_users = auth.list_users(user_ids=set(project_users.keys()))
+        user_ids = set(project_users.keys())
+        all_users = auth.list_users(user_ids=user_ids)
+
+        try:
+            social_data: list = self.module.context.rpc_manager.call.social_get_users(user_ids)
+        except KeyError:
+            social_data = []
+
+        avatar_map = {i['user_id']: i.get('avatar') for i in social_data}
+
         for user in all_users:
             roles = project_users.pop(user['id'], [])
             user['roles'] = roles
             if user['last_login']:
                 user['last_login'] = user['last_login'].isoformat(timespec='seconds')
+            avatar = avatar_map.pop(user['id'], None)
+            user['avatar'] = avatar
+
         return {
             "total": len(all_users),
             "rows": all_users,
