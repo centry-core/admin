@@ -122,7 +122,7 @@ class ProjectAPI(api_tools.APIModeHandler):
     def put(self, project_id):  # pylint: disable=R0201
         """ Process """
         new_data = request.get_json()
-        old_data = self.get(project_id)["rows"]
+        old_data = self.get(project_id=project_id)["rows"]
         old_permissions = set(
             (r, p['name']) for p in old_data for r, v in p.items() if v)
         new_permissions = set(
