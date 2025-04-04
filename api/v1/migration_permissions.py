@@ -135,12 +135,31 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 # Apply
                 #
                 if missing_roles:
-                    self.module.context.rpc_manager.call.admin_add_role(project_id, missing_roles)
+                    try:
+                        self.module.context.rpc_manager.call.admin_add_role(
+                            project_id, missing_roles
+                        )
+                    except:  # pylint: disable=W0702
+                        log.exception("Failed to add missing roles")
+                        logs.append("> Failed to add missing roles")
                 #
                 for permission in missing_permissions:
-                    self.module.context.rpc_manager.call.admin_set_permission_for_role(
-                        project_id, permission["role"], permission["permission"]
-                    )
+                    try:
+                        self.module.context.rpc_manager.call.admin_set_permission_for_role(
+                            project_id, permission["role"], permission["permission"]
+                        )
+                    except:  # pylint: disable=W0702
+                        log.exception(
+                            "Failed to add missing permission: %s:%s",
+                            permission["role"], permission["permission"],
+                        )
+                        #
+                        l_role = permission["role"]
+                        l_perm = permission["permission"]
+                        #
+                        logs.append(
+                            f"> Failed to add missing permission: {l_role}:{l_perm}"
+                        )
         elif mode in [  # pylint: disable=R1702
                 "add_user_project_permissions",
                 "add_team_project_permissions",

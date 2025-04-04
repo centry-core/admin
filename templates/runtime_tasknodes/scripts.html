@@ -96,8 +96,43 @@
 <script src="{{ url_for('admin.static', filename='js/vendor/jquery.serialize-object.min.js') }}"></script>
 <script src="{{ url_for('admin.static', filename='js/vendor/axios.min.js') }}"></script>
 
+<div id="modal-task-logs" class="modal fixed-left fade shadow-sm" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-aside" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Logs: <span id="modal-logs-task"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+
+          <div class="col">
+
+            <form id="form-logs">
+              <div class="form-group">
+                <label for="input-logs">Logs</label>
+                <textarea class="col-12" rows="20" id="input-logs" readonly></textarea>
+              </div>
+            </form>
+
+          </div> <!-- col -->
+        </div> <!-- row -->
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> <!-- modal -->
+
 <script>
   var tasknodes_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_tasknodes/administration/";
+  //
+  var logs_row = {};
 </script>
 
 <script src="{{ url_for('admin.static', filename='js/runtime_tasknodes.js') }}"></script>

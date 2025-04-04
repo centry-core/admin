@@ -294,6 +294,39 @@ class Module(module.ModuleModel):
             icon_class="fas fa-server fa-fw",
         )
         #
+        # Tasks
+        #
+        theme.register_mode_section(
+            "administration", "tasks", "Tasks",
+            kind="holder",
+            permissions={
+                "permissions": ["runtime"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            location="left",
+            icon_class="fas fa-info-circle fa-fw",
+        )
+        theme.register_mode_subsection(
+            "administration", "tasks",
+            "tasks", "Tasks",
+            title="Tasks",
+            kind="slot",
+            permissions={
+                "permissions": ["runtime.plugins"],
+                "recommended_roles": {
+                    "administration": {"admin": True, "viewer": False, "editor": False},
+                    "default": {"admin": True, "viewer": False, "editor": False},
+                    "developer": {"admin": True, "viewer": False, "editor": False},
+                }
+            },
+            prefix="admin_tasks_tasks_",
+            icon_class="fas fa-server fa-fw",
+        )
+        #
         # Migration
         #
         theme.register_mode_section(

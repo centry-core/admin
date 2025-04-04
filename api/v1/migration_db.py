@@ -87,7 +87,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             return {
                 "ok": False,
                 "logs": "\n".join(logs),
-            }, 400
+            }
         finally:
             connection.close()
         #

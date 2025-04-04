@@ -3,39 +3,21 @@ $(".refresh-table-button").click(function() {
 });
 
 
-$(".refresh-pool-button").click(function() {
-  var target = $(this).data("target");
+$("#btn-start-task").click(function() {
+  var task = $("#task-selector").val();
+  var param = $("#task-param").val();
   //
-  axios.get(tasknodes_api_url, {params: {action: "refresh", node: $(this).data("node"), scope: "pool"}})
+  axios.get(tasks_api_url, {params: {action: "start", scope: task + ":" + param}})
     .then(function (response) {
       if (response.data.ok) {
-        showNotify("SUCCESS", "Refresh request completed");
-        $(target).bootstrapTable("refresh", {});
+        showNotify("SUCCESS", "Task start requested");
+        $("#table-task").bootstrapTable("refresh", {});
       } else {
         showNotify("ERROR", response.data.error);
       }
     })
     .catch(function (error) {
-      showNotify("ERROR", "Error during refresh request");
-      console.log(error);
-    });
-});
-
-
-$(".refresh-task-button").click(function() {
-  var target = $(this).data("target");
-  //
-  axios.get(tasknodes_api_url, {params: {action: "refresh", node: $(this).data("node"), scope: "task"}})
-    .then(function (response) {
-      if (response.data.ok) {
-        showNotify("SUCCESS", "Refresh request completed");
-        $(target).bootstrapTable("refresh", {});
-      } else {
-        showNotify("ERROR", response.data.error);
-      }
-    })
-    .catch(function (error) {
-      showNotify("ERROR", "Error during refresh request");
+      showNotify("ERROR", "Error during task start request");
       console.log(error);
     });
 });
@@ -83,7 +65,7 @@ function actions_formatter(value, row, index) {
 
 window.actions_events = {
   "click .task-stop": function (e, value, row, index) {
-    axios.get(tasknodes_api_url, {params: {action: "stop", node: row.node, scope: row.task_id}})
+    axios.get(tasks_api_url, {params: {action: "stop", scope: row.task_id}})
       .then(function (response) {
         if (response.data.ok) {
           showNotify("SUCCESS", "Stop requested");

@@ -6,7 +6,11 @@ $("#btn-execute").click(function() {
       exceptions: $("#textarea-exceptions").val(),
     })
     .then(function (response) {
-      showNotify("SUCCESS", "Action performed")
+      if (response.data.ok) {
+        showNotify("SUCCESS", "Action performed")
+      } else {
+        showNotify("WARNING", "Action performed with warnings")
+      }
       $("#textarea-logs").val(response.data.logs);
     })
     .catch(function (error) {
