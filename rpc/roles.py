@@ -292,7 +292,7 @@ class RPC:
                 user_id = int(g.auth.id)
             except (AttributeError, TypeError, ValueError):
                 return False
-        log.info('Checking if user %s is in project %s', user_id, project_id)
+        # log.debug('Checking if user %s is in project %s', user_id, project_id)
 
         try:
             with db.with_project_schema_session(project_id) as tenant_session:
