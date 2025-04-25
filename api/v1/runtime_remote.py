@@ -49,9 +49,16 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             #
             for plugin in sorted(runtime_info, key=lambda x: x["name"]):
                 item = plugin.copy()
+                #
                 item["pylon_id"] = pylon_id
+                #
                 item.pop("config", None)
                 item.pop("config_data", None)
+                #
+                if "git_head" in item.get("metadata", {}):
+                    item_version = item["metadata"].get("version", "-")
+                    item_git_head = item["metadata"]["git_head"]
+                    item["metadata"]["version"] = f"{item_version} ({item_git_head})"
                 #
                 result.append(item)
         #
