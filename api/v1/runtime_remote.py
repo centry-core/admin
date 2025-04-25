@@ -58,7 +58,6 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 if "git_head" in item.get("metadata", {}):
                     item_version = item.get("local_version", "-")
                     item_git_head = item["metadata"]["git_head"][:7]
-                    
                     item["local_version"] = f"{item_version} ({item_git_head})"
                 #
                 result.append(item)
