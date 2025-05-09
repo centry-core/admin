@@ -96,6 +96,7 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     connection=shared_db.connection(),
                     opts={
                         "include_name": _non_auth_name,
+                        "alembic_module_prefix": "",
                     },
                 )
                 #
