@@ -118,8 +118,16 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                 )
                 operations = Operations(sql_migration_context)
                 #
-                for upgrade_op in db_script.upgrade_ops.ops:
-                    operations.invoke(upgrade_op)
+                to_process = [db_script.upgrade_ops]
+                #
+                while to_process:
+                    current_op = to_process.pop(0)
+                    #
+                    if hasattr(current_op, "ops"):
+                        to_process.extend(current_op.ops)
+                        continue
+                    #
+                    operations.invoke(current_op)
                 #
                 log.info("- - Shared DB SQLs:\n%s\n", output_buffer.getvalue())
             #
