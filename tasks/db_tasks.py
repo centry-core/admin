@@ -107,7 +107,7 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                 db_script = produce_migrations(migration_ctx, shared_metadata)
                 autogen_context = AutogenContext(migration_ctx, metadata=shared_metadata)
                 #
-                for upgrade_op in db_script.upgrade_ops_list:
+                for upgrade_op in db_script.upgrade_ops.ops:
                     rendered_op = render_op_text(autogen_context, upgrade_op)
                     log.info("- - Shared DB op: %s", rendered_op)
             #
