@@ -17,6 +17,7 @@
 
 """ Task """
 
+import io
 import time
 
 from tools import context  # pylint: disable=E0401
@@ -76,8 +77,8 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
             from sqlalchemy import MetaData  # pylint: disable=C0415,E0401
             #
             from alembic.migration import MigrationContext  # pylint: disable=C0415,E0401
-            from alembic.autogenerate import compare_metadata, produce_migrations, render_op_text  # pylint: disable=C0415,E0401
-            from alembic.autogenerate.api import AutogenContext  # pylint: disable=C0415,E0401
+            from alembic.autogenerate import compare_metadata, produce_migrations  # pylint: disable=C0415,E0401
+            from alembic.operations import Operations  # pylint: disable=C0415,E0401
             #
             # ---
             #
@@ -96,7 +97,6 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     connection=shared_db.connection(),
                     opts={
                         "include_name": _non_auth_name,
-                        "alembic_module_prefix": "",
                     },
                 )
                 #
@@ -106,11 +106,22 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     log.info("- Shared DB diff: %s", db_diff)
                 #
                 db_script = produce_migrations(migration_ctx, shared_metadata)
-                autogen_context = AutogenContext(migration_ctx, metadata=shared_metadata)
+                #
+                output_buffer = io.StringIO()
+                #
+                sql_migration_context = MigrationContext.configure(
+                    connection=migration_ctx.connection,
+                    opts={
+                        "as_sql": True,
+                        "output_buffer": output_buffer,
+                    },
+                )
+                operations = Operations(sql_migration_context)
                 #
                 for upgrade_op in db_script.upgrade_ops.ops:
-                    rendered_op = render_op_text(autogen_context, upgrade_op)
-                    log.info("- - Shared DB op: %s", rendered_op)
+                    operations.invoke(upgrade_op)
+                #
+                log.info("- - Shared DB SQLs:\n%s\n", output_buffer.getvalue())
             #
             # ---
             #
