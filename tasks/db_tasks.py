@@ -129,7 +129,13 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     #
                     operations.invoke(current_op)
                 #
-                log.info("- - Shared DB SQLs:\n%s\n", output_buffer.getvalue())
+                sql_lines = "\n".join([
+                    line.strip()
+                    for line in output_buffer.getvalue().splitlines()
+                    if line.strip()
+                ])
+                #
+                log.info("- - Shared DB SQLs:\n---\n%s\n---", sql_lines)
             #
             # ---
             #
@@ -179,6 +185,38 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     #
                     for db_diff in db_diffs:
                         log.info("- Project DB diff: %s", db_diff)
+                    #
+                    db_script = produce_migrations(migration_ctx, tenant_metadata)
+                    #
+                    output_buffer = io.StringIO()
+                    #
+                    sql_migration_context = MigrationContext.configure(
+                        connection=migration_ctx.connection,
+                        opts={
+                            "as_sql": True,
+                            "output_buffer": output_buffer,
+                        },
+                    )
+                    operations = Operations(sql_migration_context)
+                    #
+                    to_process = [db_script.upgrade_ops]
+                    #
+                    while to_process:
+                        current_op = to_process.pop(0)
+                        #
+                        if hasattr(current_op, "ops"):
+                            to_process.extend(current_op.ops)
+                            continue
+                        #
+                        operations.invoke(current_op)
+                    #
+                    sql_lines = "\n".join([
+                        line.strip()
+                        for line in output_buffer.getvalue().splitlines()
+                        if line.strip()
+                    ])
+                    #
+                    log.info("- - Project DB SQLs:\n---\n%s\n---", sql_lines)
             #
         except:  # pylint: disable=W0702
             log.exception("Got exception, stopping")
