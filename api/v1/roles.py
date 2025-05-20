@@ -31,9 +31,9 @@ class AdminAPI(api_tools.APIModeHandler):
     @auth.decorators.check_api({
         "permissions": ["configuration.roles.roles.view"],
         "recommended_roles": {
-            "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": True, "viewer": False, "editor": False},
-            "developer": {"admin": True, "viewer": False, "editor": False},
+            "administration": {"admin": True, "viewer": True, "editor": True},
+            "default": {"admin": True, "viewer": True, "editor": True},
+            "developer": {"admin": True, "viewer": True, "editor": True},
         }})
     def get(self, target_mode: str):
         roles = auth.get_roles(target_mode)
