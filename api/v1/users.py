@@ -53,7 +53,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         "permissions": ["configuration.users.users.view"],
         "recommended_roles": {
             "administration": {"admin": True, "viewer": False, "editor": False},
-            "default": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
     def get(self, project_id: int, **kwargs):
