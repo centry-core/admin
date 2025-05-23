@@ -121,8 +121,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             #
             return {
                 "ok": True,
-            }
-        #
+            }        #
         # stop
         #
         if action == "stop":
@@ -154,6 +153,43 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             return {
                 "ok": True,
             }
+        #
+        # result - get task results
+        #
+        if action == "result":
+            if node is None or scope is None:
+                return {
+                    "ok": False,
+                    "error": "node or scope not set",
+                }
+            #
+            plugin_name, task_node_name = node.split(".", 1)
+            #
+            if plugin_name not in module_manager.modules:
+                return {
+                    "ok": False,
+                    "error": "unknown plugin",
+                }
+            #
+            plugin = module_manager.modules[plugin_name].module
+            task_node = getattr(plugin, task_node_name, None)
+            #
+            if task_node is None:
+                return {
+                    "ok": False,
+                    "error": "unknown node",
+                }
+            #
+            task_id = scope
+            result = task_node.get_task_result(task_id)
+            #
+            if result is None:
+                return {
+                    "ok": False,
+                    "error": "task result not found",
+                }
+            #
+            return result
         #
         return {
             "ok": False,

@@ -22,6 +22,41 @@ $("#btn-start-task").click(function() {
     });
 });
 
+// Convenience buttons for database operations
+$("#btn-create-tables").click(function() {
+  $("#task-selector").val("create_tables");
+  $("#task-param").val("");
+  $("#btn-start-task").click();
+});
+
+$("#btn-propose-migrations").click(function() {
+  $("#task-selector").val("propose_migrations");
+  $("#task-param").val("");
+  $("#btn-start-task").click();
+});
+
+$("#btn-apply-migrations").click(function() {
+  $("#task-selector").val("apply_migrations");
+  $("#task-param").val("");
+  $("#btn-start-task").click();
+});
+
+// Backup and restore operation buttons
+$("#btn-list-backups").click(function() {
+  $("#task-selector").val("list_backups");
+  $("#task-param").val("");
+  $("#btn-start-task").click();
+  
+  // Also refresh the backup list in the restore modal
+  refreshBackupList();
+});
+
+$("#btn-backup-database").click(function() {
+  $("#task-selector").val("backup_database");
+  $("#task-param").val("");
+  $("#btn-start-task").click();
+});
+
 
 $("#modal-task-logs").on("show.bs.modal", function (e) {
   $("#modal-logs-task").text(logs_row.task_id);

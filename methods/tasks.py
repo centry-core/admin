@@ -25,6 +25,9 @@ from pylon.core.tools import web  # pylint: disable=E0611,E0401
 from ..tasks import db_tasks
 from ..tasks import indexer_tasks
 from ..tasks import project_tasks
+from ..tasks import db_backup
+from ..tasks import db_restore
+from ..tasks import db_list_backups
 
 
 class Method:  # pylint: disable=E1101,R0903
@@ -63,11 +66,13 @@ class Method:  # pylint: disable=E1101,R0903
             result_transport="memory",
             start_attempts=1,
         )
-        #
-        self.task_node.start()
-        #
-        self.task_node.register_task(db_tasks.create_tables, "create_tables")
+        #        self.task_node.start()
+        #        self.task_node.register_task(db_tasks.create_tables, "create_tables")
         self.task_node.register_task(db_tasks.propose_migrations, "propose_migrations")
+        self.task_node.register_task(db_tasks.apply_migrations, "apply_migrations")
+        self.task_node.register_task(db_backup.backup_database, "backup_database")
+        self.task_node.register_task(db_restore.restore_database, "restore_database")
+        self.task_node.register_task(db_list_backups.list_backups, "list_backups")
         #
         self.task_node.register_task(indexer_tasks.indexer_migrate, "indexer_migrate")
         #
@@ -86,9 +91,11 @@ class Method:  # pylint: disable=E1101,R0903
         self.task_node.unregister_task(
             project_tasks.list_failed_projects, "list_failed_projects"
         )
-        #
-        self.task_node.unregister_task(indexer_tasks.indexer_migrate, "indexer_migrate")
-        #
+        #        self.task_node.unregister_task(indexer_tasks.indexer_migrate, "indexer_migrate")
+        #        self.task_node.unregister_task(db_list_backups.list_backups, "list_backups")
+        self.task_node.unregister_task(db_restore.restore_database, "restore_database")
+        self.task_node.unregister_task(db_backup.backup_database, "backup_database")
+        self.task_node.unregister_task(db_tasks.apply_migrations, "apply_migrations")
         self.task_node.unregister_task(db_tasks.propose_migrations, "propose_migrations")
         self.task_node.unregister_task(db_tasks.create_tables, "create_tables")
         #

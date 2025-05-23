@@ -144,16 +144,13 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                 for table in db.Base.metadata.tables.values():
                     if table.schema == c.POSTGRES_TENANT_SCHEMA:
                         table.tometadata(meta, schema=target_schema)
-                return meta
-            #
+                return meta            #
             log.info("Getting project list")
             project_list = context.rpc_manager.timeout(120).project_list(
                 filter_={"create_success": True},
             )
             #
-            if project_list:
-                project = project_list[0]
-                #
+            for project in project_list:
                 log.info("Processing project: %s", project)
                 with db.get_session(project["id"]) as tenant_db:
                     from tools import project_constants as pc  # pylint: disable=E0401,C0415
@@ -184,7 +181,7 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                     db_diffs = compare_metadata(migration_ctx, tenant_metadata)
                     #
                     for db_diff in db_diffs:
-                        log.info("- Project DB diff: %s", db_diff)
+                        log.info("- Project %s DB diff: %s", project["id"], db_diff)
                     #
                     db_script = produce_migrations(migration_ctx, tenant_metadata)
                     #
@@ -216,7 +213,7 @@ def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
                         if line.strip()
                     ])
                     #
-                    log.info("- - Project DB SQLs:\n---\n%s\n---", sql_lines)
+                    log.info("- - Project %s DB SQLs:\n---\n%s\n---", project["id"], sql_lines)
             #
         except:  # pylint: disable=W0702
             log.exception("Got exception, stopping")
