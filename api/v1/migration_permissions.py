@@ -59,6 +59,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 default_role_map[item["name"]] = list(default_role_map[item["name"]])
                 default_role_map[item["name"]].sort()
             #
+            log.debug("Default role map: %s", default_role_map)
+            #
             # Get projects
             #
             personal_project_ids = \
@@ -96,6 +98,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             else:
                 project_ids = []
             #
+            log.debug("Project IDs: %s", project_ids)
+            #
             for project_id in project_ids:
                 #
                 # Build project role map
@@ -115,6 +119,8 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     project_role_map[item["name"]] = list(project_role_map[item["name"]])
                     project_role_map[item["name"]].sort()
                 #
+                log.debug("Project role map: %s", project_role_map)
+                #
                 # Diff
                 #
                 missing_roles = []
@@ -130,6 +136,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                         if permission not in role_permissions:
                             missing_permissions.append({"role": role, "permission": permission})
                 #
+                log.debug(f"Project {project_id}: {missing_roles=} {missing_permissions=}")
                 logs.append(f"Project {project_id}: {missing_roles=} {missing_permissions=}")
                 #
                 # Apply
