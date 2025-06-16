@@ -77,9 +77,15 @@ class Method:  # pylint: disable=E1101,R0903
         self.task_node.register_task(
             project_tasks.delete_failed_projects, "delete_failed_projects"
         )
+        self.task_node.register_task(
+            project_tasks.fix_personal_projects, "fix_personal_projects"
+        )
 
     @web.deinit()
     def _tasks_deinit(self):
+        self.task_node.unregister_task(
+            project_tasks.fix_personal_projects, "fix_personal_projects"
+        )
         self.task_node.unregister_task(
             project_tasks.delete_failed_projects, "delete_failed_projects"
         )

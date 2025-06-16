@@ -74,3 +74,20 @@ def delete_failed_projects(*args, **kwargs):
         #
         end_ts = time.time()
         log.info("Exiting (duration = %s)", end_ts - start_ts)
+
+
+def fix_personal_projects(*args, **kwargs):
+    """ Task """
+    #
+    with make_logger() as log:
+        log.info("Starting")
+        start_ts = time.time()
+        #
+        try:
+            log.info("Fixing personal projects")
+            context.rpc_manager.timeout(3600).projects_fix_create_personal_projects()
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping task (on timeout RPC will continue)")
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
