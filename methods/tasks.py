@@ -68,6 +68,7 @@ class Method:  # pylint: disable=E1101,R0903
         #
         self.task_node.register_task(db_tasks.create_tables, "create_tables")
         self.task_node.register_task(db_tasks.propose_migrations, "propose_migrations")
+        self.task_node.register_task(db_tasks.create_database, "create_database")
         #
         self.task_node.register_task(indexer_tasks.indexer_migrate, "indexer_migrate")
         #
@@ -95,6 +96,7 @@ class Method:  # pylint: disable=E1101,R0903
         #
         self.task_node.unregister_task(indexer_tasks.indexer_migrate, "indexer_migrate")
         #
+        self.task_node.unregister_task(db_tasks.create_database, "create_database")
         self.task_node.unregister_task(db_tasks.propose_migrations, "propose_migrations")
         self.task_node.unregister_task(db_tasks.create_tables, "create_tables")
         #

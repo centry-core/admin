@@ -25,6 +25,53 @@ from tools import context  # pylint: disable=E0401
 from .logs import make_logger
 
 
+def create_database(*args, **kwargs):
+    """ Task """
+    #
+    with make_logger() as log:
+        log.info("Starting")
+        start_ts = time.time()
+        #
+        try:
+            if "param" not in kwargs:
+                raise ValueError("Param is not set")
+            #
+            target_db = kwargs["param"].strip()
+            #
+            from tools import config  # pylint: disable=C0415,E0401
+            #
+            if config.DATABASE_VENDOR != "postgres":
+                log.error("DB vendor is not supported: %s", config.DATABASE_VENDOR)
+            #
+            target_db_url = 'postgresql://{username}:{password}@{host}:{port}/{database}'.format(  # pylint: disable=C0209
+                host=config.POSTGRES_HOST,
+                port=config.POSTGRES_PORT,
+                username=config.POSTGRES_USER,
+                password=config.POSTGRES_PASSWORD,
+                database=target_db
+            )
+            #
+            log.info("Target DB: %s", target_db_url)
+            #
+            import sqlalchemy  # pylint: disable=C0415,E0401
+            #
+            core_db_url = context.db.url
+            core_engine = sqlalchemy.create_engine(
+                core_db_url,
+                isolation_level="AUTOCOMMIT",
+            )
+            #
+            with core_engine.connect() as connection:
+                connection.execute(
+                    sqlalchemy.text(f"CREATE DATABASE {target_db}")
+                )
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping")
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
+
+
 def create_tables(*args, **kwargs):
     """ Task """
     #
