@@ -49,4 +49,5 @@ class Slot:  # pylint: disable=E1101,R0903
         with context.app.app_context():
             return self.descriptor.render_template(
                 "tasks/scripts.html",
+                tasks=self.present_admin_tasks(),
             )

@@ -40,6 +40,8 @@ class Method:  # pylint: disable=E1101,R0903
 
     @web.init()
     def _tasks_init(self):
+        self.admin_tasks = {}  # name -> func
+        #
         self.event_node = arbiter.make_event_node(
             config={
                 "type": "MockEventNode",
@@ -66,38 +68,49 @@ class Method:  # pylint: disable=E1101,R0903
         #
         self.task_node.start()
         #
-        self.task_node.register_task(db_tasks.create_tables, "create_tables")
-        self.task_node.register_task(db_tasks.propose_migrations, "propose_migrations")
-        self.task_node.register_task(db_tasks.create_database, "create_database")
+        local_admin_tasks = [
+            ("create_tables", db_tasks.create_tables),
+            ("propose_migrations", db_tasks.propose_migrations),
+            ("create_database", db_tasks.create_database),
+            #
+            ("indexer_migrate", indexer_tasks.indexer_migrate),
+            #
+            ("list_failed_projects", project_tasks.list_failed_projects),
+            ("delete_failed_projects", project_tasks.delete_failed_projects),
+            ("fix_personal_projects", project_tasks.fix_personal_projects),
+        ]
         #
-        self.task_node.register_task(indexer_tasks.indexer_migrate, "indexer_migrate")
+        for task_name, task_func in local_admin_tasks:
+            self.register_admin_task(task_name, task_func)
+
+    @web.method()
+    def register_admin_task(self, name, func):
+        """ Method """
+        if name in self.admin_tasks:
+            raise RuntimeError(f"Task already registered: {name}")
         #
-        self.task_node.register_task(
-            project_tasks.list_failed_projects, "list_failed_projects"
-        )
-        self.task_node.register_task(
-            project_tasks.delete_failed_projects, "delete_failed_projects"
-        )
-        self.task_node.register_task(
-            project_tasks.fix_personal_projects, "fix_personal_projects"
-        )
+        self.admin_tasks[name] = func
+        self.task_node.register_task(func, name)
+
+    @web.method()
+    def unregister_admin_task(self, name, func):
+        """ Method """
+        if name not in self.admin_tasks:
+            raise RuntimeError(f"Task is not registered: {name}")
+        #
+        self.task_node.unregister_task(func, name)
+        self.admin_tasks.pop(name, None)
+
+    @web.method()
+    def present_admin_tasks(self):
+        """ Method """
+        result = list(self.admin_tasks)
+        result.sort()
+        return result
 
     @web.deinit()
     def _tasks_deinit(self):
-        self.task_node.unregister_task(
-            project_tasks.fix_personal_projects, "fix_personal_projects"
-        )
-        self.task_node.unregister_task(
-            project_tasks.delete_failed_projects, "delete_failed_projects"
-        )
-        self.task_node.unregister_task(
-            project_tasks.list_failed_projects, "list_failed_projects"
-        )
-        #
-        self.task_node.unregister_task(indexer_tasks.indexer_migrate, "indexer_migrate")
-        #
-        self.task_node.unregister_task(db_tasks.create_database, "create_database")
-        self.task_node.unregister_task(db_tasks.propose_migrations, "propose_migrations")
-        self.task_node.unregister_task(db_tasks.create_tables, "create_tables")
+        for task_name, task_func in list(self.admin_tasks.items()):
+            self.unregister_admin_task(task_name, task_func)
         #
         self.task_node.stop()
