@@ -25,6 +25,7 @@ from pylon.core.tools import web  # pylint: disable=E0611,E0401
 from ..tasks import db_tasks
 from ..tasks import indexer_tasks
 from ..tasks import project_tasks
+from ..tasks import mesh_tasks
 
 
 class Method:  # pylint: disable=E1101,R0903
@@ -78,6 +79,8 @@ class Method:  # pylint: disable=E1101,R0903
             ("list_failed_projects", project_tasks.list_failed_projects),
             ("delete_failed_projects", project_tasks.delete_failed_projects),
             ("fix_personal_projects", project_tasks.fix_personal_projects),
+            #
+            ("mesh_get_plugin_frozen_requirements", mesh_tasks.mesh_get_plugin_frozen_requirements),
         ]
         #
         for task_name, task_func in local_admin_tasks:
