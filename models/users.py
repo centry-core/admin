@@ -34,7 +34,7 @@ class RolePermission(db.Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     role_id: Mapped[int] = mapped_column(ForeignKey(
         f'{c.POSTGRES_TENANT_SCHEMA}.{Role.__tablename__}.id'
-    ), nullable=False)
+    ), nullable=False, index=True)
     permission = mapped_column(String(128), nullable=False)
 
 
@@ -46,7 +46,7 @@ class UserRole(db.Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     role_id: Mapped[int] = mapped_column(ForeignKey(
         f'{c.POSTGRES_TENANT_SCHEMA}.{Role.__tablename__}.id'
-    ), nullable=False)
+    ), nullable=False, index=True)
