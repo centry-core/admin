@@ -110,6 +110,36 @@ def create_tables(*args, **kwargs):
         log.info("Exiting (duration = %s)", end_ts - start_ts)
 
 
+def create_tables_for_failed(*args, **kwargs):
+    """ Task """
+    #
+    with make_logger() as log:
+        log.info("Starting")
+        start_ts = time.time()
+        #
+        try:
+            from tools import db  # pylint: disable=C0415,E0401
+            #
+            log.info("Getting project metadata")
+            tenant_metadata = db.get_tenant_specific_metadata()
+            #
+            log.info("Getting failed project list")
+            project_list = context.rpc_manager.timeout(120).project_list(
+                filter_={"create_success": False},
+            )
+            #
+            for project in project_list:
+                log.info("Applying failed project metadata: %s", project)
+                with db.get_session(project["id"]) as tenant_db:
+                    tenant_metadata.create_all(bind=tenant_db.connection())
+                    tenant_db.commit()
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping")
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
+
+
 def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
     """ Task """
     #

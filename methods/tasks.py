@@ -71,6 +71,7 @@ class Method:  # pylint: disable=E1101,R0903
         #
         local_admin_tasks = [
             ("create_tables", db_tasks.create_tables),
+            ("create_tables_for_failed", db_tasks.create_tables_for_failed),
             ("propose_migrations", db_tasks.propose_migrations),
             ("create_database", db_tasks.create_database),
             #
