@@ -80,6 +80,7 @@ class Method:  # pylint: disable=E1101,R0903
             ("list_failed_projects", project_tasks.list_failed_projects),
             ("delete_failed_projects", project_tasks.delete_failed_projects),
             ("fix_personal_projects", project_tasks.fix_personal_projects),
+            ("sync_pgvector_credentials", project_tasks.sync_pgvector_credentials),
             #
             ("mesh_get_plugin_frozen_requirements", mesh_tasks.mesh_get_plugin_frozen_requirements),
         ]
@@ -104,6 +105,11 @@ class Method:  # pylint: disable=E1101,R0903
         #
         self.task_node.unregister_task(func, name)
         self.admin_tasks.pop(name, None)
+
+    @web.method()
+    def execute_admin_task(self, func, *args, **kwargs):
+        """ Method """
+        return func(*args, **kwargs)
 
     @web.method()
     def present_admin_tasks(self):

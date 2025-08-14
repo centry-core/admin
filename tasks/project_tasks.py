@@ -91,3 +91,20 @@ def fix_personal_projects(*args, **kwargs):
         #
         end_ts = time.time()
         log.info("Exiting (duration = %s)", end_ts - start_ts)
+
+
+def sync_pgvector_credentials(*args, **kwargs):
+    """ Task """
+    #
+    with make_logger() as log:
+        log.info("Starting")
+        start_ts = time.time()
+        #
+        try:
+            log.info("Syncing pgvector credentials for projects")
+            context.rpc_manager.timeout(3600).applications_create_pgvector_credentials()
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping task (on timeout RPC will continue)")
+        #
+        end_ts = time.time()
+        log.info("Exiting (duration = %s)", end_ts - start_ts)
