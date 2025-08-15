@@ -102,7 +102,18 @@ def sync_pgvector_credentials(*args, **kwargs):
         #
         try:
             log.info("Syncing pgvector credentials for projects")
-            context.rpc_manager.timeout(3600).applications_create_pgvector_credentials()
+            #
+            param = kwargs.get("param", "")
+            #
+            force_recreate = "force_recreate" in param
+            save_connstr_to_secrets = "save_connstr_to_secrets" in param
+            #
+            res = context.rpc_manager.timeout(5*60*60).applications_create_pgvector_credentials(
+                save_connstr_to_secrets=save_connstr_to_secrets,
+                force_recreate=force_recreate,
+            )
+            #
+            log.info("Result: %s", res)
         except:  # pylint: disable=W0702
             log.exception("Got exception, stopping task (on timeout RPC will continue)")
         #
