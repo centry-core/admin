@@ -17,10 +17,14 @@
 
 """ Method """
 
+import time
+import functools
+
 import arbiter
 
-from pylon.core.tools import log  # pylint: disable=E0611,E0401
-from pylon.core.tools import web  # pylint: disable=E0611,E0401
+from centry_logging.handlers.eventnode import EventNodeLogHandler  # pylint: disable=E0611,E0401
+
+from tools import context, log, web  # pylint: disable=E0611,E0401
 
 from ..tasks import db_tasks
 from ..tasks import indexer_tasks
@@ -94,22 +98,64 @@ class Method:  # pylint: disable=E1101,R0903
         if name in self.admin_tasks:
             raise RuntimeError(f"Task already registered: {name}")
         #
-        self.admin_tasks[name] = func
-        self.task_node.register_task(func, name)
+        partial_func = functools.partial(self.execute_admin_task, func)
+        #
+        self.admin_tasks[name] = partial_func
+        self.task_node.register_task(partial_func, name)
 
     @web.method()
     def unregister_admin_task(self, name, func):
         """ Method """
+        _ = func
+        #
         if name not in self.admin_tasks:
             raise RuntimeError(f"Task is not registered: {name}")
         #
-        self.task_node.unregister_task(func, name)
-        self.admin_tasks.pop(name, None)
+        partial_func = self.admin_tasks.pop(name)
+        #
+        self.task_node.unregister_task(partial_func, name)
 
     @web.method()
     def execute_admin_task(self, func, *args, **kwargs):
         """ Method """
-        return func(*args, **kwargs)
+        handler = None
+        #
+        try:
+            event_node_config = context.module_manager.descriptors[
+                "logging_hub"
+            ].module.event_node_config
+            #
+            import tasknode_task  # pylint: disable=E0401,C0415
+            #
+            handler = EventNodeLogHandler({
+                "event_node": event_node_config,
+                "labels": {
+                    "tasknode_task": f"id:{tasknode_task.id}",
+                    "stream_id": "",  # until datasources are updated or removed
+                }
+            })
+            #
+            log.prepare_handler(handler)
+            log.state.local.handler = handler
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, using default logs only")
+        #
+        log.info("Starting")
+        start_ts = time.time()
+        #
+        try:
+            return func(*args, **kwargs)
+        except:  # pylint: disable=W0702
+            log.exception("Got exception, stopping")
+            raise
+        #
+        finally:
+            end_ts = time.time()
+            log.info("Exiting (duration = %s)", end_ts - start_ts)
+            #
+            if handler is not None:
+                delattr(log.state.local, "handler")
+                handler.close()
 
     @web.method()
     def present_admin_tasks(self):

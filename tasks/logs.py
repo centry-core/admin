@@ -30,50 +30,10 @@ class make_logger:  # pylint: disable=C0103
     """ Task """
 
     def __init__(self):
-        try:
-            import tasknode_task  # pylint: disable=E0401,C0415
-            #
-            self.task_id = tasknode_task.id
-            self.task_name = tasknode_task.name
-            #
-            self.event_node_config = context.module_manager.descriptors[
-                "logging_hub"
-            ].module.event_node_config
-            #
-            self.handler = None
-            self.logger = None
-            #
-            self.fallback = False
-        except:  # pylint: disable=W0702
-            self.fallback = True
+        return
 
     def __enter__(self):
-        if self.fallback:
-            return log
-        #
-        self.handler = EventNodeLogHandler({
-            "event_node": self.event_node_config,
-            "labels": {
-                "tasknode_task": f"id:{self.task_id}",
-                "stream_id": "",  # until datasources are updated
-            }
-        })
-        self.handler.setFormatter(SecretFormatter())
-        #
-        self.logger = logging.Logger(f"{self.task_name}:{self.task_id}")
-        self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(self.handler)
-        #
-        return self.logger
+        return log
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        if self.fallback:
-            return
-        #
-        if self.handler is not None:
-            self.logger.removeHandler(self.handler)
-            #
-            self.handler.close()
-        #
-        if self.logger is not None:
-            del self.logger
+        return
