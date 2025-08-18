@@ -76,9 +76,20 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             avatar = avatar_map.pop(user['id'], None)
             user['avatar'] = avatar
 
+        result = all_users
+        #
+        limit = request.args.get("limit", None)
+        offset = request.args.get("offset", None)
+        #
+        if limit is not None and offset is not None:
+            limit = int(limit)
+            offset = int(offset)
+            #
+            result = all_users[offset:offset+limit]
+
         return {
             "total": len(all_users),
-            "rows": all_users,
+            "rows": result,
         }, 200
 
     @auth.decorators.check_api({
