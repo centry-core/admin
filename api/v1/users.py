@@ -77,15 +77,15 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             user['avatar'] = avatar
 
         result = all_users
-        #
-        limit = request.args.get("limit", None)
-        offset = request.args.get("offset", None)
-        #
-        if limit is not None and offset is not None:
-            limit = int(limit)
-            offset = int(offset)
-            #
-            result = all_users[offset:offset+limit]
+        # #
+        # limit = request.args.get("limit", None)
+        # offset = request.args.get("offset", None)
+        # #
+        # if limit is not None and offset is not None:
+        #     limit = int(limit)
+        #     offset = int(offset)
+        #     #
+        #     result = all_users[offset:offset+limit]
 
         return {
             "total": len(all_users),
