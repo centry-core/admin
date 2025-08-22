@@ -85,6 +85,7 @@ class Method:  # pylint: disable=E1101,R0903
             ("delete_failed_projects", project_tasks.delete_failed_projects),
             ("fix_personal_projects", project_tasks.fix_personal_projects),
             ("sync_pgvector_credentials", project_tasks.sync_pgvector_credentials),
+            ("recreate_project_tokens", project_tasks.recreate_project_tokens),
             #
             ("mesh_get_plugin_frozen_requirements", mesh_tasks.mesh_get_plugin_frozen_requirements),
         ]

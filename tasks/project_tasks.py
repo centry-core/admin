@@ -19,7 +19,7 @@
 
 import time
 
-from tools import context  # pylint: disable=E0401
+from tools import context, log  # pylint: disable=E0401
 
 from .logs import make_logger
 
@@ -119,3 +119,36 @@ def sync_pgvector_credentials(*args, **kwargs):
         #
         end_ts = time.time()
         log.info("Exiting (duration = %s)", end_ts - start_ts)
+
+
+def recreate_project_tokens(*args, **kwargs):
+    """ Task """
+    log.info("Getting project list")
+    project_list = context.rpc_manager.timeout(120).project_list(
+        filter_={"create_success": True},
+    )
+    #
+    from plugins.projects.utils import get_project_user
+    from tools import VaultClient, auth
+    #
+    for project in project_list:
+        log.info("Recreating project token: %s", project)
+        #
+        project_id = int(project["id"])
+        #
+        user = get_project_user(project_id)
+        user_id = user["id"]
+        #
+        log.info("- Project user: %s", user)
+        #
+        token_id = auth.add_token(user_id, "api")
+        token = auth.encode_token(token_id)
+        #
+        log.info("- Setting token: %s", token_id)
+        #
+        vault_client = VaultClient(project_id)
+        project_secrets = vault_client.get_secrets()
+        project_secrets["auth_token"] = token
+        vault_client.set_secrets(project_secrets)
+        #
+        log.info(" - Done")
