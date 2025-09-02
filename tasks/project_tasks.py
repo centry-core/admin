@@ -152,3 +152,49 @@ def recreate_project_tokens(*args, **kwargs):
         vault_client.set_secrets(project_secrets)
         #
         log.info(" - Done")
+
+
+def delete_ghost_users(*args, **kwargs):
+    """ Task """
+    from tools import auth
+    from plugins.projects.rpc.poc import is_system_user
+    #
+    log.info("Getting user list")
+    user_list = auth.list_users():
+    #
+    for user in user_list:
+        if is_system_user(user["email"]):
+            continue
+        #
+        if user["last_login"] is None:
+            log.info("Ghost user: %s", user)
+    #
+    # log.info("Getting project list")
+    # project_list = context.rpc_manager.timeout(120).project_list(
+    #     filter_={"create_success": True},
+    # )
+    # #
+    # from plugins.projects.utils import get_project_user
+    #
+    # #
+    # for project in project_list:
+    #     log.info("Recreating project token: %s", project)
+    #     #
+    #     project_id = int(project["id"])
+    #     #
+    #     user = get_project_user(project_id)
+    #     user_id = user["id"]
+    #     #
+    #     log.info("- Project user: %s", user)
+    #     #
+    #     token_id = auth.add_token(user_id, "api")
+    #     token = auth.encode_token(token_id)
+    #     #
+    #     log.info("- Setting token: %s", token_id)
+    #     #
+    #     vault_client = VaultClient(project_id)
+    #     project_secrets = vault_client.get_secrets()
+    #     project_secrets["auth_token"] = token
+    #     vault_client.set_secrets(project_secrets)
+    #     #
+    #     log.info(" - Done")
