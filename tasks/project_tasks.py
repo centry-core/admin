@@ -158,21 +158,49 @@ def delete_ghost_users(*args, **kwargs):
     """ Task """
     from tools import auth
     from plugins.projects.rpc.poc import is_system_user
+    from plugins.projects.api.v1.project import delete_project
+    #
+    log.info("Getting project list")
+    project_list = context.rpc_manager.timeout(120).project_list(
+        filter_={"create_success": True},
+    )
+    #
+    all_project_ids = [int(project["id"]) for project in project_list]
     #
     log.info("Getting user list")
     user_list = auth.list_users()
     #
     for user in user_list:
+        user_id = user["id"]
+        #
+        if user_id == 1:
+            continue
+        #
         if is_system_user(user["email"]):
             continue
         #
         if user["last_login"] is None:
             log.info("Ghost user: %s", user)
+            #
+            user_in_ids = context.rpc_manager.call.admin_check_user_in_projects(
+                all_project_ids, user_id
+            )
+            #
+            log.info("-> Projects: %s", user_in_ids)
+            #
+            # admin_remove_users_from_project
+            # project_id: int, user_ids
+            #
+            # projects_get_personal_project_id
+            #
+            # log.info("Deleting private project: %s", project)
+            # #
+            # delete_project(
+            #     project_id=project["id"],
+            #     module=this.for_module("projects").module,
+            # )
     #
-    # log.info("Getting project list")
-    # project_list = context.rpc_manager.timeout(120).project_list(
-    #     filter_={"create_success": True},
-    # )
+
     # #
     # from plugins.projects.utils import get_project_user
     #
