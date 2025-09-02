@@ -154,11 +154,11 @@ def recreate_project_tokens(*args, **kwargs):
         log.info(" - Done")
 
 
-def delete_ghost_users(*args, **kwargs):
+def delete_ghost_users(*args, **kwargs):  # pylint: disable=W0613,R0914
     """ Task """
-    from tools import auth
-    from plugins.projects.rpc.poc import is_system_user
-    from plugins.projects.api.v1.project import delete_project
+    from tools import auth, this  # pylint: disable=E0401,C0415
+    from plugins.projects.rpc.poc import is_system_user  # pylint: disable=E0401,C0415
+    from plugins.projects.api.v1.project import delete_project  # pylint: disable=E0401,C0415
     #
     log.info("Getting project list")
     project_list = context.rpc_manager.timeout(120).project_list(
@@ -182,21 +182,19 @@ def delete_ghost_users(*args, **kwargs):
         if user["last_login"] is None:
             log.info("Ghost user: %s", user)
             #
-            user_in_ids = context.rpc_manager.call.admin_check_user_in_projects(
-                all_project_ids, user_id
-            )
-            #
-            log.info("-> Projects (where user has roles): %s", user_in_ids)
-            #
             personal_project_id = context.rpc_manager.call.projects_get_personal_project_id(
                 user_id
             )
             #
             log.info("-> Personal project ID: %s", personal_project_id)
             #
-            personal_project = context.rpc_manager.call.project_get_by_id(personal_project_id)
+            log.info("-> Getting user projects")
             #
-            log.info("-> Personal project: %s", personal_project)
+            user_in_ids = context.rpc_manager.call.admin_check_user_in_projects(
+                all_project_ids, user_id
+            )
+            #
+            log.info("-> Projects (where user has roles): %s", user_in_ids)
             #
             for user_in_id in user_in_ids:
                 if user_in_id == personal_project_id:
@@ -205,42 +203,32 @@ def delete_ghost_users(*args, **kwargs):
                 user_project = context.rpc_manager.call.project_get_by_id(user_in_id)
                 #
                 log.info("-> Project info: %s -> %s", user_in_id, user_project)
+                #
+                if user_project:
+                    log.info("--> Deleting from project")
+                    #
+                    context.rpc_manager.call.admin_remove_users_from_project(
+                        user_in_id, [user_id],
+                    )
+                    #
+                    log.info("--> Deleted")
             #
-            # admin_remove_users_from_project
-            # project_id: int, user_ids
+            personal_project = context.rpc_manager.call.project_get_by_id(personal_project_id)
             #
+            log.info("-> Personal project: %s", personal_project)
             #
+            if personal_project_id and personal_project:
+                log.info("--> Deleting project")
+                #
+                delete_project(
+                    project_id=personal_project_id,
+                    module=this.for_module("projects").module,
+                )
+                #
+                log.info("--> Deleted")
             #
-            # log.info("Deleting private project: %s", project)
-            # #
-            # delete_project(
-            #     project_id=project["id"],
-            #     module=this.for_module("projects").module,
-            # )
-    #
-
-    # #
-    # from plugins.projects.utils import get_project_user
-    #
-    # #
-    # for project in project_list:
-    #     log.info("Recreating project token: %s", project)
-    #     #
-    #     project_id = int(project["id"])
-    #     #
-    #     user = get_project_user(project_id)
-    #     user_id = user["id"]
-    #     #
-    #     log.info("- Project user: %s", user)
-    #     #
-    #     token_id = auth.add_token(user_id, "api")
-    #     token = auth.encode_token(token_id)
-    #     #
-    #     log.info("- Setting token: %s", token_id)
-    #     #
-    #     vault_client = VaultClient(project_id)
-    #     project_secrets = vault_client.get_secrets()
-    #     project_secrets["auth_token"] = token
-    #     vault_client.set_secrets(project_secrets)
-    #     #
-    #     log.info(" - Done")
+            log.info("-> Deleting user")
+            #
+            auth.delete_user(user_id)
+            #
+            log.info("-> Deleted")
