@@ -225,6 +225,8 @@ def delete_ghost_users(*args, **kwargs):  # pylint: disable=W0613,R0914
                     module=this.for_module("projects").module,
                 )
                 #
+                all_project_ids.remove(personal_project_id)
+                #
                 log.info("--> Deleted")
             #
             log.info("-> Deleting user")
