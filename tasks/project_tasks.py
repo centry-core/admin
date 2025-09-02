@@ -186,12 +186,30 @@ def delete_ghost_users(*args, **kwargs):
                 all_project_ids, user_id
             )
             #
-            log.info("-> Projects: %s", user_in_ids)
+            log.info("-> Projects (where user has roles): %s", user_in_ids)
+            #
+            personal_project_id = context.rpc_manager.call.projects_get_personal_project_id(
+                user_id
+            )
+            #
+            log.info("-> Personal project ID: %s", personal_project_id)
+            #
+            personal_project = context.rpc_manager.call.project_get_by_id(personal_project_id)
+            #
+            log.info("-> Personal project: %s", personal_project)
+            #
+            for user_in_id in user_in_ids:
+                if user_in_id == personal_project_id:
+                    continue
+                #
+                user_project = context.rpc_manager.call.project_get_by_id(user_in_id)
+                #
+                log.info("-> Project info: %s -> %s", user_in_id, user_project)
             #
             # admin_remove_users_from_project
             # project_id: int, user_ids
             #
-            # projects_get_personal_project_id
+            #
             #
             # log.info("Deleting private project: %s", project)
             # #
