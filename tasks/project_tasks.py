@@ -160,7 +160,7 @@ def delete_ghost_users(*args, **kwargs):
     from plugins.projects.rpc.poc import is_system_user
     #
     log.info("Getting user list")
-    user_list = auth.list_users():
+    user_list = auth.list_users()
     #
     for user in user_list:
         if is_system_user(user["email"]):
