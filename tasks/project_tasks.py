@@ -165,10 +165,14 @@ def delete_ghost_users(*args, **kwargs):  # pylint: disable=W0613,R0914
         filter_={"create_success": True},
     )
     #
+    log.info("Total projects: %s", len(project_list))
+    #
     all_project_ids = [int(project["id"]) for project in project_list]
     #
     log.info("Getting user list")
     user_list = auth.list_users()
+    #
+    log.info("Total users: %s", len(user_list))
     #
     for user in user_list:
         user_id = user["id"]
