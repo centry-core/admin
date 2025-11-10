@@ -24,7 +24,7 @@ $("#btn-enable-debug-mode").click(function() {
       showNotify("SUCCESS", "Enabling debug mode requested");
     })
     .catch(function (error) {
-      showNotify("ERROR", "Error during logs retrieval");
+      showNotify("ERROR", "Error during mode change");
       console.log(error);
     });
 });
@@ -36,10 +36,34 @@ $("#btn-disable-debug-mode").click(function() {
       showNotify("SUCCESS", "Disabling debug mode requested");
     })
     .catch(function (error) {
-      showNotify("ERROR", "Error during logs retrieval");
+      showNotify("ERROR", "Error during mode change");
       console.log(error);
     });
 });
+
+$("#btn-enable-profiling").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "enable_profiling"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Enabling profiling requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during profiling change");
+      console.log(error);
+    });
+});
+
+
+$("#btn-disable-profiling").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "disable_profiling"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Disabling profiling requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during profiling change");
+      console.log(error);
+    });
+});
+
 
 // Configs
 
