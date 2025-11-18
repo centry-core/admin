@@ -65,6 +65,30 @@ $("#btn-disable-profiling").click(function() {
 });
 
 
+$("#btn-enable-splash").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "enable_splash"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Enabling maintenance splash requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during maintenance splash change");
+      console.log(error);
+    });
+});
+
+
+$("#btn-disable-splash").click(function() {
+  axios.post(logs_api_url, {pylon_id: logs_row.pylon_id, action: "disable_splash"})
+    .then(function (response) {
+      showNotify("SUCCESS", "Disabling maintenance splash requested");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during maintenance splash change");
+      console.log(error);
+    });
+});
+
+
 // Configs
 
 $("#modal-pylon-config").on("show.bs.modal", function (e) {
