@@ -283,6 +283,21 @@ class RPC:
             roles = tenant_session.query(Role).filter(Role.id.in_(user_roles)).all()
             return [RoleDetailModel.from_orm(role).dict() for role in roles]
 
+    @web.rpc("admin_check_user_is_admin", "check_user_is_admin")
+    def check_user_is_admin(self, project_id: int, user_id: int) -> bool:
+        # log.debug('Checking if user %s is admin in project %s', user_id, project_id)
+        with db.with_project_schema_session(project_id) as tenant_session:
+            user_roles = tenant_session.query(UserRole, Role).filter(
+                UserRole.user_id == user_id,
+                UserRole.role_id == Role.id
+            ).all()
+
+            for user_role, role in user_roles:
+                if 'admin' in role.name.lower():
+                    return True
+
+            return False
+
     @web.rpc('admin_check_user_in_project', 'check_user_in_project')
     def check_user_in_project(self, project_id: int, user_id: Optional[int] = None, **kwargs) -> bool:
         # log.info('Checking if user %s is in project %s', user_id, project_id)
