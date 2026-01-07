@@ -5,3 +5,7 @@
 # 1.7.0 -> 2.0.0-beta
 
 INSERT INTO p_1.user_role (user_id, role_id) SELECT DISTINCT ur_all.user_id, r.id FROM p_1.user_role ur_all CROSS JOIN p_1.role r LEFT JOIN p_1.user_role ur_system ON ur_system.user_id = ur_all.user_id LEFT JOIN p_1.role r_system ON ur_system.role_id = r_system.id AND r_system.name = 'system' WHERE r.name = 'viewer' AND r_system.id IS NULL AND NOT EXISTS (SELECT 1 FROM p_1.user_role ur WHERE ur.user_id = ur_all.user_id AND ur.role_id = r.id);
+
+# Remove deprecated permissions for datasources and prompt_lib models
+DELETE FROM {pid}.role_permission WHERE permission LIKE 'models.datasources.%';
+DELETE FROM {pid}.role_permission WHERE permission LIKE 'models.prompt_lib.%';
