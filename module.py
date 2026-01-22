@@ -506,6 +506,47 @@ class Module(module.ModuleModel):
                 secrets["auth_token"] = token
                 vault_client.set_secrets(secrets)
 
+    def ready(self):
+        """ Ready callback """
+        from tools import db, auth  # pylint: disable=C0415
+        from .models.users import Role, RolePermission, UserRole
+        #
+        if self.descriptor.config.get("check_for_roles_migration", True):
+            #
+            # Check if auth project roles table is empty, and if so, run migration
+            #
+            log.info("Getting project list")
+            project_list = self.context.rpc_manager.timeout(120).project_list(
+                filter_={"create_success": True},
+            )
+            #
+            for project in project_list:
+                try:
+                    if auth.list_project_roles(project["id"]):
+                        continue
+                    #
+                    log.info("Migrating project roles: %s", project["id"])
+                    with db.get_session(project["id"]) as tenant_db:
+                        roles_map = {}
+                        #
+                        for role in tenant_db.query(Role).all():
+                            roles_map[role.id] = auth.add_project_role(
+                                project["id"], role.name
+                            )
+                            #
+                            for permission in role.permissions:
+                                auth.add_project_role_permission(
+                                    project["id"], roles_map[role.id], permission.permission
+                                )
+                        #
+                        for user_role in tenant_db.query(UserRole).all():
+                            if user_role.role_id in roles_map:
+                                auth.add_project_user_role(
+                                    project["id"], user_role.user_id, roles_map[user_role.role_id]
+                                )
+                except:  # pylint: disable=W0702
+                    log.warning("Migration failed: %s", project["id"], exc_info=True)
+
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
         log.info("De-initializing module")
