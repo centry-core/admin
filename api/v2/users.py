@@ -56,6 +56,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": True, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
+    @api_tools.endpoint_metrics
     def get(self, project_id: int, **kwargs):
         project_users = self.module.get_users_roles_in_project(project_id, filter_system_user=True)
         user_ids = set(project_users.keys())
@@ -99,6 +100,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
+    @api_tools.endpoint_metrics
     def post(self, project_id: int, **kwargs):
         user_emails = request.json["emails"]
         user_roles = request.json["roles"]
@@ -159,6 +161,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
+    @api_tools.endpoint_metrics
     def put(self, project_id: int, **kwargs):
         user_ids = request.json.get("ids", [])
         user_id = request.json.get("id")
@@ -180,6 +183,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             "default": {"admin": True, "viewer": False, "editor": False},
             "developer": {"admin": True, "viewer": False, "editor": False},
         }})
+    @api_tools.endpoint_metrics
     def delete(self, project_id: int, **kwargs):
         try:
             delete_ids = list(map(int, request.args["id[]"].split(',')))
