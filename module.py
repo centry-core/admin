@@ -506,6 +506,116 @@ class Module(module.ModuleModel):
                 secrets["auth_token"] = token
                 vault_client.set_secrets(secrets)
 
+    def ready(self):
+        """ Ready callback """
+        from tools import db, auth  # pylint: disable=C0415
+        from .models.users import Role, RolePermission, UserRole
+        from concurrent.futures import ThreadPoolExecutor
+
+        #
+        # Migration logic
+        #
+        check_migration = self.descriptor.config.get("check_for_roles_migration", True)
+        force_migration = self.descriptor.config.get("force_role_migration", False)
+        
+        if check_migration or force_migration:
+            log.info("Getting project list for roles migration check")
+            project_list = self.context.rpc_manager.timeout(120).project_list(
+                filter_={"create_success": True},
+            )
+            
+            projects_to_process = []
+            
+            # Filter projects
+            for project in project_list:
+                p_id = project["id"]
+                should_process = False
+                
+                if force_migration is True:
+                    should_process = True
+                elif isinstance(force_migration, list) and p_id in force_migration:
+                    should_process = True
+                elif check_migration:
+                    # Check if already has roles, if so skip (unless forced)
+                    # Optimization: check one role existence
+                    if not auth.list_project_roles(p_id):
+                        should_process = True
+                
+                if should_process:
+                    projects_to_process.append(project)
+
+            if not projects_to_process:
+                return
+
+            log.info("Migrating roles for %s projects", len(projects_to_process))
+
+            #
+            # Worker function to read project data
+            #
+            def get_project_data(project):
+                p_id = project["id"]
+                try:
+                    with db.get_session(p_id) as tenant_db:
+                        roles = []
+                        assignments = []
+                        
+                        # Read Roles and Permissions
+                        db_roles = tenant_db.query(Role).all()
+                        role_map = {r.id: r.name for r in db_roles}
+                        
+                        for role in db_roles:
+                            perms = [p.permission for p in role.permissions]
+                            roles.append({
+                                "name": role.name,
+                                "permissions": perms
+                            })
+                        
+                        # Read User Roles
+                        db_user_roles = tenant_db.query(UserRole).all()
+                        for ur in db_user_roles:
+                            if ur.role_id in role_map:
+                                assignments.append({
+                                    "user_id": ur.user_id,
+                                    "role": role_map[ur.role_id]
+                                })
+                        
+                        return {
+                            "project_id": p_id,
+                            "roles": roles,
+                            "assignments": assignments
+                        }
+                except:  # pylint: disable=W0702
+                    log.warning("Failed to read project data for %s", p_id, exc_info=True)
+                    return None
+
+            #
+            # Parallel Execution
+            #
+            max_workers = self.descriptor.config.get("role_migration_threads", 1)
+            batch_size = self.descriptor.config.get("role_migration_batch_size", 10)
+            snapshot_batch = []
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {executor.submit(get_project_data, p): p for p in projects_to_process}
+                
+                for future in futures:
+                    data = future.result()
+                    if data:
+                        snapshot_batch.append(data)
+                        
+                    # Apply in batches of e.g. 50 (or just all at once if memory permits, but safer to batch)
+                    if len(snapshot_batch) >= batch_size:
+                        log.info("Uploading batch of %s project snapshots", len(snapshot_batch))
+                        auth.apply_project_roles_snapshot(snapshot_batch)
+                        snapshot_batch = []
+            
+            # Apply remaining
+            if snapshot_batch:
+                log.info("Uploading batch of %s project snapshots", len(snapshot_batch))
+                auth.apply_project_roles_snapshot(snapshot_batch)
+            
+            log.info("Roles migration finished")
+
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
         log.info("De-initializing module")
