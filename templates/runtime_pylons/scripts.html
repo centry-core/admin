@@ -120,12 +120,50 @@
   </div>
 </div> <!-- modal -->
 
+<div id="modal-pylon-splash" class="modal fixed-left fade shadow-sm" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-aside" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Splash: <span id="modal-splash-pylon"></span></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="row">
+
+          <div class="col">
+
+            <form id="form-edit-splash">
+              <div class="form-group">
+                <label for="input-splash-edit">Splash</label>
+                <textarea class="col-12" rows="20" id="input-splash-edit" name="cfg_edit"></textarea>
+              </div>
+            </form>
+
+          </div> <!-- col -->
+        </div> <!-- row -->
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-splash-load">Load</button>
+        <button type="button" class="btn btn-secondary" id="btn-splash-save">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> <!-- modal -->
+
 <script>
   var logs_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_pylons/administration";
   var logs_row = {};
   //
   var config_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_pylons_config/administration";
   var config_row = {};
+  //
+  var splash_api_url = "{{ tools.context.url_prefix }}/api/v1/admin/runtime_pylons_splash/administration";
+  var splash_row = {};
 </script>
 
 <script src="{{ url_for('admin.static', filename='js/runtime_pylons.js') }}"></script>
