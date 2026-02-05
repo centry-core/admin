@@ -147,6 +147,42 @@ $("#btn-cfg-restart").click(function() {
     });
 });
 
+
+// Splash
+
+
+$("#modal-pylon-splash").on("show.bs.modal", function (e) {
+  $("#modal-splash-pylon").text(splash_row.pylon_id);
+  $("#input-splash-edit").val("");
+});
+
+
+$("#btn-splash-load").click(function() {
+  axios.get(splash_api_url + "/" + splash_row.pylon_id)
+    .then(function (response) {
+      $("#input-splash-edit").val(response.data.splash);
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during splash retrieval")
+      console.log(error);
+    });
+});
+
+
+$("#btn-splash-save").click(function() {
+  var result = $("#input-splash-edit").val();
+  axios.post(splash_api_url + "/" + splash_row.pylon_id, {action: "save", data: result})
+    .then(function (response) {
+      showNotify("SUCCESS", "Splash saved")
+      $("#modal-pylon-splash").modal("hide");
+    })
+    .catch(function (error) {
+      showNotify("ERROR", "Error during splash save")
+      console.log(error);
+    });
+});
+
+
 // Table
 
 $("#refresh-table").click(function() {
@@ -163,6 +199,9 @@ function pylonsActionsFormatter(value, row, index) {
     '<a class="task-show-logs" href="javascript:void(0)" title="Show logs">',
     '  <i class="fa fa-file-text" style="color: #858796"></i>',
     '</a>',
+    '<a class="task-set-splash" href="javascript:void(0)" title="Set splash">',
+    '  <i class="fa fa-bullhorn" style="color: #858796"></i>',
+    '</a>',
   ].join('')
 }
 
@@ -175,5 +214,9 @@ window.pylonsActionsEvents = {
   "click .task-show-logs": function (e, value, row, index) {
     logs_row = row;
     $("#modal-pylon-logs").modal("show");
+  },
+  "click .task-set-splash": function (e, value, row, index) {
+    splash_row = row;
+    $("#modal-pylon-splash").modal("show");
   }
 }
