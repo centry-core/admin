@@ -24,6 +24,7 @@ from pylon.core.tools import config  # pylint: disable=E0611,E0401,W0611
 
 from tools import auth  # pylint: disable=E0401
 from tools import api_tools  # pylint: disable=E0401
+from tools import context  # pylint: disable=E0401
 
 
 class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
@@ -32,7 +33,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def get(self, target_pylon_id):
         """ Process GET """
-        if self.context.id != target_pylon_id:
+        if context.id != target_pylon_id:
             return {"error": "Only main pylon supported"}, 400
         #
         return {"splash": config.tunable_get("splash_template", b"").decode()}
@@ -44,7 +45,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         #
         action = data.get("action", None)
         #
-        if self.context.id != target_pylon_id or action != "save":
+        if context.id != target_pylon_id or action != "save":
             return {"error": "Only main pylon splash save supported"}, 400
         #
         if "data" in data and data["data"]:
