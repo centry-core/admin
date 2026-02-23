@@ -31,16 +31,20 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["admin.auth.users"])
     def get(self):
         """ Process GET """
-        all_users = auth.list_users()
+        result = auth.list_users_paginated(
+            limit=flask.request.args.get("limit", 20, type=int),
+            offset=flask.request.args.get("offset", 0, type=int),
+            search=flask.request.args.get("search", None, type=str),
+            user_type=flask.request.args.get("user_type", None, type=str),
+            sort_by=flask.request.args.get("sort_by", "name", type=str),
+            sort_order=flask.request.args.get("sort_order", "asc", type=str),
+        )
         #
-        for user in all_users:
+        for user in result["rows"]:
             if user["last_login"]:
                 user["last_login"] = user["last_login"].isoformat(timespec="seconds")
         #
-        return {
-            "total": len(all_users),
-            "rows": all_users,
-        }
+        return result
 
     @auth.decorators.check_api(["admin.auth.users"])
     def post(self):  # pylint: disable=R0912,R0914,R0915
@@ -68,6 +72,24 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         if action == "create":
             user_id = auth.add_user(data["user_email"], data["user_name"])
             auth.add_user_group(user_id, 1)
+        #
+        if action == "toggle_admin":
+            if "user_id" not in data:
+                return {"error": "user_id not set"}, 400
+            if "is_admin" not in data:
+                return {"error": "is_admin not set"}, 400
+            if data["is_admin"]:
+                auth.assign_user_to_role(
+                    user_id=data["user_id"],
+                    role_name="admin",
+                    mode="administration",
+                )
+            else:
+                auth.remove_user_from_role(
+                    user_id=data["user_id"],
+                    role_name="admin",
+                    mode="administration",
+                )
         #
         return {
             "ok": True,
