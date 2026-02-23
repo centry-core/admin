@@ -49,66 +49,39 @@ class RPC:
     @web.rpc("admin_get_permissions", "get_permissions")
     def get_permissions(self, project_id: int, **kwargs) -> list[dict]:
         roles = auth.list_project_roles(project_id)
-        role_map = {r['id']: r['name'] for r in roles}
-        permissions = auth.list_project_role_permissions(project_id)
-        result = []
-        for p in permissions:
-            if p['role_id'] in role_map:
-                result.append({
-                    "name": role_map[p['role_id']],
-                    "permission": p['permission']
-                })
-        return result
+        project_role_names = {r['name'] for r in roles}
+        central_permissions = auth.get_permissions(mode='default')
+        return [p for p in central_permissions if p['name'] in project_role_names]
 
     @web.rpc("admin_set_permission_for_role", "set_permission_for_role")
     def set_permission_for_role(
             self, project_id: int, role_name: str, permission: str
     ) -> None:
-        return self.set_permissions_for_role(
-            project_id=project_id, role_name=role_name, permissions=[permission]
-        )
+        pass
 
     @web.rpc("admin_set_permissions_for_role", "set_permissions_for_role")
     def set_permissions_for_role(
             self, project_id: int, role_name: str, permissions: List[str],
             session=None, commit: bool = True
     ) -> None:
-        role = auth.get_project_role(project_id, name=role_name)
-        if role:
-            existing_permissions = {p['permission'] for p in auth.list_project_role_permissions(project_id, role['id'])}
-            for permission in permissions:
-                if permission not in existing_permissions:
-                    auth.add_project_role_permission(project_id, role['id'], permission)
+        pass
 
     @web.rpc("admin_get_permissions_for_role", "get_permissions_for_role")
     def get_permissions_for_role(
             self, project_id: int, role_name: str,
     ) -> List[str]:
-        role = auth.get_project_role(project_id, name=role_name)
-        if role:
-            return [p['permission'] for p in auth.list_project_role_permissions(project_id, role['id'])]
-        return []
+        return [p['permission'] for p in auth.get_permissions(mode='default') if p['name'] == role_name]
 
     @web.rpc("admin_add_permissions_for_role", "add_permissions_for_role")
     def add_permissions_for_role(
             self, project_id: int, role_name: str, permissions: List[str],
     ) -> bool:
-        role = auth.get_project_role(project_id, name=role_name)
-        if role:
-            existing_permissions = {p['permission'] for p in auth.list_project_role_permissions(project_id, role['id'])}
-            for permission in permissions:
-                if permission not in existing_permissions:
-                    auth.add_project_role_permission(project_id, role['id'], permission)
-            return True
-        return False
+        return True
 
     @web.rpc("admin_remove_permission_from_role", "remove_permission_from_role")
     def remove_permission_from_role(
             self, project_id: int, role_name: str, permission: str
     ) -> bool:
-        role = auth.get_project_role(project_id, name=role_name)
-        if role:
-            auth.delete_project_role_permission(project_id, role['id'], permission)
         return True
 
     #

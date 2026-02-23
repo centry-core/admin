@@ -515,7 +515,7 @@ class Module(module.ModuleModel):
         #
         # Migration logic
         #
-        check_migration = self.descriptor.config.get("check_for_roles_migration", True)
+        check_migration = self.descriptor.config.get("check_for_roles_migration", False)
         force_migration = self.descriptor.config.get("force_role_migration", False)
         
         if check_migration or force_migration:

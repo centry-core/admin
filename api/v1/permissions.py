@@ -24,7 +24,7 @@ from flask import g, request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth, api_tools  # pylint: disable=E0401
+from tools import auth, api_tools, VaultClient  # pylint: disable=E0401
 
 
 def group_roles_by_permissions(auth_permissions, roles):
@@ -132,16 +132,86 @@ class ProjectAPI(api_tools.APIModeHandler):
         log.info(f"{permissions_to_delete=} {permissions_to_add=}")
 
         for permission in permissions_to_add:
-            self.module.set_permission_for_role(
-                project_id,
-                *permission,
-            )
+            auth.set_permission_for_role(*permission, mode='default')
         for permission in permissions_to_delete:
-            self.module.remove_permission_from_role(
-                project_id,
-                *permission,
-            )
+            auth.remove_permission_from_role(*permission, mode='default')
         return {"ok": True}
+
+
+class PublicProjectAPI(api_tools.APIModeHandler):
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.permissions.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+        }}, mode="administration")
+    def get(self, target_mode):
+        project_id = self._get_public_project_id()
+        if project_id is None:
+            return {"error": "Public project not configured"}, 404
+        roles = auth.list_project_roles(project_id)
+        role_map = {r['id']: r['name'] for r in roles}
+        overrides = auth.list_project_role_permissions(project_id)
+        if overrides:
+            roles_to_perms = {r['name']: set() for r in roles}
+            for entry in overrides:
+                role_name = role_map.get(entry['role_id'])
+                if role_name and role_name in roles_to_perms:
+                    roles_to_perms[role_name].add(entry['permission'])
+            all_permissions = sorted(auth.local_permissions)
+            return {
+                "total": len(all_permissions),
+                "rows": [{
+                    "name": p,
+                    **{rn: p in perms for rn, perms in roles_to_perms.items()}
+                } for p in all_permissions]
+            }
+        # No overrides — show central defaults
+        central = auth.get_permissions(mode='default')
+        roles_to_perms = group_roles_by_permissions(central, roles)
+        all_permissions = sorted(auth.local_permissions)
+        return {
+            "total": len(all_permissions),
+            "rows": [{
+                "name": p,
+                **{r['name']: p in roles_to_perms[r['name']] for r in roles}
+            } for p in all_permissions]
+        }
+
+    @auth.decorators.check_api({
+        "permissions": ["configuration.roles.permissions.edit"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": False, "editor": False},
+            "default": {"admin": True, "viewer": False, "editor": False},
+        }}, mode="administration")
+    def put(self, target_mode):
+        project_id = self._get_public_project_id()
+        if project_id is None:
+            return {"error": "Public project not configured"}, 404
+        new_data = request.get_json()
+        roles = auth.list_project_roles(project_id)
+        role_name_to_id = {r['name']: r['id'] for r in roles}
+        # Clear existing overrides
+        existing = auth.list_project_role_permissions(project_id)
+        for entry in existing:
+            auth.delete_project_role_permission(
+                project_id, entry['role_id'], entry['permission'],
+            )
+        # Insert new permissions
+        for row in new_data:
+            perm_name = row.get('name')
+            if not perm_name:
+                continue
+            for role_name, role_id in role_name_to_id.items():
+                if row.get(role_name):
+                    auth.add_project_role_permission(project_id, role_id, perm_name)
+        return {"ok": True}
+
+    @staticmethod
+    def _get_public_project_id():
+        secrets = VaultClient().get_all_secrets()
+        pid = secrets.get('ai_project_id')
+        return int(pid) if pid is not None else None
 
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
@@ -154,4 +224,5 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
     mode_handlers = {
         'default': ProjectAPI,
         'administration': AdminAPI,
+        'public': PublicProjectAPI,
     }
