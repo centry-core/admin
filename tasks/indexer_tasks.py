@@ -25,7 +25,7 @@ from .logs import make_logger
 
 
 def indexer_migrate(*args, **kwargs):
-    """ Task """
+    """Run vector index migration on pylon_indexer. Param: connection string."""
     #
     with make_logger() as log:
         log.info("Starting")

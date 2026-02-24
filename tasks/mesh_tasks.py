@@ -23,7 +23,7 @@ from .logs import make_logger
 
 
 def mesh_get_plugin_frozen_requirements(*_args, **kwargs):
-    """ Task """
+    """Get frozen pip requirements for a plugin via mesh. Param: 'pylon_id:plugin_name'."""
     #
     with make_logger() as log:
         log.info("Starting")

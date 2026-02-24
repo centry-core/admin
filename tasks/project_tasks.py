@@ -25,7 +25,7 @@ from .logs import make_logger
 
 
 def list_failed_projects(*args, **kwargs):
-    """ Task """
+    """List all projects with create_success=False. No params. Output in logs."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -47,7 +47,7 @@ def list_failed_projects(*args, **kwargs):
 
 
 def delete_failed_projects(*args, **kwargs):
-    """ Task """
+    """Delete all projects with create_success=False and their associated data. No params. Destructive."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -77,7 +77,7 @@ def delete_failed_projects(*args, **kwargs):
 
 
 def fix_personal_projects(*args, **kwargs):
-    """ Task """
+    """Create missing personal projects for users who don't have one. No params. Long-running."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -94,7 +94,7 @@ def fix_personal_projects(*args, **kwargs):
 
 
 def sync_pgvector_credentials(*args, **kwargs):
-    """ Task """
+    """Sync pgvector credentials for all projects. Param: 'force_recreate' and/or 'save_connstr_to_secrets' (space-separated flags)."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -122,7 +122,7 @@ def sync_pgvector_credentials(*args, **kwargs):
 
 
 def recreate_project_tokens(*args, **kwargs):
-    """ Task """
+    """Regenerate API auth tokens for all projects and store in Vault. No params. Destructive: invalidates old tokens."""
     log.info("Getting project list")
     project_list = context.rpc_manager.timeout(120).project_list(
         filter_={"create_success": True},
@@ -155,7 +155,7 @@ def recreate_project_tokens(*args, **kwargs):
 
 
 def delete_ghost_users(*args, **kwargs):  # pylint: disable=W0613,R0914
-    """ Task """
+    """Remove users who never logged in: delete their roles, personal projects, and user records. No params. Destructive."""
     from tools import auth, this  # pylint: disable=E0401,C0415
     from plugins.projects.rpc.poc import is_system_user  # pylint: disable=E0401,C0415
     from plugins.projects.api.v1.project import delete_project  # pylint: disable=E0401,C0415

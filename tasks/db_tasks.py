@@ -26,7 +26,7 @@ from .logs import make_logger
 
 
 def create_database(*args, **kwargs):
-    """ Task """
+    """Create a new PostgreSQL database. Param: database name."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -73,7 +73,7 @@ def create_database(*args, **kwargs):
 
 
 def create_tables(*args, **kwargs):
-    """ Task """
+    """Apply DB schema migrations for shared tables and all successful projects. No params."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -111,7 +111,7 @@ def create_tables(*args, **kwargs):
 
 
 def create_tables_for_failed(*args, **kwargs):
-    """ Task """
+    """Apply DB schema migrations only for projects with create_success=False. No params."""
     #
     with make_logger() as log:
         log.info("Starting")
@@ -141,7 +141,7 @@ def create_tables_for_failed(*args, **kwargs):
 
 
 def propose_migrations(*args, **kwargs):  # pylint: disable=R0914
-    """ Task """
+    """Compare current DB schema against models and output SQL migration statements. No params."""
     #
     with make_logger() as log:
         log.info("Starting")
