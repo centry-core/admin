@@ -16,6 +16,8 @@
 #   limitations under the License.
 
 """ API """
+import flask  # pylint: disable=E0401
+
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
 from tools import auth, api_tools  # pylint: disable=E0401
@@ -31,11 +33,29 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
         }})
     def get(self):
         """ Process """
-        result = []
+        limit = flask.request.args.get("limit", 20, type=int)
+        offset = flask.request.args.get("offset", 0, type=int)
+        search = flask.request.args.get("search", None, type=str)
+        sort_by = flask.request.args.get("sort_by", "name", type=str)
+        sort_order = flask.request.args.get("sort_order", "asc", type=str)
+        project_type = flask.request.args.get("project_type", None, type=str)
         #
-        all_projects = self.module.context.rpc_manager.call.project_list()
+        # DB-level pagination, filtering, sorting
         #
-        for project in all_projects:
+        data = self.module.context.rpc_manager.call.project_list_paginated(
+            limit=limit,
+            offset=offset,
+            search=search or None,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            project_type=project_type or None,
+        )
+        #
+        rows = data["rows"]
+        #
+        # Enrich only the current page with admin names
+        #
+        for project in rows:
             project_users = self.module.get_users_roles_in_project(
                 project["id"],
                 filter_system_user=True,
@@ -64,15 +84,25 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
                 else:
                     admin_names.append(str(user["email"]))
             #
-            result_item = project.copy()
-            result_item["project_name"] = result_item["name"]
-            result_item["admin_name"] = ", ".join(admin_names)
+            project["project_name"] = project["name"]
+            project["admin_name"] = ", ".join(admin_names)
+            project["is_personal"] = is_personal_project
             #
-            result.append(result_item)
+            # Derive unified status from create_success + suspended
+            #
+            if project.get("suspended"):
+                project["status"] = "suspended"
+            elif project.get("create_success") is True:
+                project["status"] = "active"
+            elif project.get("create_success") is False:
+                project["status"] = "failed"
+            else:
+                project["status"] = "pending"
         #
         return {
-            "total": len(result),
-            "rows": result,
+            "total": data["total"],
+            "rows": rows,
+            "counts": data["counts"],
         }
 
 

@@ -43,6 +43,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         for user in result["rows"]:
             if user["last_login"]:
                 user["last_login"] = user["last_login"].isoformat(timespec="seconds")
+            user["status"] = "suspended" if user.get("suspended") else "active"
         #
         return result
 
