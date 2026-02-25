@@ -64,6 +64,13 @@ SECTION_DEFINITIONS = {
         "icon": "lock",
         "description": "Configure the authentication provider and identity settings.",
     },
+    "maintenance": {
+        "title": "Maintenance",
+        "order": 90,
+        "icon": "construction",
+        "description": "Enable maintenance mode to show a splash screen to all non-admin users.",
+        "always_visible": True,
+    },
     "advanced": {
         "title": "Advanced",
         "order": 100,
