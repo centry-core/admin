@@ -122,36 +122,8 @@ def sync_pgvector_credentials(*args, **kwargs):
 
 
 def recreate_project_tokens(*args, **kwargs):
-    """Regenerate API auth tokens for all projects and store in Vault. No params. Destructive: invalidates old tokens."""
-    log.info("Getting project list")
-    project_list = context.rpc_manager.timeout(120).project_list(
-        filter_={"create_success": True},
-    )
-    #
-    from plugins.projects.utils import get_project_user
-    from tools import VaultClient, auth
-    #
-    for project in project_list:
-        log.info("Recreating project token: %s", project)
-        #
-        project_id = int(project["id"])
-        #
-        user = get_project_user(project_id)
-        user_id = user["id"]
-        #
-        log.info("- Project user: %s", user)
-        #
-        token_id = auth.add_token(user_id, "api")
-        token = auth.encode_token(token_id)
-        #
-        log.info("- Setting token: %s", token_id)
-        #
-        vault_client = VaultClient(project_id)
-        project_secrets = vault_client.get_secrets()
-        project_secrets["auth_token"] = token
-        vault_client.set_secrets(project_secrets)
-        #
-        log.info(" - Done")
+    """Rotate auth tokens for admin and all projects. No params. Destructive: invalidates old tokens."""
+    context.rpc_manager.timeout(5 * 60).admin_rotate_tokens()
 
 
 def delete_ghost_users(*args, **kwargs):  # pylint: disable=W0613,R0914

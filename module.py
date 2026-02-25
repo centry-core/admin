@@ -479,7 +479,7 @@ class Module(module.ModuleModel):
         vault_client = VaultClient()  # for administration mode
         vault_client.create_project_space(quiet=True)
         #
-        secrets = vault_client.get_all_secrets()
+        secrets = vault_client.get_secrets()
         if "auth_token" not in secrets:
             #
             try:
@@ -615,6 +615,19 @@ class Module(module.ModuleModel):
                 auth.apply_project_roles_snapshot(snapshot_batch)
             
             log.info("Roles migration finished")
+        #
+        # Schedule: weekly auth token rotation
+        #
+        try:
+            self.context.rpc_manager.timeout(5).scheduling_create_if_not_exists({
+                'name': 'rotate_auth_tokens',
+                'cron': '0 2 * * 0',  # Sunday 02:00
+                'rpc_func': 'admin_rotate_tokens',
+                'rpc_kwargs': {},
+                'active': True,
+            })
+        except Exception:  # pylint: disable=W0703
+            log.warning("Could not register token rotation schedule", exc_info=True)
 
     def deinit(self):  # pylint: disable=R0201
         """ De-init module """
