@@ -94,9 +94,8 @@ class AdminAPI(api_tools.APIModeHandler):
         personal_project_ids = set(personal_project_ids)
         project_ids = personal_project_ids
         if for_team_projects:
-            from tools import VaultClient
-            secrets = VaultClient().get_all_secrets()
-            ai_project_id = secrets.get('ai_project_id')
+            from tools import elitea_config  # pylint: disable=C0415,E0401
+            ai_project_id = elitea_config.get("ai_project_id")
             if ai_project_id:
                 ai_project_id = int(ai_project_id)
             project_ids = [

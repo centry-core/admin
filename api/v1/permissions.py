@@ -24,7 +24,7 @@ from flask import g, request
 
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
-from tools import auth, api_tools, VaultClient  # pylint: disable=E0401
+from tools import auth, api_tools  # pylint: disable=E0401
 
 
 def group_roles_by_permissions(auth_permissions, roles):
@@ -209,8 +209,8 @@ class PublicProjectAPI(api_tools.APIModeHandler):
 
     @staticmethod
     def _get_public_project_id():
-        secrets = VaultClient().get_all_secrets()
-        pid = secrets.get('ai_project_id')
+        from tools import elitea_config  # pylint: disable=C0415,E0401
+        pid = elitea_config.get("ai_project_id")
         return int(pid) if pid is not None else None
 
 

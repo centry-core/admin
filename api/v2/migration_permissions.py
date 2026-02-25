@@ -72,10 +72,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             if mode == "add_user_project_defaults":
                 project_ids = personal_project_ids
             elif mode == "add_team_project_defaults":
-                from tools import VaultClient  # pylint: disable=E0401,C0415
+                from tools import elitea_config  # pylint: disable=E0401,C0415
                 #
-                secrets = VaultClient().get_all_secrets()
-                ai_project_id = secrets.get('ai_project_id')
+                ai_project_id = elitea_config.get("ai_project_id")
                 #
                 if ai_project_id:
                     ai_project_id = int(ai_project_id)
@@ -86,10 +85,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
                 ]
             elif mode == "add_public_project_defaults":
-                from tools import VaultClient  # pylint: disable=E0401,C0415
+                from tools import elitea_config  # pylint: disable=E0401,C0415
                 #
-                secrets = VaultClient().get_all_secrets()
-                ai_project_id = secrets.get('ai_project_id')
+                ai_project_id = elitea_config.get("ai_project_id")
                 #
                 if ai_project_id:
                     ai_project_id = int(ai_project_id)
@@ -201,10 +199,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             if mode in ["add_user_project_permissions", "delete_user_project_permissions"]:
                 project_ids = personal_project_ids
             elif mode in ["add_team_project_permissions", "delete_team_project_permissions"]:
-                from tools import VaultClient  # pylint: disable=E0401,C0415
+                from tools import elitea_config  # pylint: disable=E0401,C0415
                 #
-                secrets = VaultClient().get_all_secrets()
-                ai_project_id = secrets.get('ai_project_id')
+                ai_project_id = elitea_config.get("ai_project_id")
                 #
                 if ai_project_id:
                     ai_project_id = int(ai_project_id)
@@ -215,10 +212,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     if (i['id'] not in personal_project_ids) and (i['id'] != ai_project_id)
                 ]
             elif mode in ["add_public_project_permissions", "delete_public_project_permissions"]:
-                from tools import VaultClient  # pylint: disable=E0401,C0415
+                from tools import elitea_config  # pylint: disable=E0401,C0415
                 #
-                secrets = VaultClient().get_all_secrets()
-                ai_project_id = secrets.get('ai_project_id')
+                ai_project_id = elitea_config.get("ai_project_id")
                 #
                 if ai_project_id:
                     ai_project_id = int(ai_project_id)
