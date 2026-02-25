@@ -52,8 +52,10 @@ def set_nested(d, path, value):
 
 def find_pylon_id_by_prefix(remote_runtimes, pylon_prefix):
     """ Find actual pylon_id that contains the given prefix """
+    normalized_prefix = pylon_prefix.replace("-", "_").replace(" ", "_").lower()
     for pylon_id in remote_runtimes:
-        if pylon_prefix in pylon_id:
+        normalized_id = pylon_id.replace("-", "_").replace(" ", "_").lower()
+        if normalized_prefix in normalized_id:
             return pylon_id
     return None
 
