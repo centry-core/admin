@@ -64,6 +64,13 @@ SECTION_DEFINITIONS = {
         "icon": "lock",
         "description": "Configure the authentication provider and identity settings.",
     },
+    "advanced": {
+        "title": "Advanced",
+        "order": 100,
+        "icon": "code",
+        "description": "View and edit raw plugin configurations for all connected pylons.",
+        "always_visible": True,
+    },
 }
 
 
@@ -113,6 +120,18 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     field_entry["plugin"] = plugin_name
                     field_entry["pylon_id"] = pylon_id
                     sections[section_id]["fields"].append(field_entry)
+        #
+        # Ensure always-visible sections are included
+        for sec_id, sec_meta in SECTION_DEFINITIONS.items():
+            if sec_meta.get("always_visible") and sec_id not in sections:
+                sections[sec_id] = {
+                    "id": sec_id,
+                    "title": sec_meta.get("title", sec_id.replace("_", " ").title()),
+                    "description": sec_meta.get("description", ""),
+                    "order": sec_meta.get("order", 99),
+                    "icon": sec_meta.get("icon", "settings"),
+                    "fields": [],
+                }
         #
         result = sorted(sections.values(), key=lambda s: s["order"])
         return {"sections": result}

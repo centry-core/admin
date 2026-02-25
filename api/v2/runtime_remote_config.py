@@ -33,6 +33,24 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     def get(self, plugin_id):
         """ Process GET """
         if ":" not in plugin_id:
+            # Pylon-level config
+            target_pylon_id = plugin_id
+            for pylon_id in list(sorted(self.module.remote_runtimes.keys())):
+                if pylon_id != target_pylon_id:
+                    continue
+                #
+                data = self.module.remote_runtimes[pylon_id]
+                pylon_settings = data.get("pylon_settings", {})
+                #
+                if flask.request.args.get("raw", "false") == "true":
+                    config_data = pylon_settings.get("tunable", "")
+                else:
+                    config_data = pylon_settings.get("tunable", "")
+                    if not config_data:
+                        config_data = yaml.dump(pylon_settings) if pylon_settings else ""
+                #
+                return {"config": config_data}
+            #
             return {"config": ""}
         #
         target_pylon_id, target_plugin = plugin_id.split(":", 1)
@@ -60,15 +78,30 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def post(self, plugin_id):
         """ Process POST """
-        if ":" not in plugin_id:
-            return {"ok": True}
-        #
-        target_pylon_id, target_plugin = plugin_id.split(":", 1)
-        #
         data = flask.request.get_json()
         #
         if "data" not in data or not data["data"]:
             return {"ok": True}
+        #
+        if ":" not in plugin_id:
+            # Pylon-level config update
+            target_pylon_id = plugin_id
+            log.info("Requesting pylon config update: %s", target_pylon_id)
+            #
+            self.module.context.event_manager.fire_event(
+                "bootstrap_runtime_update",
+                {
+                    "pylon_id": target_pylon_id,
+                    "actions": [
+                        ["update_pylon_config", data["data"]],
+                    ],
+                    "restart": False,
+                },
+            )
+            #
+            return {"ok": True}
+        #
+        target_pylon_id, target_plugin = plugin_id.split(":", 1)
         #
         log.info("Requesting config update: %s -> %s", target_pylon_id, target_plugin)
         #
