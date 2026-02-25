@@ -140,6 +140,20 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     "fields": [],
                 }
         #
+        # Disambiguate duplicate prop_keys across pylons
+        for section in sections.values():
+            key_pylons = {}
+            for field in section["fields"]:
+                pk = field["key"]
+                if pk not in key_pylons:
+                    key_pylons[pk] = set()
+                key_pylons[pk].add(field["pylon_id"])
+            #
+            for field in section["fields"]:
+                if len(key_pylons.get(field["key"], set())) > 1:
+                    field["_original_key"] = field["key"]
+                    field["key"] = f"{field['key']}::{field['pylon_id']}"
+        #
         result = sorted(sections.values(), key=lambda s: s["order"])
         return {"sections": result}
 

@@ -64,8 +64,9 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def get(self, section_id):
         """ Read current values for all fields in the given section """
-        values = {}
-        fields_meta = {}
+        #
+        # Pass 1: collect all entries
+        raw_entries = []
         #
         for pylon_id in list(sorted(self.module.remote_runtimes.keys())):
             data = self.module.remote_runtimes[pylon_id]
@@ -87,22 +88,46 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     if prop_def.get("section") != section_id:
                         continue
                     #
-                    # Avoid duplicates: first source wins
-                    if prop_key in values:
-                        continue
-                    #
                     path = prop_def.get("path", prop_key)
                     raw_value = get_nested(config, path)
                     if raw_value is None:
                         raw_value = prop_def.get("default")
                     #
-                    values[prop_key] = raw_value
-                    fields_meta[prop_key] = {
-                        "plugin": plugin_name,
+                    raw_entries.append({
+                        "prop_key": prop_key,
                         "pylon_id": pylon_id,
+                        "plugin_name": plugin_name,
+                        "raw_value": raw_value,
                         "path": path,
                         "requires_restart": prop_def.get("requires_restart", False),
-                    }
+                    })
+        #
+        # Pass 2: detect multi-pylon keys
+        key_pylons = {}
+        for entry in raw_entries:
+            pk = entry["prop_key"]
+            if pk not in key_pylons:
+                key_pylons[pk] = set()
+            key_pylons[pk].add(entry["pylon_id"])
+        #
+        # Pass 3: build values with unique keys
+        values = {}
+        fields_meta = {}
+        #
+        for entry in raw_entries:
+            pk = entry["prop_key"]
+            if len(key_pylons.get(pk, set())) > 1:
+                unique_key = f"{pk}::{entry['pylon_id']}"
+            else:
+                unique_key = pk
+            #
+            values[unique_key] = entry["raw_value"]
+            fields_meta[unique_key] = {
+                "plugin": entry["plugin_name"],
+                "pylon_id": entry["pylon_id"],
+                "path": entry["path"],
+                "requires_restart": entry["requires_restart"],
+            }
         #
         return {"values": values, "fields_meta": fields_meta}
 
@@ -116,6 +141,15 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
         new_values = request_data.get("values", {})
         if not new_values:
             return {"saved": True, "requires_restart": []}
+        #
+        # Pre-parse incoming keys (may contain ::pylon_id suffix)
+        parsed_values = {}  # (prop_key, pylon_id_or_None) -> value
+        for key, value in new_values.items():
+            if "::" in key:
+                prop_key, target_pylon = key.split("::", 1)
+                parsed_values[(prop_key, target_pylon)] = value
+            else:
+                parsed_values[(key, None)] = value
         #
         # Collect changes grouped by (pylon_id, plugin_name)
         targets = {}  # (pylon_id, plugin_name) -> [(path, value), ...]
@@ -136,14 +170,28 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 #
                 plugin_name = plugin["name"]
                 #
+                config = plugin.get("config") or {}
+                #
                 for prop_key, prop_def in schema.get("properties", {}).items():
                     if prop_def.get("section") != section_id:
                         continue
-                    if prop_key not in new_values:
+                    #
+                    # Match: pylon-specific key first, then generic key
+                    if (prop_key, pylon_id) in parsed_values:
+                        value = parsed_values[(prop_key, pylon_id)]
+                    elif (prop_key, None) in parsed_values:
+                        value = parsed_values[(prop_key, None)]
+                    else:
                         continue
                     #
                     path = prop_def.get("path", prop_key)
-                    value = new_values[prop_key]
+                    #
+                    # Skip if value hasn't changed
+                    current_value = get_nested(config, path)
+                    if current_value is None:
+                        current_value = prop_def.get("default")
+                    if value == current_value:
+                        continue
                     #
                     target_key = (pylon_id, plugin_name)
                     if target_key not in targets:
