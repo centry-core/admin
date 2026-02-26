@@ -19,8 +19,85 @@
 from pylon.core.tools import log  # pylint: disable=E0401
 from pylon.core.tools import module  # pylint: disable=E0401
 
-from tools import theme, VaultClient  # pylint: disable=E0401
+from tools import VaultClient  # pylint: disable=E0401
 import hvac
+
+
+class ThemeStub:
+    """Minimal theme replacement when theme plugin is not loaded."""
+
+    def __init__(self):
+        self.modes = {}
+        self.sections = {}
+        self.subsections = {}
+        self.pages = {}
+        self.mode_sections = {}
+        self.mode_subsections = {}
+        self.mode_pages = {}
+        self.mode_landing = {}
+        self.landing = {"kind": "holder"}
+
+    @property
+    def access_denied_part(self):
+        return ""
+
+    @property
+    def empty_content(self):
+        return ""
+
+    def register_mode(self, key, name, permissions=None, weight=1, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        auth.update_local_permissions(permissions)
+        self.modes[key] = {
+            "name": name, "permissions": permissions, "weight": weight, **kwargs,
+        }
+
+    def register_mode_landing(self, mode, **kwargs):
+        self.mode_landing[mode] = kwargs
+
+    def register_mode_section(self, mode, key, name, permissions=None, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        auth.update_local_permissions(permissions)
+
+    def register_mode_subsection(self, mode, section, key, name, permissions=None, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        auth.update_local_permissions(permissions)
+
+    def register_mode_page(self, mode, section, subsection, key, permissions=None, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        if isinstance(permissions, dict):
+            auth.update_local_permissions(permissions)
+        elif permissions:
+            auth.update_local_permissions(permissions)
+
+    def register_section(self, key, name, permissions=None, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        auth.update_local_permissions(permissions)
+
+    def register_subsection(self, section, key, name, permissions=None, **kwargs):
+        from tools import auth  # pylint: disable=E0401,C0415
+        permissions = permissions or []
+        auth.update_local_permissions(permissions)
+
+    def register_page(self, section, subsection, key, **kwargs):
+        permissions = kwargs.get("permissions", [])
+        if permissions:
+            from tools import auth  # pylint: disable=E0401,C0415
+            auth.update_local_permissions(permissions)
+
+    def get_visible_sections(self):
+        return []
+
+    def get_visible_subsections(self, section):
+        return []
+
+    def get_visible_plugins(self):
+        return []
 
 
 class Module(module.ModuleModel):
@@ -30,6 +107,14 @@ class Module(module.ModuleModel):
         self.context = context
         self.descriptor = descriptor
         #
+        # Register ThemeStub if theme plugin is not loaded.
+        # Must happen in __init__ (not preload) because other plugins
+        # import theme at module level during their import step.
+        #
+        module_manager = self.context.module_manager
+        if "theme" not in module_manager.modules:
+            self.descriptor.register_tool('theme', ThemeStub())
+        #
         # self.db = Holder()  # pylint: disable=C0103
         # self.db.tbl = Holder()
         #
@@ -38,6 +123,7 @@ class Module(module.ModuleModel):
     def init(self):
         """ Init module """
         log.info("Initializing module")
+        from tools import theme  # pylint: disable=E0401,C0415
         # Run DB migrations
         # db_migrations.run_db_migrations(self, db.url)
         # DB
