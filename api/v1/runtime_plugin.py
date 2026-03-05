@@ -66,48 +66,43 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
     @auth.decorators.check_api(["runtime.plugins"])
     def put(self, plugin):  # pylint: disable=R0201
         """ Process PUT """
-        module_manager = self.module.context.module_manager
+        data = flask.request.get_json(silent=True) or {}
+        pylon_ids = data.get("pylon_ids", [])
         #
-        if "bootstrap" not in module_manager.modules:
+        if not pylon_ids:
             return {
                 "ok": False,
-                "error": "Bootstrap plugin is not installed",
+                "error": "No target pylon_ids provided",
             }
         #
-        bootstrap = module_manager.modules["bootstrap"].module
-        repo_resolver = bootstrap.repo_resolver
+        # Fire update events to each targeted pylon (handled by bootstrap plugin)
         #
-        plugin_info = repo_resolver.resolve(plugin)
+        events = []
         #
-        if plugin_info is None:
-            return {
-                "ok": False,
-                "error": "Plugin is not known by repo resolver(s)",
+        for pylon_id in pylon_ids:
+            log.info("Requesting plugin update: %s -> %s", pylon_id, plugin)
+            #
+            event_data = {
+                "pylon_id": pylon_id,
+                "plugins": [plugin],
+                "restart": False,
+                "pylon_pid": 1,
             }
+            #
+            if pylon_id == self.module.context.id:
+                events.append(event_data)
+            else:
+                events.insert(0, event_data)
         #
-        metadata_provider = repo_resolver.get_metadata_provider(plugin)
-        #
-        metadata_url = plugin_info["objects"]["metadata"]
-        metadata = metadata_provider.get_metadata({"source": metadata_url})
-        #
-        source_target = plugin_info["source"].copy()
-        source_type = source_target.pop("type")
-        #
-        if source_type != "git":
-            return {
-                "ok": False,
-                "error": "Plugin source type is not supported",
-            }
-        #
-        source_provider = repo_resolver.get_source_provider(plugin)
-        source = source_provider.get_source(source_target)
-        #
-        plugins_provider = module_manager.providers["plugins"]
-        plugins_provider.add_plugin(plugin, source)
+        for event_item in events:
+            self.module.context.event_manager.fire_event(
+                "bootstrap_runtime_update",
+                event_item,
+            )
         #
         return {
             "ok": True,
-            "message": f'Plugin updated to version {metadata.get("version", "0.0.0")}, restart pylon to enable new version',  # pylint: disable=C0301
+            "message": f"Plugin update requested on {len(pylon_ids)} pylon(s), restart to enable new version",
         }
 
     # @auth.decorators.check_api(["runtime.plugins"])
