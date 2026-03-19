@@ -81,11 +81,18 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
             items = sel.get("items", {})
             if isinstance(items, dict):
                 tools = items.get("enum", [])
+                # Pydantic V2 emits "const" instead of "enum" for single-value Literals
+                if not tools and "const" in items:
+                    tools = [items["const"]]
             #
-            # Fallback: check args_schemas keys in json_schema_extra
+            # Fallback: check args_schemas keys (may live directly on the
+            # property or nested under json_schema_extra depending on
+            # Pydantic version / toolkit implementation)
             if not tools:
-                extra = sel.get("json_schema_extra", {})
-                args_schemas = extra.get("args_schemas", {})
+                args_schemas = (
+                    sel.get("args_schemas")
+                    or sel.get("json_schema_extra", {}).get("args_schemas")
+                )
                 if isinstance(args_schemas, dict):
                     tools = list(args_schemas.keys())
             #
