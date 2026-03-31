@@ -28,7 +28,6 @@ from pylon.core.tools import log  # pylint: disable=E0611,E0401
 from tools import auth  # pylint: disable=E0401
 from tools import api_tools  # pylint: disable=E0401
 
-
 def get_nested(d, path):
     """ Get a value from a nested dict using dot-notation path """
     keys = path.split(".")
@@ -258,6 +257,10 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                     "restart": False,
                 },
             )
+            #
+            # Update local cache so subsequent GETs return new values immediately
+            plugin["config"] = config_dict
+            plugin["config_data"] = new_yaml
         #
         return {
             "saved": True,
@@ -266,7 +269,6 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903
                 for pid, plugins in reload_needed.items()
             ],
         }
-
 
 class API(api_tools.APIBase):  # pylint: disable=R0903
     """ API """
