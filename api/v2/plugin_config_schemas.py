@@ -70,6 +70,13 @@ SECTION_DEFINITIONS = {
         "icon": "lock",
         "description": "Configure the authentication provider and identity settings.",
     },
+     "dedicated_banner": {
+        "title": "Banner",
+        "order": 89,
+        "icon": "campaign",
+        "description": "Enable dedicated banner to communicate important notifications across the platform.",
+        "always_visible": True,
+    },
     "maintenance": {
         "title": "Maintenance",
         "order": 90,
