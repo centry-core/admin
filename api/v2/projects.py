@@ -16,6 +16,8 @@
 #   limitations under the License.
 
 """ API """
+import flask  # pylint: disable=E0401
+
 from pylon.core.tools import log  # pylint: disable=E0611,E0401,W0611
 
 from tools import auth, api_tools  # pylint: disable=E0401
@@ -31,11 +33,39 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
         }})
     def get(self):
         """ Process """
-        result = []
+        limit = flask.request.args.get("limit", 20, type=int)
+        offset = flask.request.args.get("offset", 0, type=int)
+        search = flask.request.args.get("search", None, type=str)
+        sort_by = flask.request.args.get("sort_by", "name", type=str)
+        sort_order = flask.request.args.get("sort_order", "asc", type=str)
+        project_type = flask.request.args.get("project_type", None, type=str)
+        owner_ids = flask.request.args.getlist("owner_ids", type=int) or None
         #
-        all_projects = self.module.context.rpc_manager.call.project_list()
+        # Resolve owner_ids by searching users when search term is provided
         #
-        for project in all_projects:
+        if search and not owner_ids:
+            owner_ids = None
+            if search:
+                matched = self.module.context.rpc_manager.call.auth_search_users(search=search)
+                owner_ids = [u["id"] for u in matched] or None
+        #
+        # DB-level pagination, filtering, sorting
+        #
+        data = self.module.context.rpc_manager.call.project_list_paginated(
+            limit=limit,
+            offset=offset,
+            search=search or None,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            project_type=project_type or None,
+            owner_ids=owner_ids,
+        )
+        #
+        rows = data["rows"]
+        #
+        # Enrich only the current page with admin names
+        #
+        for project in rows:
             project_users = self.module.get_users_roles_in_project(
                 project["id"],
                 filter_system_user=True,
@@ -64,15 +94,14 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
                 else:
                     admin_names.append(str(user["email"]))
             #
-            result_item = project.copy()
-            result_item["project_name"] = result_item["name"]
-            result_item["admin_name"] = ", ".join(admin_names)
-            #
-            result.append(result_item)
+            project["project_name"] = project["name"]
+            project["admin_name"] = ", ".join(admin_names)
+            project["is_personal"] = is_personal_project
         #
         return {
-            "total": len(result),
-            "rows": result,
+            "total": data["total"],
+            "rows": rows,
+            "counts": data["counts"],
         }
 
 
