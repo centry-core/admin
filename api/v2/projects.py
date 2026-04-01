@@ -71,6 +71,7 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
                 filter_system_user=True,
             )
             #
+            owner_id = project.get("owner_id")
             is_personal_project = project["name"].startswith("project_user_")
             project_admin_ids = []
             #
@@ -85,17 +86,33 @@ class AdminAPI(api_tools.APIModeHandler):  # pylint: disable=R0903,C0115
                 if "admin" in user_roles
             )
             #
-            user_infos = auth.list_users(user_ids=set(project_admin_ids))
+            all_user_ids = set(project_admin_ids)
+            if owner_id:
+                all_user_ids.add(owner_id)
             #
-            admin_names = []
-            for user in user_infos:
-                if user["name"] is not None:
-                    admin_names.append(user["name"])
-                else:
-                    admin_names.append(str(user["email"]))
+            user_infos = auth.list_users(user_ids=all_user_ids)
+            user_map = {u["id"]: (u["name"] or str(u["email"])) for u in user_infos}
+            #
+            owner_name = user_map.get(owner_id, str(owner_id)) if owner_id else ""
+            other_admin_names = [
+                user_map[uid] for uid in project_admin_ids
+                if uid != owner_id and uid in user_map
+            ]
+            #
+            if project.get("suspended"):
+                status = "suspended"
+            elif project.get("create_success") is True:
+                status = "active"
+            elif project.get("create_success") is False:
+                status = "failed"
+            else:
+                status = "pending"
             #
             project["project_name"] = project["name"]
-            project["admin_name"] = ", ".join(admin_names)
+            project["status"] = status
+            project["owner_name"] = owner_name
+            project["admin_names"] = other_admin_names
+            project["admin_name"] = owner_name
             project["is_personal"] = is_personal_project
         #
         return {
