@@ -114,7 +114,8 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
             result = self.module.context.rpc_manager.call.add_user_to_project_or_create(
                 user_email, project_id, user_roles)
             results.append(result)
-        added_ids = set()
+        added_ids = {r['id'] for r in results if r.get('status') == 'ok'}
+        has_errors = any(r.get('status') == 'error' for r in results)
         # try:
         #     if invitation_integration := request.json.get('invitation_integration'):
         #         from tools import TaskManager
@@ -152,7 +153,7 @@ class API(api_tools.APIBase):  # pylint: disable=R0903
         self.module.context.event_manager.fire_event(
             "user_added_to_project", {'project_id': project_id, 'user_ids': added_ids},
         )
-        return results, 200
+        return results, 400 if has_errors else 200
 
     @auth.decorators.check_api({
         "permissions": ["configuration.users.users.edit"],
